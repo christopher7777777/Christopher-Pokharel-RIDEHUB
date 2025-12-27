@@ -4,7 +4,16 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/UserDashboard';
+import UserDashboard from './pages/UserDashboard';
+import SellerDashboard from './pages/SellerDashboard';
+
+const DashboardRedirect = () => {
+  const { user } = useAuth();
+  if (user?.role === 'seller') {
+    return <SellerDashboard />;
+  }
+  return <UserDashboard />;
+};
 
 function App() {
   return (
@@ -15,14 +24,15 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <PrivateRoute>
-                  <Dashboard />
+                  <DashboardRedirect />
                 </PrivateRoute>
-              } 
+              }
             />
+            {/* Seller specific routes can be added here */}
           </Routes>
         </div>
       </Router>

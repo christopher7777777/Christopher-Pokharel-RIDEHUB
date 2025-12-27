@@ -37,17 +37,16 @@ const Register = () => {
             return;
         }
 
-        setLoading(true);
-
-        const result = await register(formData.name, formData.email, formData.password, formData.role);
-
-        if (!result.success) {
-            setError(result.message);
-        } else {
-            navigate('/dashboard');
+        try {
+            const result = await register(formData);
+            if (result.success) {
+                navigate('/dashboard');
+            }
+        } catch (err) {
+            setError(err.message || 'Registration failed');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     return (
@@ -106,7 +105,7 @@ const Register = () => {
                     <div className="text-center mb-8">
                         <div className="flex items-center justify-center gap-2 mb-2">
                             <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
                             </svg>
                             <h1 className="text-2xl font-bold text-gray-900">RIDEHUB</h1>
                         </div>
@@ -201,9 +200,9 @@ const Register = () => {
                             <label className="block text-gray-700 text-sm font-medium mb-2">
                                 Register as
                             </label>
-                            <select 
-                                name="role" 
-                                value={formData.role} 
+                            <select
+                                name="role"
+                                value={formData.role}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
                             >

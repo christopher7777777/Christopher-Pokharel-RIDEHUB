@@ -1,5 +1,6 @@
+// routes/auth.js
 const express = require('express');
-const router = express.Router();
+const router = express.Router(); // This is the key change!
 const { register, login, getMe } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
