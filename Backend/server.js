@@ -26,6 +26,17 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/bikes', require('./routes/bikeRoutes'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
 
 // Test route
 app.get('/', (req, res) => {
