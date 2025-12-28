@@ -1,184 +1,90 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
-    Bike,
+    Package,
     Calendar,
-    DollarSign,
-    Users,
-    BarChart3,
-    Settings,
+    TrendingUp,
+    CreditCard,
+    MessageSquare,
+    LogOut,
     ChevronLeft,
     ChevronRight,
-    PlusCircle,
-    ClipboardList,
-    Receipt,
-    MessageSquare,
-    Star,
-    Bell,
-    User,
-    Store,
-    PieChart,
-    ChevronDown
+    Bike
 } from 'lucide-react';
-
-const SidebarItem = ({ icon: Icon, label, path, badge, isOpen, subItems }) => {
-    const location = useLocation();
-    const isActive = location.pathname === path || (subItems && subItems.some(sub => location.pathname === sub.path));
-    const [isSubOpen, setIsSubOpen] = useState(false);
-
-    useEffect(() => {
-        if (isActive && subItems) setIsSubOpen(true);
-    }, [isActive, subItems]);
-
-    return (
-        <div className="mb-1">
-            <Link
-                to={path}
-                onClick={(e) => {
-                    if (subItems && isOpen) {
-                        e.preventDefault();
-                        setIsSubOpen(!isSubOpen);
-                    }
-                }}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    }`}
-            >
-                <div className="flex items-center gap-3">
-                    <Icon size={20} className={isActive ? 'text-white' : 'group-hover:text-orange-500'} />
-                    {isOpen && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}
-                </div>
-                {isOpen && (
-                    <div className="flex items-center gap-2">
-                        {badge && (
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-white/20 text-white' : 'bg-orange-500/20 text-orange-500'
-                                }`}>
-                                {badge}
-                            </span>
-                        )}
-                        {subItems && (
-                            <ChevronDown size={14} className={`transition-transform duration-200 ${isSubOpen ? 'rotate-180' : ''}`} />
-                        )}
-                    </div>
-                )}
-            </Link>
-
-            {isOpen && subItems && isSubOpen && (
-                <div className="mt-1 ml-9 space-y-1 animate-fadeIn">
-                    {subItems.map((sub, idx) => (
-                        <Link
-                            key={idx}
-                            to={sub.path}
-                            className={`block px-3 py-2 rounded-lg text-xs font-medium transition-colors ${location.pathname === sub.path
-                                ? 'text-orange-500'
-                                : 'text-gray-500 hover:text-gray-300'
-                                }`}
-                        >
-                            {sub.label}
-                        </Link>
-                    ))}
-                </div>
-            )}
-
-            {!isOpen && badge && (
-                <div className="absolute left-10 mt-[-35px]">
-                    <span className="w-2 h-2 bg-orange-500 rounded-full border-2 border-gray-900 shadow-sm"></span>
-                </div>
-            )}
-        </div>
-    );
-};
+import { useAuth } from '../context/AuthContext';
 
 const SellerSidebar = ({ isOpen, toggleSidebar }) => {
+    const location = useLocation();
+    const { logout } = useAuth();
+
     const menuItems = [
         { icon: LayoutDashboard, label: 'DASHBOARD', path: '/dashboard' },
-        {
-            icon: Bike,
-            label: 'INVENTORY',
-            path: '/seller/inventory'
-        },
-        {
-            icon: Calendar,
-            label: 'RENTALS',
-            path: '/seller/rentals'
-        },
-        {
-            icon: DollarSign,
-            label: 'SALES',
-            path: '/seller/sales',
-            subItems: [
-                { label: 'Orders', path: '/seller/sales/orders' },
-                { label: 'Exchanges', path: '/seller/sales/exchanges' }
-            ]
-        },
-        {
-            icon: Receipt,
-            label: 'FINANCE',
-            path: '/seller/finance',
-            subItems: [
-                { label: 'Earnings', path: '/seller/finance/earnings' },
-                { label: 'Payments', path: '/seller/finance/methods' }
-            ]
-        },
-        {
-            icon: MessageSquare,
-            label: 'CUSTOMERS',
-            path: '/seller/customers',
-            badge: '3',
-            subItems: [
-                { label: 'Messages', path: '/seller/customers/messages' },
-                { label: 'Reviews', path: '/seller/customers/reviews' }
-            ]
-        },
-        { icon: BarChart3, label: 'ANALYTICS', path: '/seller/analytics' },
-        {
-            icon: Settings,
-            label: 'SETTINGS',
-            path: '/seller/settings',
-            subItems: [
-                { label: 'Profile', path: '/seller/settings/profile' },
-                { label: 'Shop Settings', path: '/seller/settings/shop' },
-                { label: 'Notifications', path: '/seller/settings/notifications' }
-            ]
-        },
+        { icon: Package, label: 'INVENTORY', path: '/seller/inventory' },
+        { icon: Calendar, label: 'RENTALS', path: '/seller/rentals' },
+        { icon: TrendingUp, label: 'SALES', path: '/seller/sales' },
+        { icon: CreditCard, label: 'PAYMENT', path: '/seller/payments' },
+        { icon: MessageSquare, label: 'MESSAGE MANAGEMENT', path: '/seller/messages' },
     ];
 
     return (
         <aside
-            className={`h-full bg-[#1F2937] text-gray-400 transition-all duration-300 flex flex-col ${isOpen ? 'w-[260px]' : 'w-[80px]'
-                }`}
+            className={`h-screen bg-white border-r border-gray-200 text-gray-800 transition-all duration-300 flex flex-col ${isOpen ? 'w-[260px]' : 'w-[80px]'}`}
         >
             {/* Branding */}
-            <div className="h-20 flex items-center px-6 border-b border-gray-800">
-                <Link to="/dashboard" className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-900/40">
-                        <Bike size={24} className="text-white" />
+            <div className="h-20 flex items-center justify-center border-b border-gray-100">
+                <Link to="/dashboard" className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white shadow-md">
+                        <Bike size={24} />
                     </div>
                     {isOpen && (
-                        <span className="text-xl font-black text-white tracking-tighter animate-fadeIn">
-                            RIDE<span className="text-orange-500">HUB</span>
+                        <span className="text-xl font-bold tracking-tight">
+                            RIDE<span className="text-orange-600">HUB</span>
                         </span>
                     )}
                 </Link>
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar">
-                {menuItems.map((item, idx) => (
-                    <SidebarItem key={idx} {...item} isOpen={isOpen} />
-                ))}
+            <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+                {menuItems.map((item, idx) => {
+                    const isActive = location.pathname === item.path;
+                    const Icon = item.icon;
+
+                    return (
+                        <Link
+                            key={idx}
+                            to={item.path}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                                ? 'bg-orange-50 text-orange-600 font-bold'
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium'
+                                }`}
+                        >
+                            <Icon size={20} />
+                            {isOpen && <span className="uppercase text-xs tracking-wide">{item.label}</span>}
+                        </Link>
+                    );
+                })}
             </div>
 
-            {/* Collapse Toggle */}
-            <div className="p-4 border-t border-gray-800">
+            {/* Bottom Actions */}
+            <div className="p-4 border-t border-gray-100 space-y-2">
                 <button
-                    onClick={toggleSidebar}
-                    className="w-full h-10 flex items-center justify-center bg-gray-800/50 rounded-xl hover:bg-gray-800 hover:text-white transition-all group"
+                    onClick={logout}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-all font-bold ${!isOpen && 'justify-center'}`}
                 >
-                    {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                    <LogOut size={20} />
+                    {isOpen && <span className="uppercase text-xs tracking-wide">Logout</span>}
                 </button>
+
+                {toggleSidebar && (
+                    <button
+                        onClick={toggleSidebar}
+                        className="w-full h-10 flex items-center justify-center bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition-all"
+                    >
+                        {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                    </button>
+                )}
             </div>
         </aside>
     );

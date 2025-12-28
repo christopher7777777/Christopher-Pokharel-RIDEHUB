@@ -6,6 +6,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
 import SellerDashboard from './pages/SellerDashboard';
+import SellerInventory from './pages/SellerInventory';
+import BrowseBikes from './pages/BrowseBikes';
+import AboutUs from './pages/AboutUs';
+import Contact from './pages/Contact';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -32,7 +36,35 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* Seller specific routes can be added here */}
+            <Route
+              path="/browse"
+              element={
+                <PrivateRoute>
+                  <BrowseBikes />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <AboutUs />
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <Contact />
+              }
+            />
+            {/* Seller specific routes */}
+            <Route
+              path="/seller/inventory"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerInventory />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </div>
       </Router>

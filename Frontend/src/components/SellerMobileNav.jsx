@@ -36,11 +36,11 @@ const SellerMobileNav = () => {
     return (
         <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-xl border-t border-gray-100 flex items-center justify-between px-2 md:hidden z-50 rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
             <MobileNavItem icon={Home} label="Home" path="/dashboard" />
-            <MobileNavItem icon={Box} label="Listings" path="/seller/inventory/list" />
+            <MobileNavItem icon={Box} label="Listings" path="/seller/inventory" />
 
             <div className="flex-1 flex justify-center -mt-10">
                 <Link
-                    to="/seller/inventory/add"
+                    to="/seller/inventory"
                     className="w-16 h-16 bg-orange-600 rounded-[24px] flex items-center justify-center text-white shadow-xl shadow-orange-900/40 transform hover:scale-110 active:scale-95 transition-all border-4 border-white"
                 >
                     <PlusCircle size={32} />

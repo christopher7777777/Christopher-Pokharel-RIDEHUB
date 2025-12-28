@@ -1,5 +1,6 @@
 import React from 'react';
 import SellerLayout from '../components/SellerLayout';
+import { useNavigate } from 'react-router-dom';
 import {
     TrendingUp,
     ArrowUpRight,
@@ -16,11 +17,11 @@ import {
 const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <div className="flex justify-between items-start mb-4">
-            <div className={`p-3 rounded-2xl ${color} bg-opacity-10`}>
+            <div className={`p - 3 rounded - 2xl ${color} bg - opacity - 10`}>
                 <Icon size={24} className={color.replace('bg-', 'text-')} />
             </div>
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                }`}>
+            <div className={`flex items - center gap - 1 px - 2 py - 1 rounded - full text - [10px] font - bold ${isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                } `}>
                 {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                 {trend}
             </div>
@@ -31,6 +32,8 @@ const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
 );
 
 const SellerDashboard = () => {
+    const navigate = useNavigate();
+
     return (
         <SellerLayout>
             <div className="animate-fadeIn">
@@ -44,7 +47,10 @@ const SellerDashboard = () => {
                         <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all">
                             <Filter size={18} /> Filters
                         </button>
-                        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-orange-700 shadow-lg shadow-orange-900/20 transform active:scale-95 transition-all">
+                        <button
+                            onClick={() => navigate('/seller/inventory')}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-orange-700 shadow-lg shadow-orange-900/20 transform active:scale-95 transition-all"
+                        >
                             <Plus size={18} /> Add New Ride
                         </button>
                     </div>
@@ -106,10 +112,10 @@ const SellerDashboard = () => {
                                     <div className="text-right">
                                         <p className="font-black text-gray-900 mb-1">{item.amount}</p>
                                         <div className="flex items-center justify-end gap-2">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                                            <span className={`text - [9px] font - black uppercase tracking - widest px - 2 py - 0.5 rounded - full ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
                                                     item.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
                                                         'bg-orange-100 text-orange-700'
-                                                }`}>
+                                                } `}>
                                                 {item.status}
                                             </span>
                                             <span className="text-[10px] text-gray-400 italic">{item.time}</span>

@@ -40,7 +40,7 @@ const Register = () => {
         try {
             const result = await register(formData);
             if (result.success) {
-                navigate('/dashboard');
+                navigate('/login');
             }
         } catch (err) {
             setError(err.message || 'Registration failed');
