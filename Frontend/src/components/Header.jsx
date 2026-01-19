@@ -19,7 +19,10 @@ const Header = () => {
     const navLinks = [
         { name: 'Home', path: '/dashboard' },
         { name: 'Browse', path: '/browse' },
-        { name: 'Sell', path: '/sell' },
+        ...(user?.role === 'seller'
+            ? []
+            : [{ name: 'Sell Bike', path: '/sell' }]
+        ),
         { name: 'About Us', path: '/about' },
         { name: 'Contact', path: '/contact' },
     ];
@@ -61,22 +64,37 @@ const Header = () => {
 
                     {/* User Profile & Logout */}
                     <div className="hidden md:flex items-center gap-4">
-                        <Link to="/profile" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-orange-200 group-hover:border-orange-500 transition-all">
-                                <span className="text-orange-600 font-bold text-xs">
-                                    {user?.name?.charAt(0).toUpperCase()}
+                        <div className="relative group/profile">
+                            <Link to="/profile" className="flex items-center gap-2 group">
+                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-orange-200 group-hover:border-orange-500 transition-all">
+                                    <span className="text-orange-600 font-bold text-xs">
+                                        {user?.name?.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
+                                    Profile
                                 </span>
+                            </Link>
+                            {/* Dropdown Menu */}
+                            <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300">
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2 w-48 overflow-hidden">
+                                    <Link to="/profile" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
+                                        My Profile
+                                    </Link>
+                                    {user?.role !== 'seller' && (
+                                        <Link to="/my-selling" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
+                                            My Selling Status
+                                        </Link>
+                                    )}
+                                    <button
+                                        onClick={logout}
+                                        className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 uppercase tracking-wider transition-colors"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
-                            <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
-                                Profile
-                            </span>
-                        </Link>
-                        <button
-                            onClick={logout}
-                            className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-orange-600 transition-all duration-300 transform hover:scale-105 shadow-md active:scale-95"
-                        >
-                            Logout
-                        </button>
+                        </div>
                     </div>
 
                     {/* Mobile Menu Button */}

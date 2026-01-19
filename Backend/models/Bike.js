@@ -30,8 +30,34 @@ const bikeSchema = new mongoose.Schema({
     },
     listingType: {
         type: String,
-        required: [true, 'Listing type (Rental or Purchase) is required'],
-        enum: ['Rental', 'Purchase']
+        required: [true, 'Listing type (Rental or Sale) is required'],
+        enum: ['Rental', 'Sale']
+    },
+    status: {
+        type: String,
+        enum: ['Available', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rejected'],
+        default: 'Available'
+    },
+    negotiatedPrice: {
+        type: Number,
+        default: 0
+    },
+    userCounterPrice: {
+        type: Number,
+        default: 0
+    },
+    dealerNote: {
+        type: String,
+        trim: true
+    },
+    userConfirmed: {
+        type: Boolean,
+        default: false
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['QR', 'Cash', 'None'],
+        default: 'None'
     },
     price: {
         type: Number,
@@ -48,6 +74,10 @@ const bikeSchema = new mongoose.Schema({
     images: {
         type: [String],
         default: []
+    },
+    bluebookImage: {
+        type: String,
+        default: ''
     },
     seller: {
         type: mongoose.Schema.Types.ObjectId,

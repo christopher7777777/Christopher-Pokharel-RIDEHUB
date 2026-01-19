@@ -6,11 +6,27 @@ const Bike = require('../models/Bike');
 exports.createBike = async (req, res) => {
     try {
         req.body.seller = req.user.id;
-        req.body.images = []; 
+        req.body.images = [];
 
-        // Handle image uploads if they exist in req.files
-        if (req.files && req.files.length > 0) {
-            req.body.images = req.files.map(file => file.path);
+        // Handle file uploads
+        if (req.files) {
+            // If using upload.fields()
+            if (req.files.images) {
+                req.body.images = req.files.images.map(file => file.path);
+            }
+            if (req.files.bluebook) {
+                req.body.bluebookImage = req.files.bluebook[0].path;
+            }
+            // If using upload.array() as fallback
+            if (Array.isArray(req.files) && req.files.length > 0) {
+                req.body.images = req.files.map(file => file.path);
+            }
+        }
+
+        if (req.body.listingType === 'Sale') {
+            req.body.status = 'Pending Review';
+        } else {
+            req.body.status = 'Available';
         }
 
         const bike = await Bike.create(req.body);
@@ -72,7 +88,7 @@ exports.updateBike = async (req, res) => {
         // Handle image updates
         let updatedImages = [];
 
-        // Add existing images that were kept (now sent as existingImages)
+        // Add existing images that were kept
         if (req.body.existingImages) {
             const existing = Array.isArray(req.body.existingImages)
                 ? req.body.existingImages
@@ -80,10 +96,15 @@ exports.updateBike = async (req, res) => {
             updatedImages = [...existing];
         }
 
-        // Add new uploaded images from Cloudinary storage (Multer)
-        if (req.files && req.files.length > 0) {
-            const newImagesFiles = req.files.map(file => file.path);
-            updatedImages = [...updatedImages, ...newImagesFiles];
+        // Handle file uploads (images and bluebook)
+        if (req.files) {
+            if (req.files.images) {
+                const newImages = req.files.images.map(file => file.path);
+                updatedImages = [...updatedImages, ...newImages];
+            }
+            if (req.files.bluebook) {
+                req.body.bluebookImage = req.files.bluebook[0].path;
+            }
         }
 
         // Set the final images array for the model
@@ -168,17 +189,138 @@ exports.getBike = async (req, res) => {
     }
 };
 
-// @desc    Get all bikes (Public/Search)
 // @route   GET /api/bikes
 // @access  Public
 exports.getAllBikes = async (req, res) => {
     try {
-        const bikes = await Bike.find().sort('-createdAt');
+        const bikes = await Bike.find({ status: 'Available' }).sort('-createdAt');
 
         res.status(200).json({
             success: true,
             count: bikes.length,
             data: bikes
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Get bikes listed for sale by users for sellers to review
+// @route   GET /api/bikes/sale-requests
+// @access  Private/Seller
+exports.getSaleRequests = async (req, res) => {
+    try {
+        const bikes = await Bike.find({
+            listingType: 'Sale',
+            status: { $in: ['Pending Review', 'Negotiating', 'Countered', 'Approved'] }
+        }).populate('seller', 'name email').sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            count: bikes.length,
+            data: bikes
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Update sale status (Sellers negotiate/approve)
+// @route   PUT /api/bikes/sale-status/:id
+// @access  Private/Seller
+exports.updateSaleStatus = async (req, res) => {
+    try {
+        const { status, negotiatedPrice, dealerNote } = req.body;
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, {
+            status,
+            negotiatedPrice,
+            dealerNote
+        }, { new: true, runValidators: true });
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    User counters a dealer offer
+// @route   PUT /api/bikes/counter-offer/:id
+// @access  Private
+exports.counterOffer = async (req, res) => {
+    try {
+        const { userCounterPrice } = req.body;
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        if (bike.seller.toString() !== req.user.id) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, {
+            status: 'Countered',
+            userCounterPrice,
+            userConfirmed: false
+        }, { new: true });
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    User confirms sale
+// @route   PUT /api/bikes/confirm-sale/:id
+// @access  Private
+exports.confirmSale = async (req, res) => {
+    try {
+        // Enforce Cash on Delivery only as per user request
+        const paymentMethod = 'Cash';
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        if (bike.seller.toString() !== req.user.id) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, {
+            userConfirmed: true,
+            paymentMethod,
+            status: 'Purchased'
+        }, { new: true, runValidators: true });
+
+        res.status(200).json({
+            success: true,
+            data: bike
         });
     } catch (error) {
         res.status(400).json({

@@ -10,7 +10,8 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
-    Bike
+    Bike,
+    ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -22,7 +23,7 @@ const SellerSidebar = ({ isOpen, toggleSidebar }) => {
         { icon: LayoutDashboard, label: 'DASHBOARD', path: '/dashboard' },
         { icon: Package, label: 'INVENTORY', path: '/seller/inventory' },
         { icon: Calendar, label: 'RENTALS', path: '/seller/rentals' },
-        { icon: TrendingUp, label: 'SALES', path: '/seller/sales' },
+        { icon: TrendingUp, label: 'SALES', path: '/seller/purchase-hub' },
         { icon: CreditCard, label: 'PAYMENT', path: '/seller/payments' },
         { icon: MessageSquare, label: 'MESSAGE MANAGEMENT', path: '/seller/messages' },
     ];

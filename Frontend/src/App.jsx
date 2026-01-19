@@ -10,6 +10,10 @@ import SellerInventory from './pages/SellerInventory';
 import BrowseBikes from './pages/BrowseBikes';
 import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
+import ListBike from './pages/ListBike';
+import SellerPurchaseHub from './pages/SellerPurchaseHub';
+import UserSellingStatus from './pages/UserSellingStatus';
+import UserProfile from './pages/UserProfile';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -56,12 +60,44 @@ function App() {
                 <Contact />
               }
             />
+            <Route
+              path="/sell"
+              element={
+                <PrivateRoute>
+                  <ListBike />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-selling"
+              element={
+                <PrivateRoute>
+                  <UserSellingStatus />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <UserProfile />
+                </PrivateRoute>
+              }
+            />
             {/* Seller specific routes */}
             <Route
               path="/seller/inventory"
               element={
                 <PrivateRoute role="seller">
                   <SellerInventory />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller/purchase-hub"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerPurchaseHub />
                 </PrivateRoute>
               }
             />

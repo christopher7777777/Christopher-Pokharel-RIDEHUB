@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 
@@ -20,12 +21,12 @@ const UserDashboard = () => {
                                 Ride Your Way. Discover outstanding bikes, find the perfect ride for your next adventure.
                             </p>
                             <div className="flex flex-wrap gap-4 pt-4">
-                                <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-orange-200 transition-transform active:scale-95">
+                                <Link to="/browse" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-orange-200 transition-transform active:scale-95 inline-block text-center">
                                     View Ride Now
-                                </button>
-                                <button className="bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-800 hover:text-slate-900 px-8 py-4 rounded-xl font-bold transition-all active:scale-95">
+                                </Link>
+                                <Link to="/sell" className="bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-800 hover:text-slate-900 px-8 py-4 rounded-xl font-bold transition-all active:scale-95 inline-block text-center">
                                     Sell Bike
-                                </button>
+                                </Link>
                             </div>
                         </div>
 
