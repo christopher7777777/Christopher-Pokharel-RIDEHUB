@@ -1,26 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SellerLayout from '../components/SellerLayout';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import {
     TrendingUp,
     ArrowUpRight,
     ArrowDownRight,
-    Users,
     ShoppingBag,
-    BarChart3,
     Bike,
     Clock,
     Plus,
-    Filter
+    Filter,
+    MessageSquare,
+    Loader2,
+    Mail,
+    Phone
 } from 'lucide-react';
 
 const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         <div className="flex justify-between items-start mb-4">
-            <div className={`p - 3 rounded - 2xl ${color} bg - opacity - 10`}>
+            <div className={`p-3 rounded-2xl ${color} bg-opacity-10`}>
                 <Icon size={24} className={color.replace('bg-', 'text-')} />
             </div>
-            <div className={`flex items - center gap - 1 px - 2 py - 1 rounded - full text - [10px] font - bold ${isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                 } `}>
                 {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                 {trend}
@@ -33,6 +36,23 @@ const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
 
 const SellerDashboard = () => {
     const navigate = useNavigate();
+    const [messages, setMessages] = useState([]);
+    const [loadingMessages, setLoadingMessages] = useState(true);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const response = await api.get('/api/messages');
+                setMessages(response.data.data);
+            } catch (err) {
+                console.error('Failed to fetch messages', err);
+            } finally {
+                setLoadingMessages(false);
+            }
+        };
+
+        fetchMessages();
+    }, []);
 
     return (
         <SellerLayout>
@@ -82,6 +102,16 @@ const SellerDashboard = () => {
                         icon={ShoppingBag}
                         color="bg-blue-600"
                     />
+                    <div onClick={() => navigate('/seller/messages')} className="cursor-pointer">
+                        <StatCard
+                            title="Inquiries"
+                            value={messages.length}
+                            trend="New"
+                            isPositive={true}
+                            icon={MessageSquare}
+                            color="bg-purple-600"
+                        />
+                    </div>
                 </div>
 
                 {/* Content Sections */}
@@ -112,9 +142,9 @@ const SellerDashboard = () => {
                                     <div className="text-right">
                                         <p className="font-black text-gray-900 mb-1">{item.amount}</p>
                                         <div className="flex items-center justify-end gap-2">
-                                            <span className={`text - [9px] font - black uppercase tracking - widest px - 2 py - 0.5 rounded - full ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                                    item.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
-                                                        'bg-orange-100 text-orange-700'
+                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                                                item.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-orange-100 text-orange-700'
                                                 } `}>
                                                 {item.status}
                                             </span>
@@ -126,8 +156,45 @@ const SellerDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Right Column: Performance & Tips */}
+                    {/* Right Column: Messages & Alerts */}
                     <div className="flex flex-col gap-8">
+                        {/* Messages Section */}
+                        <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
+                            <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
+                                <MessageSquare size={20} className="text-purple-600" /> Client Inquiries
+                            </h3>
+
+                            {loadingMessages ? (
+                                <div className="flex justify-center py-8">
+                                    <Loader2 className="animate-spin text-purple-600" />
+                                </div>
+                            ) : messages.length === 0 ? (
+                                <p className="text-center text-gray-400 text-xs italic py-8">No messages yet.</p>
+                            ) : (
+                                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+                                    {messages.map((msg) => (
+                                        <div key={msg._id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-purple-200 transition-all">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h4 className="text-sm font-black text-gray-900">{msg.name}</h4>
+                                                <span className="text-[10px] text-gray-400 italic">
+                                                    {new Date(msg.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-600 line-clamp-2 mb-3 italic">"{msg.message}"</p>
+                                            <div className="flex items-center gap-3">
+                                                <a href={`mailto:${msg.email}`} className="text-purple-600 hover:text-purple-700 transition-colors">
+                                                    <Mail size={14} />
+                                                </a>
+                                                <a href={`tel:${msg.phone}`} className="text-purple-600 hover:text-purple-700 transition-colors">
+                                                    <Phone size={14} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Quick Tips */}
                         <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
@@ -140,7 +207,7 @@ const SellerDashboard = () => {
                                 </div>
                                 <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
                                     <p className="text-[11px] font-bold text-blue-700 uppercase mb-1">New Message</p>
-                                    <p className="text-xs text-gray-600">3 potential buyers are waiting for a response.</p>
+                                    <p className="text-xs text-gray-600">{messages.length > 0 ? `${messages.length} potential buyers are waiting for a response.` : 'No new messages.'}</p>
                                 </div>
                             </div>
                         </div>

@@ -1,8 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import api from '../utils/api';
+import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 
 const Contact = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+    });
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            await api.post('/api/messages', formData);
+            setSubmitted(true);
+            setFormData({ name: '', email: '', phone: '', message: '' });
+        } catch (err) {
+            setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
             <Header />
@@ -27,50 +59,99 @@ const Contact = () => {
                         {/* Right: Form */}
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 mb-6 uppercase text-sm tracking-wide">Provide Detail For Contact With US</h2>
-                            <form className="space-y-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Full Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter your full name"
-                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
-                                    />
-                                </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Email</label>
-                                    <input
-                                        type="email"
-                                        placeholder="Enter your email address"
-                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
-                                    />
+                            {submitted ? (
+                                <div className="bg-green-50 border border-green-100 p-8 rounded-3xl text-center animate-fadeIn">
+                                    <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
+                                        <CheckCircle2 size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-green-900 mb-2">Message Sent!</h3>
+                                    <p className="text-green-700 text-sm mb-6">Thank you for reaching out. We will get back to you shortly.</p>
+                                    <button
+                                        onClick={() => setSubmitted(false)}
+                                        className="text-green-600 font-bold text-sm hover:underline"
+                                    >
+                                        Send another message
+                                    </button>
                                 </div>
+                            ) : (
+                                <form className="space-y-6" onSubmit={handleSubmit}>
+                                    {error && (
+                                        <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl font-medium">
+                                            {error}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Full Name</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Enter your full name"
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
+                                        />
+                                    </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Phone</label>
-                                    <input
-                                        type="tel"
-                                        placeholder="Enter phone number"
-                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
-                                    />
-                                </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Email</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Enter your email address"
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
+                                        />
+                                    </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Message</label>
-                                    <textarea
-                                        rows="4"
-                                        placeholder="Enter your complete address or message"
-                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all resize-none"
-                                    ></textarea>
-                                </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Phone</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Enter phone number"
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all"
+                                        />
+                                    </div>
 
-                                <button
-                                    type="button"
-                                    className="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-200 uppercase tracking-widest text-sm"
-                                >
-                                    Submit
-                                </button>
-                            </form>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Your Message</label>
+                                        <textarea
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
+                                            required
+                                            rows="4"
+                                            placeholder="Enter your complete address or message"
+                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none text-sm transition-all resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 disabled:bg-gray-400 transition-all shadow-lg shadow-red-200 uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 size={18} className="animate-spin" />
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send size={18} />
+                                                Submit
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>

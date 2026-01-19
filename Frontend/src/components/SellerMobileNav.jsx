@@ -47,8 +47,8 @@ const SellerMobileNav = () => {
                 </Link>
             </div>
 
-            <MobileNavItem icon={MessageSquare} label="Chats" path="/seller/customers/messages" />
-            <MobileNavItem icon={User} label="Profile" path="/seller/settings/profile" />
+            <MobileNavItem icon={MessageSquare} label="Chats" path="/seller/messages" />
+            <MobileNavItem icon={User} label="Profile" path="/profile" />
         </nav>
     );
 };

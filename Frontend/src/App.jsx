@@ -12,6 +12,7 @@ import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
 import ListBike from './pages/ListBike';
 import SellerPurchaseHub from './pages/SellerPurchaseHub';
+import SellerMessages from './pages/SellerMessages';
 import UserSellingStatus from './pages/UserSellingStatus';
 import UserProfile from './pages/UserProfile';
 
@@ -98,6 +99,14 @@ function App() {
               element={
                 <PrivateRoute role="seller">
                   <SellerPurchaseHub />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller/messages"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerMessages />
                 </PrivateRoute>
               }
             />
