@@ -120,7 +120,12 @@ const SellerDashboard = () => {
                     <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-xl font-black text-gray-900">Recent Activity</h2>
-                            <button className="text-orange-600 text-xs font-bold hover:underline italic">View all transactions</button>
+                            <button
+                                onClick={() => navigate('/seller/bikes')}
+                                className="text-orange-600 text-[10px] font-black uppercase tracking-widest hover:underline italic"
+                            >
+                                View all transactions
+                            </button>
                         </div>
 
                         <div className="space-y-6">

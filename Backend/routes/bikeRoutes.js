@@ -10,7 +10,8 @@ const {
     getSaleRequests,
     updateSaleStatus,
     confirmSale,
-    counterOffer
+    counterOffer,
+    rentBike
 } = require('../controllers/bikeController');
 const { protect, isSeller } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
@@ -38,6 +39,9 @@ router.route('/confirm-sale/:id')
 
 router.route('/counter-offer/:id')
     .put(protect, counterOffer);
+
+router.route('/rent/:id')
+    .put(protect, rentBike);
 
 router.route('/:id')
     .get(getBike)

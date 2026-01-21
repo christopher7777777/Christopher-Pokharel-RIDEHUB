@@ -1,4 +1,5 @@
 const Bike = require('../models/Bike');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Create new bike listing
 // @route   POST /api/bikes
@@ -23,7 +24,11 @@ exports.createBike = async (req, res) => {
             }
         }
 
-        if (req.body.listingType === 'Sale') {
+        // If it's a seller, newly added bikes should be 'Available'
+        // If it's a user listing for 'Sale' or 'Purchase', it should be 'Pending Review'
+        if (req.user.role === 'seller') {
+            req.body.status = 'Available';
+        } else if (req.body.listingType === 'Sale' || req.body.listingType === 'Purchase') {
             req.body.status = 'Pending Review';
         } else {
             req.body.status = 'Available';
@@ -109,6 +114,12 @@ exports.updateBike = async (req, res) => {
 
         // Set the final images array for the model
         req.body.images = updatedImages;
+
+        // If a seller is updating a 'Pending Review' bike, it should probably become 'Available'
+        // (This handles bikes that were incorrectly set to Pending Review previously)
+        if (req.user.role === 'seller' && bike.status === 'Pending Review') {
+            req.body.status = 'Available';
+        }
 
         bike = await Bike.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -214,7 +225,7 @@ exports.getAllBikes = async (req, res) => {
 exports.getSaleRequests = async (req, res) => {
     try {
         const bikes = await Bike.find({
-            listingType: 'Sale',
+            listingType: { $in: ['Sale', 'Purchase'] },
             status: { $in: ['Pending Review', 'Negotiating', 'Countered', 'Approved'] }
         }).populate('seller', 'name email').sort('-createdAt');
 
@@ -308,7 +319,9 @@ exports.confirmSale = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Listing not found' });
         }
 
-        if (bike.seller.toString() !== req.user.id) {
+        // If the bike is listed by a USER (for sale to dealer), only that user can confirm the deal.
+        // If the bike is 'Available' (listed by SELLER for users), any logged-in user can purchase it.
+        if (bike.status !== 'Available' && bike.seller.toString() !== req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized' });
         }
 
@@ -316,7 +329,49 @@ exports.confirmSale = async (req, res) => {
             userConfirmed: true,
             paymentMethod,
             status: 'Purchased'
-        }, { new: true, runValidators: true });
+        }, { new: true, runValidators: true }).populate('seller', 'name email');
+
+        // Send confirmation email
+        try {
+            await sendEmail({
+                email: bike.seller.email,
+                subject: 'Bike Purchased Confirmation',
+                message: `Congratulations! Your bike "${bike.name}" has been purchased.\n\nPayment Method: ${paymentMethod}\nStatus: Purchased`
+            });
+        } catch (err) {
+            console.error('Email error:', err);
+        }
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+// @desc    User rents a bike
+// @route   PUT /api/bikes/rent/:id
+// @access  Private
+exports.rentBike = async (req, res) => {
+    try {
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        if (bike.status !== 'Available') {
+            return res.status(400).json({ success: false, message: 'Bike is not available for rent' });
+        }
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, {
+            status: 'Rented',
+            paymentMethod: 'Cash'
+        }, { new: true, runValidators: true }).populate('seller', 'name email');
 
         res.status(200).json({
             success: true,

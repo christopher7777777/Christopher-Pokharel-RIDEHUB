@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import api from '../utils/api';
 import { Search, Filter, Bike, Loader2, AlertCircle } from 'lucide-react';
 
 const BrowseBikes = () => {
+    const navigate = useNavigate();
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -46,7 +48,9 @@ const BrowseBikes = () => {
 
         // Type Filter (Sale / Rental)
         // Note: Backend likely saves 'Sale' or 'Rental' in listingType
-        const matchesType = filters.type === 'all' || bike.listingType === filters.type;
+        const matchesType = filters.type === 'all' ||
+            bike.listingType === filters.type ||
+            (filters.type === 'Sale' && bike.listingType === 'Purchase');
 
         // Brand Filter
         const matchesBrand = filters.brand === 'all' || bike.brand === filters.brand;
@@ -84,7 +88,7 @@ const BrowseBikes = () => {
                                     onChange={(e) => setFilters({ ...filters, type: e.target.value })}
                                 >
                                     <option value="all">All Types</option>
-                                    <option value="Purchase">Buy</option>
+                                    <option value="Sale">Buy</option>
                                     <option value="Rental">Rent</option>
                                 </select>
                             </div>
@@ -222,10 +226,16 @@ const BrowseBikes = () => {
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-3 mt-auto">
-                                                <button className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors">
+                                                <button
+                                                    onClick={() => navigate(`/bike/${bike._id}`)}
+                                                    className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
+                                                >
                                                     View Details
                                                 </button>
-                                                <button className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200">
+                                                <button
+                                                    onClick={() => navigate(`/bike/${bike._id}`)}
+                                                    className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200"
+                                                >
                                                     {bike.listingType === 'Rental' ? 'Rent Now' : 'Buy Now'}
                                                 </button>
                                             </div>

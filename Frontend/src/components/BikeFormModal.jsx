@@ -265,7 +265,7 @@ const BikeFormModal = ({ isOpen, onClose, bike, onSuccess }) => {
                                 className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500 transition-all font-medium"
                             >
                                 <option value="Rental">Rental</option>
-                                <option value="Purchase">Purchase</option>
+                                <option value="Sale">Sale (Purchase)</option>
                             </select>
                         </div>
 

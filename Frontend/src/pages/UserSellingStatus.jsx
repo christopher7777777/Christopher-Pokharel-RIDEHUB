@@ -34,7 +34,7 @@ const UserSellingStatus = () => {
         try {
             setLoading(true);
             const response = await api.get('/api/bikes/my-listings');
-            const sales = response.data.data.filter(bike => bike.listingType === 'Sale');
+            const sales = response.data.data.filter(bike => bike.listingType === 'Sale' || bike.listingType === 'Purchase');
             setListings(sales);
             if (sales.length > 0) setSelectedListing(sales[0]);
         } catch (err) {

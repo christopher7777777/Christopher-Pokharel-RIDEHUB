@@ -1,4 +1,5 @@
 const Message = require('../models/Message');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Submit a contact form
 // @route   POST /api/messages
@@ -13,6 +14,17 @@ exports.submitMessage = async (req, res) => {
             phone,
             message
         });
+
+        // Send email notification
+        try {
+            await sendEmail({
+                email: process.env.FROM_EMAIL, // Send to admin
+                subject: 'New Booking Inquiry',
+                message: `You have a new inquiry from ${name} (${email}, ${phone}):\n\n${message}`
+            });
+        } catch (err) {
+            console.error('Email error:', err);
+        }
 
         res.status(201).json({
             success: true,

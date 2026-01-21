@@ -91,7 +91,7 @@ const Login = () => {
                     <div className="text-center mb-8">
                         <div className="flex items-center justify-center gap-2 mb-2">
                             <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
                             </svg>
                             <h1 className="text-2xl font-bold text-gray-900">RIDEHUB</h1>
                         </div>
@@ -149,6 +149,9 @@ const Login = () => {
                                 <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500" />
                                 <span className="ml-2">Remember me</span>
                             </label>
+                            <Link to="/forgotpassword" size="sm" className="text-red-600 hover:text-red-700 font-medium transition-colors">
+                                Forgot password?
+                            </Link>
                         </div>
 
                         <button

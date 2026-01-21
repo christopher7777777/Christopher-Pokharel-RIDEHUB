@@ -15,6 +15,10 @@ import SellerPurchaseHub from './pages/SellerPurchaseHub';
 import SellerMessages from './pages/SellerMessages';
 import UserSellingStatus from './pages/UserSellingStatus';
 import UserProfile from './pages/UserProfile';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import BikeDetails from './pages/BikeDetails';
+import SellerBikes from './pages/SellerBikes';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -33,6 +37,8 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/resetpassword/:token" element={<ResetPassword />} />
             <Route
               path="/dashboard"
               element={
@@ -46,6 +52,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <BrowseBikes />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/bike/:id"
+              element={
+                <PrivateRoute>
+                  <BikeDetails />
                 </PrivateRoute>
               }
             />
@@ -91,6 +105,14 @@ function App() {
               element={
                 <PrivateRoute role="seller">
                   <SellerInventory />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller/bikes"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerBikes />
                 </PrivateRoute>
               }
             />

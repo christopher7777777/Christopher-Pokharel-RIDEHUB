@@ -7,7 +7,11 @@ html {
 }
 
 body {
-    @apply text-gray-900 overflow-x-hidden;
+    @apply text-gray-900 overflow-x-hidden font-['Inter'];
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

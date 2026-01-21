@@ -31,11 +31,11 @@ const bikeSchema = new mongoose.Schema({
     listingType: {
         type: String,
         required: [true, 'Listing type (Rental or Sale) is required'],
-        enum: ['Rental', 'Sale']
+        enum: ['Rental', 'Sale', 'Purchase']
     },
     status: {
         type: String,
-        enum: ['Available', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rejected'],
+        enum: ['Available', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rented', 'Rejected'],
         default: 'Available'
     },
     negotiatedPrice: {

@@ -3,7 +3,30 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import { Loader2, Bike as BikeIcon } from 'lucide-react';
+
 const UserDashboard = () => {
+    const navigate = useNavigate();
+    const [bikes, setBikes] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchBikes = async () => {
+            try {
+                const response = await api.get('/api/bikes');
+                // Show latest 3 for featured
+                setBikes(response.data.data.slice(0, 3));
+            } catch (err) {
+                console.error('Failed to fetch bikes', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBikes();
+    }, []);
+
     return (
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
@@ -56,30 +79,55 @@ const UserDashboard = () => {
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
-                            {[
-                                { name: "Yamaha MT-15", price: "Rs 130,000", image: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
-                                { name: "Honda Shine 100", price: "Rs 70,000", image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", featured: true },
-                                { name: "Kawasaki Ninja 400", price: "Rs 175,000", image: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" }
-                            ].map((bike, idx) => (
-                                <div key={idx} className="bg-white p-4 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 group">
-                                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6 bg-gray-100">
-                                        <img src={bike.image} alt={bike.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-900">
-                                            For Sale
-                                        </div>
-                                    </div>
-                                    <div className="px-2 pb-2">
-                                        <h3 className="text-xl font-bold text-gray-900 mb-1">{bike.name}</h3>
-                                        <div className="text-xs text-gray-500 mb-4 font-medium uppercase tracking-wide">2023 Model • Used</div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-lg font-black text-orange-500">{bike.price}</span>
-                                            <button className={`px-5 py-2 rounded-lg font-bold text-sm transition-colors ${bike.featured ? 'bg-orange-500 text-white hover:bg-orange-600' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
-                                                View Deal
-                                            </button>
-                                        </div>
-                                    </div>
+                            {loading ? (
+                                <div className="col-span-3 flex flex-col items-center justify-center py-20">
+                                    <Loader2 size={40} className="text-orange-500 animate-spin mb-4" />
+                                    <p className="text-gray-400 font-bold italic">Discovery in progress...</p>
                                 </div>
-                            ))}
+                            ) : bikes.length === 0 ? (
+                                <div className="col-span-3 bg-white p-20 rounded-[40px] text-center border border-gray-100 italic text-gray-400">
+                                    <BikeIcon className="mx-auto mb-4 text-gray-200" size={48} />
+                                    No featured motorcycles at the moment.
+                                </div>
+                            ) : (
+                                bikes.map((bike, idx) => (
+                                    <div key={bike._id} className="bg-white p-4 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 group">
+                                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6 bg-gray-100">
+                                            <img
+                                                src={bike.images[0] || "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"}
+                                                alt={bike.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            />
+                                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-900 shadow-sm border border-white/50">
+                                                For {bike.listingType}
+                                            </div>
+                                        </div>
+                                        <div className="px-2 pb-2">
+                                            <h3 className="text-xl font-black text-gray-900 mb-1 truncate">{bike.name}</h3>
+                                            <div className="text-[10px] text-gray-400 mb-4 font-black uppercase tracking-widest flex items-center gap-2">
+                                                <span>{bike.modelYear} MODEL</span>
+                                                <span className="w-1 h-1 bg-orange-500 rounded-full"></span>
+                                                <span>{bike.condition}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Investment</span>
+                                                    <span className="text-lg font-black text-orange-500">
+                                                        Rs {bike.price.toLocaleString()}
+                                                        {bike.listingType === 'Rental' && <span className="text-[10px] font-normal text-gray-400 ml-1">/day</span>}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => navigate(`/bike/${bike._id}`)}
+                                                    className="px-5 py-3 bg-orange-50 text-orange-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
+                                                >
+                                                    View Deal
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </section>
