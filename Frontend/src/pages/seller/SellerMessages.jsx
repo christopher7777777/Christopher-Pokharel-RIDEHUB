@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../components/SellerLayout';
-import api from '../utils/api';
+import SellerLayout from '../../components/SellerLayout';
+import api from '../../utils/api';
 import {
     MessageSquare,
     Mail,

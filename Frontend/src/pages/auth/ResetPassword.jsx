@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Lock, ArrowLeft, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
-import api from '../utils/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import api from '../../utils/api';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 const ResetPassword = () => {
     const { token } = useParams();

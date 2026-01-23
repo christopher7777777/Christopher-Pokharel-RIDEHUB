@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import api from '../utils/api';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import api from '../../utils/api';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 
 const Contact = () => {

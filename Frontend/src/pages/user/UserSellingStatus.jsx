@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import api from '../utils/api';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import api from '../../utils/api';
 import {
     Clock,
     CheckCircle2,
@@ -25,6 +25,8 @@ const UserSellingStatus = () => {
     const [showCounterModal, setShowCounterModal] = useState(false);
     const [counterPrice, setCounterPrice] = useState('');
     const [selectedPayment, setSelectedPayment] = useState('Cash');
+    const [bankDetails, setBankDetails] = useState('');
+    const [qrFile, setQrFile] = useState(null);
 
     useEffect(() => {
         fetchMySales();
@@ -36,7 +38,11 @@ const UserSellingStatus = () => {
             const response = await api.get('/api/bikes/my-listings');
             const sales = response.data.data.filter(bike => bike.listingType === 'Sale' || bike.listingType === 'Purchase');
             setListings(sales);
-            if (sales.length > 0) setSelectedListing(sales[0]);
+            if (sales.length > 0) {
+                // Keep selected listing if it still exists
+                const current = sales.find(s => s._id === selectedListing?._id);
+                setSelectedListing(current || sales[0]);
+            }
         } catch (err) {
             console.error('Failed to fetch sales', err);
         } finally {
@@ -46,13 +52,23 @@ const UserSellingStatus = () => {
 
     const handleConfirmSale = async () => {
         try {
-            await api.put(`/api/bikes/confirm-sale/${selectedListing._id}`, {
-                paymentMethod: 'Cash'
+            const formData = new FormData();
+            formData.append('paymentMethod', selectedPayment);
+            if (selectedPayment === 'Bank Transfer') {
+                formData.append('userBankDetails', bankDetails);
+            }
+            if (selectedPayment === 'QR' && qrFile) {
+                formData.append('userQrImage', qrFile);
+            }
+
+            await api.put(`/api/bikes/confirm-sale/${selectedListing._id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
+
             setShowPaymentModal(false);
             fetchMySales();
         } catch (err) {
-            alert('Confirmation failed');
+            alert('Confirmation failed: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -203,7 +219,7 @@ const UserSellingStatus = () => {
                         </div>
 
                         <div className="space-y-6">
-                            {listing.status === 'Negotiating' && (
+                            {(listing.status === 'Negotiating' || (listing.status === 'Approved' && !listing.userConfirmed)) && (
                                 <div className="bg-gray-900 rounded-[40px] p-8 text-white shadow-2xl animate-slideInUp">
                                     <h3 className="text-xl font-black mb-6">Decision Center</h3>
                                     <div className="space-y-4">
@@ -211,14 +227,16 @@ const UserSellingStatus = () => {
                                             onClick={() => setShowPaymentModal(true)}
                                             className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-2xl font-black text-sm transition-all shadow-xl shadow-orange-900/40 flex items-center justify-center gap-2 group"
                                         >
-                                            ACCEPT DEALER OFFER <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            {listing.status === 'Approved' ? 'CONFIRM DEAL' : 'ACCEPT DEALER OFFER'} <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                         </button>
-                                        <button
-                                            onClick={() => setShowCounterModal(true)}
-                                            className="w-full bg-white/10 hover:bg-white/20 text-white py-4 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <Banknote size={18} /> COUNTER OFFER
-                                        </button>
+                                        {listing.status === 'Negotiating' && (
+                                            <button
+                                                onClick={() => setShowCounterModal(true)}
+                                                className="w-full bg-white/10 hover:bg-white/20 text-white py-4 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Banknote size={18} /> COUNTER OFFER
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -231,6 +249,18 @@ const UserSellingStatus = () => {
                                     <h3 className="text-xl font-black mb-2">Countered</h3>
                                     <p className="text-xs text-pink-50 leading-relaxed">
                                         You've proposed NPR {listing.userCounterPrice?.toLocaleString()}. Waiting for the dealer to review and respond.
+                                    </p>
+                                </div>
+                            )}
+
+                            {listing.status === 'Approved' && listing.userConfirmed && (
+                                <div className="bg-orange-600 rounded-[40px] p-8 text-white shadow-xl animate-pulse">
+                                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+                                        <Clock size={24} />
+                                    </div>
+                                    <h3 className="text-xl font-black mb-2">Awaiting Payment</h3>
+                                    <p className="text-xs text-orange-50 leading-relaxed">
+                                        You've confirmed the deal via {listing.paymentMethod}. Waiting for the dealer to process your payment and upload proof.
                                     </p>
                                 </div>
                             )}
@@ -296,22 +326,63 @@ const UserSellingStatus = () => {
                     <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={() => setShowPaymentModal(false)}></div>
                     <div className="relative bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden animate-zoomIn">
                         <div className="p-8 text-center border-b border-gray-50">
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">Final Confirmation</h2>
-                            <p className="text-sm text-gray-500 italic text-xs">Confirm your sale to the dealer</p>
+                            <h2 className="text-2xl font-black text-gray-900 mb-2">How do you want to be paid?</h2>
+                            <p className="text-sm text-gray-500 italic text-xs">Choose your preferred payment method</p>
                         </div>
 
-                        <div className="p-8 space-y-4">
-                            <div className="p-6 rounded-3xl border-2 border-orange-500 bg-orange-50 flex flex-col items-center gap-3">
-                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-orange-600 text-white shadow-lg shadow-orange-200">
-                                    <Banknote size={32} />
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-bold text-gray-900 text-sm">Cash on Collection</p>
-                                    <p className="text-[9px] text-gray-400 uppercase font-black">Physical Payment Only</p>
-                                </div>
+                        <div className="p-8 space-y-4 max-h-[60vh] overflow-y-auto">
+                            <div className="grid grid-cols-1 gap-3">
+                                {[
+                                    { id: 'Cash', label: 'Cash on Collection', icon: <Banknote size={20} /> },
+                                    { id: 'QR', label: 'Scan & Pay (QR Code)', icon: <QrCode size={20} /> },
+                                    { id: 'Bank Transfer', label: 'Direct Bank Transfer', icon: <CreditCard size={20} /> }
+                                ].map((method) => (
+                                    <button
+                                        key={method.id}
+                                        onClick={() => setSelectedPayment(method.id)}
+                                        className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${selectedPayment === method.id ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedPayment === method.id ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                            {method.icon}
+                                        </div>
+                                        <span className={`font-bold text-sm ${selectedPayment === method.id ? 'text-gray-900' : 'text-gray-500'}`}>{method.label}</span>
+                                    </button>
+                                ))}
                             </div>
-                            <p className="text-[10px] text-gray-400 text-center italic mt-4 font-medium px-4">
-                                * The dealer will visit you to inspect the bike and pay cash on site. RideHub ensures a safe hand-off experience.
+
+                            {selectedPayment === 'QR' && (
+                                <div className="mt-6 animate-fadeIn">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Upload your QR Code</p>
+                                    <div className="relative group">
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            onChange={(e) => setQrFile(e.target.files[0])}
+                                            accept="image/*"
+                                        />
+                                        <div className="p-6 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:border-orange-500 transition-colors">
+                                            <QrCode size={32} className="text-gray-300 group-hover:text-orange-600" />
+                                            <p className="text-xs font-bold text-gray-400">{qrFile ? qrFile.name : 'Click to upload QR image'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedPayment === 'Bank Transfer' && (
+                                <div className="mt-6 animate-fadeIn">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Bank Account Details</p>
+                                    <textarea
+                                        placeholder="Enter Bank Name, Account Number, and Account Name..."
+                                        className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 text-sm font-medium leading-relaxed"
+                                        rows="3"
+                                        value={bankDetails}
+                                        onChange={(e) => setBankDetails(e.target.value)}
+                                    ></textarea>
+                                </div>
+                            )}
+
+                            <p className="text-[10px] text-gray-400 text-center italic mt-4 font-medium">
+                                * RideHub ensures safe transactions. The dealer will process the payment based on your selection.
                             </p>
                         </div>
 
@@ -323,10 +394,11 @@ const UserSellingStatus = () => {
                                 Back
                             </button>
                             <button
-                                className="flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all bg-orange-600 text-white shadow-orange-900/20 hover:bg-orange-700"
+                                className="flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all bg-orange-600 text-white shadow-orange-900/20 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={handleConfirmSale}
+                                disabled={(selectedPayment === 'QR' && !qrFile) || (selectedPayment === 'Bank Transfer' && !bankDetails)}
                             >
-                                CONFIRM SALE
+                                CONFIRM DEAL
                             </button>
                         </div>
                     </div>

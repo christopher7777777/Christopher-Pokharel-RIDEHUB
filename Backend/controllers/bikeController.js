@@ -48,11 +48,13 @@ exports.createBike = async (req, res) => {
     }
 };
 
-// @desc    Get all bikes for the logged in seller
+// @desc    Get all bikes listed by the dealer (Seller -> User flow)
 // @route   GET /api/bikes/my-listings
 // @access  Private/Seller
 exports.getMyBikes = async (req, res) => {
     try {
+        // Show only bikes listed by the current dealer/seller
+        // This includes their inventory available for rent/sale
         const bikes = await Bike.find({ seller: req.user.id }).sort('-createdAt');
 
         res.status(200).json({
@@ -219,14 +221,17 @@ exports.getAllBikes = async (req, res) => {
     }
 };
 
-// @desc    Get bikes listed for sale by users for sellers to review
+// @desc    Get bikes listed by users for the dealer to buy (User -> Seller flow)
 // @route   GET /api/bikes/sale-requests
 // @access  Private/Seller
 exports.getSaleRequests = async (req, res) => {
     try {
+        // Show bikes listed by OTHER users that the dealer can purchase
+        // Include 'Purchased' status so completed acquisitions show in the Purchase Hub
         const bikes = await Bike.find({
+            seller: { $ne: req.user.id },
             listingType: { $in: ['Sale', 'Purchase'] },
-            status: { $in: ['Pending Review', 'Negotiating', 'Countered', 'Approved'] }
+            status: { $in: ['Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased'] }
         }).populate('seller', 'name email').sort('-createdAt');
 
         res.status(200).json({
@@ -310,8 +315,12 @@ exports.counterOffer = async (req, res) => {
 // @access  Private
 exports.confirmSale = async (req, res) => {
     try {
-        // Enforce Cash on Delivery only as per user request
-        const paymentMethod = 'Cash';
+        const { paymentMethod, userBankDetails } = req.body;
+        let userQrImage = '';
+
+        if (req.files && req.files.userQrImage) {
+            userQrImage = req.files.userQrImage[0].path;
+        }
 
         let bike = await Bike.findById(req.params.id);
 
@@ -320,27 +329,21 @@ exports.confirmSale = async (req, res) => {
         }
 
         // If the bike is listed by a USER (for sale to dealer), only that user can confirm the deal.
-        // If the bike is 'Available' (listed by SELLER for users), any logged-in user can purchase it.
         if (bike.status !== 'Available' && bike.seller.toString() !== req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized' });
         }
 
-        bike = await Bike.findByIdAndUpdate(req.params.id, {
+        const updateData = {
             userConfirmed: true,
             paymentMethod,
-            status: 'Purchased'
-        }, { new: true, runValidators: true }).populate('seller', 'name email');
+            userBankDetails,
+            // Only update status if it's not already purchased
+            status: bike.status === 'Purchased' ? 'Purchased' : 'Approved'
+        };
 
-        // Send confirmation email
-        try {
-            await sendEmail({
-                email: bike.seller.email,
-                subject: 'Bike Purchased Confirmation',
-                message: `Congratulations! Your bike "${bike.name}" has been purchased.\n\nPayment Method: ${paymentMethod}\nStatus: Purchased`
-            });
-        } catch (err) {
-            console.error('Email error:', err);
-        }
+        if (userQrImage) updateData.userQrImage = userQrImage;
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
         res.status(200).json({
             success: true,
@@ -353,6 +356,54 @@ exports.confirmSale = async (req, res) => {
         });
     }
 };
+
+// @desc    Seller completes payment
+// @route   PUT /api/bikes/complete-payment/:id
+// @access  Private/Seller
+exports.completePayment = async (req, res) => {
+    try {
+        const { paymentMessage } = req.body;
+        let paymentScreenshot = '';
+
+        if (req.files && req.files.paymentScreenshot) {
+            paymentScreenshot = req.files.paymentScreenshot[0].path;
+        }
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        const updateData = {
+            status: 'Purchased',
+            paymentMessage
+        };
+
+        if (paymentScreenshot) updateData.paymentScreenshot = paymentScreenshot;
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('seller', 'name email');
+
+        // Send confirmation email
+        try {
+            await sendEmail({
+                email: bike.seller.email,
+                subject: 'Payment Completed - Bike Sold!',
+                message: `Congratulations! Payment for your bike "${bike.name}" has been processed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Check the portal for details.'}`
+            });
+        } catch (err) {
+            console.error('Email error:', err);
+        }
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 // @desc    User rents a bike
 // @route   PUT /api/bikes/rent/:id
 // @access  Private

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../components/SellerLayout';
-import api from '../utils/api';
+import SellerLayout from '../../components/SellerLayout';
+import api from '../../utils/api';
 import {
     Plus,
     Search,
@@ -13,7 +13,7 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import BikeFormModal from '../components/BikeFormModal';
+import BikeFormModal from '../../components/BikeFormModal';
 
 const SellerInventory = () => {
     const [bikes, setBikes] = useState([]);

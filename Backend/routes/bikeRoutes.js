@@ -11,6 +11,7 @@ const {
     updateSaleStatus,
     confirmSale,
     counterOffer,
+    completePayment,
     rentBike
 } = require('../controllers/bikeController');
 const { protect, isSeller } = require('../middleware/auth');
@@ -35,7 +36,10 @@ router.route('/sale-status/:id')
 
 // User confirmation & counter
 router.route('/confirm-sale/:id')
-    .put(protect, confirmSale);
+    .put(protect, upload.fields([{ name: 'userQrImage', maxCount: 1 }]), confirmSale);
+
+router.route('/complete-payment/:id')
+    .put(protect, isSeller, upload.fields([{ name: 'paymentScreenshot', maxCount: 1 }]), completePayment);
 
 router.route('/counter-offer/:id')
     .put(protect, counterOffer);

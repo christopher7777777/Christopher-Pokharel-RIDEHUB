@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import api from '../utils/api';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import api from '../../utils/api';
 import { Search, Filter, Bike, Loader2, AlertCircle } from 'lucide-react';
 
 const BrowseBikes = () => {

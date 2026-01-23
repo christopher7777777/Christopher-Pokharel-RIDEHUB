@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../components/SellerLayout';
-import api from '../utils/api';
+import SellerLayout from '../../components/SellerLayout';
+import api from '../../utils/api';
 import {
     Package,
     Clock,
@@ -11,7 +11,11 @@ import {
     Search,
     Filter,
     ArrowUpRight,
-    Loader2
+    Loader2,
+    Upload,
+    Banknote,
+    QrCode,
+    CreditCard
 } from 'lucide-react';
 
 const SellerPurchaseHub = () => {
@@ -21,6 +25,11 @@ const SellerPurchaseHub = () => {
     const [loading, setLoading] = useState(true);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [negotiationData, setNegotiationData] = useState({ price: 0, note: '' });
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentData, setPaymentData] = useState({ message: '', screenshot: null });
+    const [selectedBike, setSelectedBike] = useState(null);
+    const [showQrModal, setShowQrModal] = useState(false);
+    const [qrImageUrl, setQrImageUrl] = useState('');
 
     useEffect(() => {
         fetchRequests();
@@ -49,6 +58,31 @@ const SellerPurchaseHub = () => {
             fetchRequests();
         } catch (err) {
             alert('Operation failed');
+        }
+    };
+
+    const handleCompletePayment = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('paymentMessage', paymentData.message);
+            if (paymentData.screenshot) {
+                formData.append('paymentScreenshot', paymentData.screenshot);
+            }
+
+            await api.put(`/api/bikes/complete-payment/${selectedBike._id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setShowPaymentModal(false);
+            setPaymentData({ message: '', screenshot: null });
+            setSelectedBike(null);
+
+            // Show success message
+            alert('✅ Payment Successful!\n\nThe bike purchase is complete. The seller will be notified and you can arrange pickup/delivery as per your payment message.');
+
+            fetchRequests();
+        } catch (err) {
+            alert('Payment completion failed: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -92,7 +126,7 @@ const SellerPurchaseHub = () => {
                 </div>
 
                 <div className="flex gap-2 mb-8 bg-gray-100/50 p-1.5 rounded-2xl max-w-fit overflow-x-auto">
-                    {['Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rejected'].map((tab) => (
+                    {['All', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rejected'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -258,10 +292,78 @@ const SellerPurchaseHub = () => {
                                                 <span className="text-[10px] font-black text-yellow-700 uppercase tracking-widest">Awaiting User Confirmation</span>
                                             </div>
                                         )}
+                                        {request.status === 'Approved' && request.userConfirmed && (
+                                            <div className="space-y-3">
+                                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
+                                                    <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Payment Method</p>
+                                                    <div className="flex items-center gap-2">
+                                                        {request.paymentMethod === 'Cash' && <Banknote size={16} className="text-blue-600" />}
+                                                        {request.paymentMethod === 'QR' && <QrCode size={16} className="text-blue-600" />}
+                                                        {request.paymentMethod === 'Bank Transfer' && <CreditCard size={16} className="text-blue-600" />}
+                                                        <span className="font-black text-blue-700 text-sm">{request.paymentMethod}</span>
+                                                    </div>
+                                                    {request.userBankDetails && (
+                                                        <div className="mt-3 p-3 bg-white rounded-xl">
+                                                            <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Bank Details</p>
+                                                            <p className="text-[10px] text-gray-700 font-medium whitespace-pre-line">{request.userBankDetails}</p>
+                                                        </div>
+                                                    )}
+                                                    {request.userQrImage && (
+                                                        <div className="mt-3">
+                                                            <p className="text-[8px] font-black text-gray-400 uppercase mb-2">User's QR Code</p>
+                                                            <div
+                                                                className="w-32 h-32 cursor-pointer hover:opacity-80 transition-opacity relative group"
+                                                                onClick={() => {
+                                                                    setQrImageUrl(request.userQrImage);
+                                                                    setShowQrModal(true);
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    src={request.userQrImage}
+                                                                    alt="QR Code"
+                                                                    className="w-full h-full object-contain bg-white rounded-xl border border-gray-200 p-2"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl flex items-center justify-center transition-all">
+                                                                    <p className="text-[8px] font-black text-white opacity-0 group-hover:opacity-100 bg-black/50 px-2 py-1 rounded">Click to enlarge</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedBike(request);
+                                                        setShowPaymentModal(true);
+                                                    }}
+                                                    className="w-full bg-green-600 text-white px-4 py-3 rounded-xl font-black text-[10px] hover:bg-green-700 transition-all shadow-lg flex items-center justify-center gap-2"
+                                                >
+                                                    <Upload size={14} /> COMPLETE PAYMENT
+                                                </button>
+                                            </div>
+                                        )}
                                         {request.status === 'Purchased' && (
-                                            <div className="bg-green-600 text-white p-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-green-900/10">
-                                                <CheckCircle2 size={16} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">PURCHASE COMPLETE (CASH)</span>
+                                            <div className="space-y-3">
+                                                <div className="bg-green-600 text-white p-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-green-900/10">
+                                                    <CheckCircle2 size={16} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">PURCHASE COMPLETE</span>
+                                                </div>
+                                                {request.paymentMessage && (
+                                                    <div className="bg-green-50 border border-green-100 p-4 rounded-2xl">
+                                                        <p className="text-[9px] font-black text-green-400 uppercase tracking-widest mb-2">Delivery/Payment Details</p>
+                                                        <p className="text-sm text-green-900 font-medium leading-relaxed">{request.paymentMessage}</p>
+                                                    </div>
+                                                )}
+                                                {request.paymentScreenshot && (
+                                                    <div className="bg-white border border-gray-100 p-3 rounded-2xl">
+                                                        <p className="text-[8px] font-black text-gray-400 uppercase mb-2">Payment Proof</p>
+                                                        <img
+                                                            src={request.paymentScreenshot}
+                                                            alt="Payment Screenshot"
+                                                            className="w-full h-auto rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                                                            onClick={() => window.open(request.paymentScreenshot, '_blank')}
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -276,8 +378,114 @@ const SellerPurchaseHub = () => {
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Package className="text-gray-200" size={40} />
                         </div>
-                        <h3 className="text-xl font-black text-gray-900 mb-2">No buy requests found</h3>
-                        <p className="text-gray-400 max-w-sm mx-auto italic text-sm">When users list their bikes for sale, they will appear here for your review.</p>
+                        <h3 className="text-xl font-black text-gray-900 mb-2">
+                            {activeTab === 'Purchased' ? 'No completed purchases yet' : `No ${activeTab.toLowerCase()} requests`}
+                        </h3>
+                        <p className="text-gray-400 max-w-sm mx-auto italic text-sm">
+                            {activeTab === 'Purchased'
+                                ? 'Bikes you have successfully purchased will appear here with payment details and delivery information.'
+                                : 'When users list their bikes for sale, they will appear here for your review.'}
+                        </p>
+                    </div>
+                )}
+
+                {/* Payment Completion Modal */}
+                {showPaymentModal && selectedBike && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={() => setShowPaymentModal(false)}></div>
+                        <div className="relative bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden animate-zoomIn">
+                            <div className="p-8 text-center border-b border-gray-50">
+                                <h2 className="text-2xl font-black text-gray-900 mb-2">Complete Payment</h2>
+                                <p className="text-sm text-gray-500 italic">Upload proof and finalize the transaction</p>
+                            </div>
+
+                            <div className="p-8 space-y-4">
+                                <div className="bg-gray-50 p-4 rounded-2xl">
+                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Transaction Details</p>
+                                    <p className="text-sm font-bold text-gray-900">{selectedBike.name}</p>
+                                    <p className="text-xs text-gray-500 mt-1">Amount: NPR {selectedBike.negotiatedPrice?.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">Method: {selectedBike.paymentMethod}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Payment Screenshot (Optional)</p>
+                                    <div className="relative group">
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            onChange={(e) => setPaymentData({ ...paymentData, screenshot: e.target.files[0] })}
+                                            accept="image/*"
+                                        />
+                                        <div className="p-6 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:border-orange-500 transition-colors">
+                                            <Upload size={32} className="text-gray-300 group-hover:text-orange-600" />
+                                            <p className="text-xs font-bold text-gray-400">{paymentData.screenshot ? paymentData.screenshot.name : 'Click to upload proof'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Message to User</p>
+                                    <textarea
+                                        placeholder="E.g., 'Payment sent via bank transfer' or 'Will pay cash on collection tomorrow at 2 PM'"
+                                        className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 text-sm font-medium leading-relaxed"
+                                        rows="3"
+                                        value={paymentData.message}
+                                        onChange={(e) => setPaymentData({ ...paymentData, message: e.target.value })}
+                                    ></textarea>
+                                </div>
+                            </div>
+
+                            <div className="p-8 bg-gray-50 flex gap-4">
+                                <button
+                                    onClick={() => {
+                                        setShowPaymentModal(false);
+                                        setPaymentData({ message: '', screenshot: null });
+                                    }}
+                                    className="flex-1 py-4 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                                    onClick={handleCompletePayment}
+                                    disabled={!paymentData.message}
+                                >
+                                    MARK AS PAID
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* QR Code Viewer Modal */}
+                {showQrModal && qrImageUrl && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowQrModal(false)}>
+                        <div className="relative bg-white rounded-[40px] shadow-2xl overflow-hidden max-w-lg w-full animate-zoomIn" onClick={(e) => e.stopPropagation()}>
+                            <div className="p-6 text-center border-b border-gray-100">
+                                <h2 className="text-2xl font-black text-gray-900 mb-1">Scan QR Code</h2>
+                                <p className="text-xs text-gray-500 italic">Use your payment app to scan</p>
+                            </div>
+
+                            <div className="p-8 flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+                                <div className="bg-white p-6 rounded-3xl shadow-xl border-4 border-orange-100">
+                                    <img
+                                        src={qrImageUrl}
+                                        alt="QR Code for Payment"
+                                        className="w-72 h-72 object-contain"
+                                    />
+                                </div>
+                                <p className="mt-6 text-xs text-gray-400 font-bold uppercase tracking-widest">Point your camera here</p>
+                            </div>
+
+                            <div className="p-6 bg-gray-50 flex justify-center">
+                                <button
+                                    onClick={() => setShowQrModal(false)}
+                                    className="px-8 py-3 bg-gray-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

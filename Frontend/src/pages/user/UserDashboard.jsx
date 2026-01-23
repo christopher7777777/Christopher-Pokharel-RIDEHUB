@@ -1,11 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Footer from '../components/Footer';
-import Header from '../components/Header';
-
-import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
-import { Loader2, Bike as BikeIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import api from '../../utils/api';
+import {
+    Bike,
+    Loader2,
+    Search,
+    Clock,
+    Tag,
+    TrendingUp,
+    ChevronRight,
+    Star,
+    ShieldCheck,
+    MapPin,
+    ArrowRight
+} from 'lucide-react';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -86,7 +96,7 @@ const UserDashboard = () => {
                                 </div>
                             ) : bikes.length === 0 ? (
                                 <div className="col-span-3 bg-white p-20 rounded-[40px] text-center border border-gray-100 italic text-gray-400">
-                                    <BikeIcon className="mx-auto mb-4 text-gray-200" size={48} />
+                                    <Bike className="mx-auto mb-4 text-gray-200" size={48} />
                                     No featured motorcycles at the moment.
                                 </div>
                             ) : (

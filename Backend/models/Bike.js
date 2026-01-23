@@ -56,8 +56,24 @@ const bikeSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['QR', 'Cash', 'None'],
+        enum: ['QR', 'Cash', 'Bank Transfer', 'None'],
         default: 'None'
+    },
+    userBankDetails: {
+        type: String,
+        trim: true
+    },
+    userQrImage: {
+        type: String,
+        default: ''
+    },
+    paymentScreenshot: {
+        type: String,
+        default: ''
+    },
+    paymentMessage: {
+        type: String,
+        trim: true
     },
     price: {
         type: Number,
