@@ -1,21 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import api from '../../utils/api';
 import {
     Bike,
-    Loader2,
-    Search,
-    Clock,
-    Tag,
-    TrendingUp,
-    ChevronRight,
-    Star,
-    ShieldCheck,
-    MapPin,
-    ArrowRight
+    Loader2
 } from 'lucide-react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Footer from '../../components/Footer';
+import Header from '../../components/Header';
+import api from '../../utils/api';
 
 const UserDashboard = () => {
     const navigate = useNavigate();

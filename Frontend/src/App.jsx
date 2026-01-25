@@ -19,9 +19,19 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import BikeDetails from './pages/user/BikeDetails';
 import SellerBikes from './pages/seller/SellerBikes';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import KycVerification from './pages/admin/KycVerification';
+import ValuationRules from './pages/admin/ValuationRules';
+import UserManagement from './pages/admin/UserManagement';
+import Payments from './pages/admin/Payments';
+import BikeList from './pages/admin/BikeList';
+import AdminLayout from './components/AdminLayout';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
+  if (user?.isAdmin) {
+    return <AdminDashboard />;
+  }
   if (user?.role === 'seller') {
     return <SellerDashboard />;
   }
@@ -129,6 +139,56 @@ function App() {
               element={
                 <PrivateRoute role="seller">
                   <SellerMessages />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Admin specific routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/kyc"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <KycVerification />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/valuation"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <ValuationRules />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <UserManagement />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/payments"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <Payments />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/bikes"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <BikeList />
                 </PrivateRoute>
               }
             />
