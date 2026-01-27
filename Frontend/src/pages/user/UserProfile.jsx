@@ -85,7 +85,7 @@ const UserProfile = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <Header />
 
-            <main className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+            <main className="flex-1 pt-32 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     {/* Page Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
@@ -205,47 +205,50 @@ const UserProfile = () => {
                         <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.2s' }}>
                             <div className="mb-6">
                                 <h2 className="text-xl font-black text-gray-900 mb-1">KYC Verification Status</h2>
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Your Know Your Customer (KYC) status.</p>
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Your identity verification level.</p>
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isKYCVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                        {isKYCVerified ? <ShieldCheck size={24} /> : <ShieldAlert size={24} />}
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${user?.kycStatus === 'verified' ? 'bg-green-100 text-green-600' :
+                                        user?.kycStatus === 'pending' ? 'bg-orange-100 text-orange-600' :
+                                            user?.kycStatus === 'rejected' ? 'bg-red-100 text-red-600' :
+                                                'bg-slate-100 text-slate-400'
+                                        }`}>
+                                        {user?.kycStatus === 'verified' ? <ShieldCheck size={24} /> :
+                                            user?.kycStatus === 'pending' ? <Clock size={24} /> :
+                                                user?.kycStatus === 'rejected' ? <ShieldAlert size={24} /> :
+                                                    <UserCircle size={24} />}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-black text-gray-900">Status:</span>
                                             <div className="flex items-center gap-1.5">
-                                                {isKYCVerified ? (
-                                                    <>
-                                                        <CheckCircle2 size={16} className="text-green-600" />
-                                                        <span className="text-xs font-black text-green-600 uppercase tracking-widest">Verified</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <XCircle size={16} className="text-red-600" />
-                                                        <span className="text-xs font-black text-red-600 uppercase tracking-widest">Not Verified</span>
-                                                    </>
-                                                )}
+                                                <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${user?.kycStatus === 'verified' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                    user?.kycStatus === 'pending' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                        user?.kycStatus === 'rejected' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                            'bg-slate-50 text-slate-500 border-slate-100'
+                                                    }`}>
+                                                    {user?.kycStatus || 'Not Started'}
+                                                </span>
                                             </div>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1 italic">
-                                            {isKYCVerified
-                                                ? "Your identity verification is currently complete and approved."
-                                                : "Please complete your KYC verification to access all features."}
+                                        <p className="text-xs text-gray-400 mt-1 italic font-medium">
+                                            {user?.kycStatus === 'verified' ? "Full access to rent, purchase and sell." :
+                                                user?.kycStatus === 'pending' ? "Documents under review. Usually takes 24-48 hours." :
+                                                    user?.kycStatus === 'rejected' ? "Verification failed. Please check the reason and resubmit." :
+                                                        "Identity verification is required for rentals & sales."}
                                         </p>
                                     </div>
                                 </div>
 
-                                {!isKYCVerified && (
-                                    <Link
-                                        to="/kyc-verification"
-                                        className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-200 text-gray-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-orange-500 hover:text-orange-600 transition-all flex items-center justify-center gap-2 group shadow-sm"
-                                    >
-                                        VERIFY NOW <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                                    </Link>
-                                )}
+                                <Link
+                                    to="/kyc-verification"
+                                    className="w-full sm:w-auto px-6 py-3 bg-white border border-gray-200 text-gray-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-orange-500 hover:text-orange-600 transition-all flex items-center justify-center gap-2 group shadow-sm active:scale-95"
+                                >
+                                    {user?.kycStatus === 'none' ? 'VERIFY NOW' : 'MANAGE KYC'}
+                                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                </Link>
                             </div>
                         </div>
                     </div>

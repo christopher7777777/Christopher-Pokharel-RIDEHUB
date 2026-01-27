@@ -14,8 +14,12 @@ import {
     MessageSquare,
     Loader2,
     Mail,
-    Phone
+    Phone,
+    AlertCircle,
+    ArrowRight
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -36,6 +40,7 @@ const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
 
 const SellerDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [loadingMessages, setLoadingMessages] = useState(true);
 
@@ -57,6 +62,35 @@ const SellerDashboard = () => {
     return (
         <SellerLayout>
             <div className="animate-fadeIn">
+                {/* KYC Notification Banner */}
+                {user?.kycStatus !== 'verified' && (
+                    <div className="mb-8 bg-orange-600 text-white p-4 rounded-3xl shadow-lg shadow-orange-900/10">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-white/20 p-3 rounded-2xl">
+                                    <AlertCircle size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-lg font-black tracking-tight uppercase">Account Verification Required</p>
+                                    <p className="text-sm text-orange-100 italic">
+                                        {user?.kycStatus === 'pending'
+                                            ? "Your identity documents are being reviewed. You'll be notified via email soon."
+                                            : "Please complete your KYC to unlock all seller features including bike listings and rent management."}
+                                    </p>
+                                </div>
+                            </div>
+                            {user?.kycStatus !== 'pending' && (
+                                <Link
+                                    to="/seller/kyc"
+                                    className="bg-white text-orange-600 px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-50 transition-all flex items-center gap-2 shadow-sm"
+                                >
+                                    Verify Now <ArrowRight size={16} />
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>

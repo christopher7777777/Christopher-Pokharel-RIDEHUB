@@ -7,7 +7,7 @@ const AboutUs = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
+            <main className="max-w-7xl mx-auto px-6 pt-32 pb-12 lg:pb-20">
                 <h1 className="text-4xl font-black text-slate-900 mb-16 uppercase tracking-tight">About Us</h1>
 
                 {/* Section 1 */}

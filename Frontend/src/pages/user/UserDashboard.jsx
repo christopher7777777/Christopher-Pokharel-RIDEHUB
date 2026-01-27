@@ -4,12 +4,15 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import api from '../../utils/api';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [bikes, setBikes] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
@@ -32,7 +35,8 @@ const UserDashboard = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
 
-            <main>
+            <main className="pt-32">
+
                 {/* Hero Section */}
                 <section className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">

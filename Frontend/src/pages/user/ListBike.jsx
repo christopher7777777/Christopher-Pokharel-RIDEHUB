@@ -15,6 +15,7 @@ import {
     Loader2
 } from 'lucide-react';
 import Footer from '../../components/Footer';
+import Header from '../../components/Header';
 
 const ListBike = () => {
     const { logout, user } = useAuth();
@@ -146,17 +147,9 @@ const ListBike = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm py-4">
-                <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-                    <Link to="/dashboard" className="text-2xl font-black text-gray-900">RIDE<span className="text-orange-600">HUB</span></Link>
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm font-bold text-gray-600">{user?.name}</span>
-                        <button onClick={logout} className="text-xs font-black uppercase tracking-widest text-red-500">Logout</button>
-                    </div>
-                </div>
-            </header>
+            <Header />
 
-            <main className="pt-24 pb-12 px-4 max-w-4xl mx-auto">
+            <main className="pt-32 pb-12 px-4 max-w-4xl mx-auto">
                 <div className="text-center mb-10 animate-fadeIn">
                     <h1 className="text-4xl font-black text-gray-900 mb-2">Sell Your Bike</h1>
                     <p className="text-gray-500 italic">Get the best price from our verified dealers</p>

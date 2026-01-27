@@ -98,7 +98,7 @@ const BikeDetails = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 lg:pb-20">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 mb-8 text-[10px] font-black uppercase tracking-widest text-gray-400 overflow-x-auto whitespace-nowrap pb-2">
                     <Link to="/dashboard" className="hover:text-orange-600 transition-colors">Home</Link>

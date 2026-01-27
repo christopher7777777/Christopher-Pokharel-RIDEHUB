@@ -11,7 +11,9 @@ import {
     ChevronLeft,
     ChevronRight,
     Bike,
-    ShoppingCart
+    ShoppingCart,
+    User,
+    UserCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,6 +28,7 @@ const SellerSidebar = ({ isOpen, toggleSidebar }) => {
         { icon: TrendingUp, label: 'SALES', path: '/seller/purchase-hub' },
         { icon: CreditCard, label: 'PAYMENT', path: '/seller/payments' },
         { icon: MessageSquare, label: 'MESSAGE MANAGEMENT', path: '/seller/messages' },
+        { icon: User, label: 'KYC VERIFICATION', path: '/seller/kyc' },
     ];
 
     return (

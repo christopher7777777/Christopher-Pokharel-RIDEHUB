@@ -132,7 +132,7 @@ const UserSellingStatus = () => {
         <div className="min-h-screen bg-gray-50">
             <Header />
 
-            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+            <main className="pt-32 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     {listings.length > 1 && (
                         <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">

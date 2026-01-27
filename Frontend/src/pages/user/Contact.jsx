@@ -39,7 +39,7 @@ const Contact = () => {
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-6 py-12">
+            <main className="max-w-7xl mx-auto px-6 pt-32 pb-12">
                 <div className="text-center mb-12">
                     <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Contact Form</h1>
                 </div>

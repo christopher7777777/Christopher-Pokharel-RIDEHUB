@@ -19,6 +19,8 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import BikeDetails from './pages/user/BikeDetails';
 import SellerBikes from './pages/seller/SellerBikes';
+import SellerKYC from './pages/seller/SellerKYC';
+import UserKYC from './pages/user/UserKYC';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import KycVerification from './pages/admin/KycVerification';
 import ValuationRules from './pages/admin/ValuationRules';
@@ -109,6 +111,14 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/kyc-verification"
+              element={
+                <PrivateRoute>
+                  <UserKYC />
+                </PrivateRoute>
+              }
+            />
             {/* Seller specific routes */}
             <Route
               path="/seller/inventory"
@@ -139,6 +149,14 @@ function App() {
               element={
                 <PrivateRoute role="seller">
                   <SellerMessages />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller/kyc"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerKYC />
                 </PrivateRoute>
               }
             />

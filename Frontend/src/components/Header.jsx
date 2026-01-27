@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AlertCircle, ArrowRight } from 'lucide-react';
 
 const Header = () => {
     const { logout, user } = useAuth();
@@ -31,10 +32,38 @@ const Header = () => {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || user?.kycStatus !== 'verified' ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
                 }`}
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* KYC Notification Banner */}
+            {user && user.role !== 'admin' && user.kycStatus !== 'verified' && (
+                <div className="bg-orange-600 text-white py-2">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <AlertCircle size={14} className="flex-shrink-0" />
+                            <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider">
+                                {user.kycStatus === 'pending'
+                                    ? "KYC Under Review"
+                                    : "Identity Verification Required"}
+                            </p>
+                            <span className="hidden md:inline text-[10px] text-orange-100 opacity-80">
+                                {user.kycStatus === 'pending'
+                                    ? "Takes 24-48 hours"
+                                    : "Mandatory for all transactions"}
+                            </span>
+                        </div>
+                        {user.kycStatus !== 'pending' && (
+                            <Link
+                                to="/kyc-verification"
+                                className="bg-white text-orange-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all flex items-center gap-1"
+                            >
+                                Verify Now <ArrowRight size={10} />
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
+            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-3' : 'py-5'}`}>
                 <div className="flex justify-between items-center">
                     {/* Logo */}
                     <Link to="/dashboard" className="flex items-center gap-2 group">
@@ -82,9 +111,14 @@ const Header = () => {
                                         My Profile
                                     </Link>
                                     {user?.role !== 'seller' && (
-                                        <Link to="/my-selling" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
-                                            My Selling Status
-                                        </Link>
+                                        <>
+                                            <Link to="/kyc-verification" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors border-b border-gray-50">
+                                                Identity Verification
+                                            </Link>
+                                            <Link to="/my-selling" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
+                                                My Selling Status
+                                            </Link>
+                                        </>
                                     )}
                                     <button
                                         onClick={logout}
