@@ -1,19 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { Bike, Search, Filter, Trash2, Eye, MapPin, Tag } from 'lucide-react';
+import { Bike, Search, Trash2, Eye, MapPin, Tag, Loader2, AlertCircle } from 'lucide-react';
+import api from '../../utils/api';
+import { toast } from 'react-hot-toast';
 
 const BikeList = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All Status');
+    const [typeFilter, setTypeFilter] = useState('All Types');
     const [bikes, setBikes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchBikes();
+    }, []);
+
+    const fetchBikes = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get('/api/bikes/admin/all');
+            setBikes(res.data.data);
+            setLoading(false);
+        } catch (error) {
+            toast.error('Failed to fetch global inventory');
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteBike = async (bikeId) => {
+        if (!window.confirm('Are you sure you want to remove this listing? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await api.delete(`/api/bikes/${bikeId}`);
+            toast.success('Listing removed successfully');
+            fetchBikes();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to remove listing');
+        }
+    };
+
+    const filteredBikes = bikes.filter(bike => {
+        const matchesSearch =
+            bike.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bike.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bike.seller?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus = statusFilter === 'All Status' || bike.status === statusFilter;
+        const matchesType = typeFilter === 'All Types' || bike.listingType === typeFilter;
+
+        return matchesSearch && matchesStatus && matchesType;
+    });
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Available': return 'bg-green-100 text-green-700';
+            case 'Sold': return 'bg-slate-900 text-white';
+            case 'Rented': return 'bg-blue-100 text-blue-700';
+            case 'Purchased': return 'bg-purple-100 text-purple-700';
+            case 'Pending Review': return 'bg-yellow-100 text-yellow-700';
+            default: return 'bg-slate-100 text-slate-700';
+        }
+    };
 
     return (
         <AdminLayout>
             <div className="space-y-6">
-                <div className="flex justify-between items-end">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Global Bike Inventory</h1>
-                        <p className="text-slate-500">View and manage all bikes listed for sale, rent, or exchange.</p>
-                    </div>
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Global Bike Inventory</h1>
+                    <p className="text-slate-500">View and manage all bikes listed for sale, rent, or exchange.</p>
                 </div>
 
                 {/* Filters */}
@@ -29,63 +85,93 @@ const BikeList = () => {
                         />
                     </div>
                     <div className="flex gap-2">
-                        <select className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none">
+                        <select
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none cursor-pointer"
+                        >
                             <option>All Types</option>
-                            <option>Sell</option>
-                            <option>Exchange</option>
-                            <option>Rent</option>
+                            <option value="Sale">Sale</option>
+                            <option value="Rental">Rental</option>
                         </select>
-                        <select className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none cursor-pointer"
+                        >
                             <option>All Status</option>
-                            <option>Listed</option>
+                            <option>Available</option>
                             <option>Sold</option>
-                            <option>In Review</option>
+                            <option>Rented</option>
+                            <option>Purchased</option>
+                            <option>Pending Review</option>
                         </select>
                     </div>
                 </div>
 
                 {/* Bike Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {bikes.map((bike) => (
-                        <div key={bike.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-all">
-                            <div className="h-40 bg-slate-100 relative overflow-hidden">
-                                <div className="absolute top-3 right-3 z-10">
-                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${bike.type === 'Exchange' ? 'bg-orange-600 text-white' : 'bg-slate-900 text-white'
-                                        }`}>
-                                        {bike.type}
-                                    </span>
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <Loader2 className="animate-spin text-orange-600" size={40} />
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Inventory...</p>
+                    </div>
+                ) : filteredBikes.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {filteredBikes.map((bike) => (
+                            <div key={bike._id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-all">
+                                <div className="h-40 bg-slate-100 relative overflow-hidden">
+                                    <div className="absolute top-3 right-3 z-10 flex flex-col gap-2 items-end">
+                                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${bike.listingType === 'Rental' ? 'bg-blue-600 text-white' : 'bg-orange-600 text-white'}`}>
+                                            {bike.listingType}
+                                        </span>
+                                        <span className={`px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-sm ${getStatusColor(bike.status)}`}>
+                                            {bike.status}
+                                        </span>
+                                    </div>
+                                    {bike.images && bike.images[0] ? (
+                                        <img src={bike.images[0]} alt={bike.model} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                            <Bike size={64} className="group-hover:scale-110 transition-transform duration-500" />
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    <Bike size={64} className="group-hover:scale-110 transition-transform duration-500" />
-                                </div>
-                            </div>
-                            <div className="p-5 space-y-3">
-                                <div>
-                                    <h4 className="font-bold text-slate-800 truncate">{bike.model}</h4>
-                                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                                        <Tag size={12} /> {bike.seller}
-                                    </p>
-                                </div>
+                                <div className="p-5 space-y-3">
+                                    <div>
+                                        <h4 className="font-bold text-slate-800 truncate">{bike.brand} {bike.model}</h4>
+                                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                                            <Tag size={12} /> {bike.seller?.name || 'Unknown Seller'}
+                                        </p>
+                                    </div>
 
-                                <div className="flex items-center justify-between">
-                                    <p className="font-black text-orange-600">{bike.price}</p>
-                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">
-                                        <MapPin size={10} /> {bike.location}
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-black text-orange-600">Rs. {bike.price.toLocaleString()}</p>
+                                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">
+                                            <MapPin size={10} /> {bike.location}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t border-slate-100 flex gap-2">
+                                        <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold">
+                                            <Eye size={14} /> VIEW
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteBike(bike._id)}
+                                            className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-all flex items-center justify-center"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="pt-3 border-t border-slate-100 flex gap-2">
-                                    <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold">
-                                        <Eye size={14} /> VIEW
-                                    </button>
-                                    <button className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-all flex items-center justify-center">
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
+                        <AlertCircle className="text-slate-300 mb-2" size={48} />
+                        <p className="text-slate-400 font-medium">No bikes found matching your criteria.</p>
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );

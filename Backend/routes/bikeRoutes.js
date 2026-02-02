@@ -12,14 +12,18 @@ const {
     confirmSale,
     counterOffer,
     completePayment,
-    rentBike
+    rentBike,
+    getAdminBikes
 } = require('../controllers/bikeController');
-const { protect, isSeller } = require('../middleware/auth');
+const { protect, isSeller, isVerified, isAdmin } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
+
+router.route('/admin/all')
+    .get(protect, isAdmin, getAdminBikes);
 
 router.route('/')
     .get(getAllBikes)
-    .post(protect, upload.fields([
+    .post(protect, isSeller, isVerified, upload.fields([
         { name: 'images', maxCount: 10 },
         { name: 'bluebook', maxCount: 1 }
     ]), createBike);

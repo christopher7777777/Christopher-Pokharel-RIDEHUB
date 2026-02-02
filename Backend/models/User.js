@@ -27,6 +27,15 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    kycStatus: {
+        type: String,
+        enum: ['none', 'pending', 'verified', 'rejected'],
+        default: 'none'
+    },
+    kycId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'KYC'
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: {

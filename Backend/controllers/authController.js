@@ -258,11 +258,67 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// @desc    Get all users (Admin)
+// @route   GET /api/auth/users
+// @access  Private/Admin
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().sort('-createdAt');
+        res.json({
+            success: true,
+            data: users
+        });
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+// @desc    Delete user (Admin)
+// @route   DELETE /api/auth/users/:id
+// @access  Private/Admin
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Prevent deleting yourself
+        if (user._id.toString() === req.user.id.toString()) {
+            return res.status(400).json({
+                success: false,
+                message: 'You cannot delete yourself'
+            });
+        }
+
+        await user.deleteOne();
+        res.json({
+            success: true,
+            message: 'User removed successfully'
+        });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
     getMe,
     updatePassword,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getAllUsers,
+    deleteUser
 };

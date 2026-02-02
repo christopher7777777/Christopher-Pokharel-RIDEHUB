@@ -36,7 +36,7 @@ const protect = async (req, res, next) => {
     }
 };
 
-const admin = (req, res, next) => {
+const isAdmin = (req, res, next) => {
     if (req.user && req.user.isAdmin) {
         next();
     } else {
@@ -58,4 +58,15 @@ const isSeller = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin, isSeller };
+const isVerified = (req, res, next) => {
+    if (req.user && (req.user.kycStatus === 'verified' || req.user.isAdmin)) {
+        next();
+    } else {
+        res.status(403).json({
+            success: false,
+            message: 'Your KYC must be verified to perform this action.'
+        });
+    }
+};
+
+module.exports = { protect, isAdmin, isSeller, isVerified };

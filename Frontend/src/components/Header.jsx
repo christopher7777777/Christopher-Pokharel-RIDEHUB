@@ -4,12 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 
 const Header = () => {
-    const { logout, user } = useAuth();
+    const { logout, user, loadUser } = useAuth();
     const location = useLocation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
+        if (user) {
+            loadUser(); // Periodically refresh user data to sync KYC status
+        }
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
         };
@@ -48,8 +51,8 @@ const Header = () => {
                             </p>
                             <span className="hidden md:inline text-[10px] text-orange-100 opacity-80">
                                 {user.kycStatus === 'pending'
-                                    ? "Takes 24-48 hours"
-                                    : "Mandatory for all transactions"}
+                                    ? "Your documents are being reviewed by our team. Please wait 24-48 hours."
+                                    : "Please complete your KYC to unlock all features including bike listings and management."}
                             </span>
                         </div>
                         {user.kycStatus !== 'pending' && (

@@ -435,3 +435,38 @@ exports.rentBike = async (req, res) => {
         });
     }
 };
+// @desc    Get all bikes (Admin)
+// @route   GET /api/bikes/admin/all
+// @access  Private/Admin
+exports.getAdminBikes = async (req, res) => {
+    try {
+        const bikes = await Bike.find().populate('seller', 'name email').sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            count: bikes.length,
+            data: bikes
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+module.exports = {
+    createBike: exports.createBike,
+    getMyBikes: exports.getMyBikes,
+    updateBike: exports.updateBike,
+    deleteBike: exports.deleteBike,
+    getBike: exports.getBike,
+    getAllBikes: exports.getAllBikes,
+    getSaleRequests: exports.getSaleRequests,
+    updateSaleStatus: exports.updateSaleStatus,
+    counterOffer: exports.counterOffer,
+    confirmSale: exports.confirmSale,
+    completePayment: exports.completePayment,
+    rentBike: exports.rentBike,
+    getAdminBikes: exports.getAdminBikes
+};

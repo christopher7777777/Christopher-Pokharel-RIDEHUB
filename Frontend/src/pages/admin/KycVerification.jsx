@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { Search, Check, X, Eye, FileText, MapPin, Phone, Mail, Calendar, Building2 } from 'lucide-react';
+import { Search, Check, X, Eye, FileText, MapPin, Phone, Mail, Calendar, Building2, Camera } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 
@@ -15,6 +15,13 @@ const KycVerification = () => {
         fetchKycs();
     }, []);
 
+    const getFullImageUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        return `${baseUrl}/${path}`;
+    };
+
     const fetchKycs = async () => {
         try {
             const res = await api.get('/api/kyc');
@@ -26,11 +33,11 @@ const KycVerification = () => {
         }
     };
 
-    const handleVerify = async (id, status) => {
+    const handleVerify = async (id, status, note = adminNote) => {
         try {
             await api.put(`/api/kyc/${id}`, {
                 status,
-                adminNote
+                adminNote: note
             });
             toast.success(`KYC ${status === 'verified' ? 'verified' : 'rejected'} successfully`);
             setIsViewModalOpen(false);
@@ -43,6 +50,7 @@ const KycVerification = () => {
 
     const openViewModal = (kyc) => {
         setSelectedKyc(kyc);
+        setAdminNote(kyc.adminNote || '');
         setIsViewModalOpen(true);
     };
 
@@ -81,7 +89,7 @@ const KycVerification = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-12 h-12 overflow-hidden rounded-2xl border-2 border-white shadow-sm ring-1 ring-slate-100">
-                                                    <img src={req.userPhoto} alt={req.name} className="w-full h-full object-cover" />
+                                                    <img src={getFullImageUrl(req.userPhoto)} alt={req.name} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-slate-800">{req.name}</p>
@@ -99,20 +107,43 @@ const KycVerification = () => {
                                             {new Date(req.submittedAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                                                req.status === 'verified' ? 'bg-green-50 text-green-700 border-green-100' :
-                                                    'bg-red-50 text-red-700 border-red-100'
-                                                }`}>
-                                                {req.status}
-                                            </span>
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                                                    req.status === 'verified' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                        'bg-red-50 text-red-700 border-red-100'
+                                                    }`}>
+                                                    {req.status}
+                                                </span>
+                                                {req.adminNote && (
+                                                    <p className="text-[10px] text-slate-400 italic truncate max-w-[150px]">
+                                                        Note: {req.adminNote}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => openViewModal(req)}
-                                                    className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-orange-600 hover:border-orange-200 hover:shadow-md rounded-2xl transition-all" title="View Docs">
+                                                    className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-orange-600 hover:border-orange-200 hover:shadow-md rounded-2xl transition-all" title="View Details">
                                                     <Eye size={18} />
                                                 </button>
+                                                {req.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                handleVerify(req._id, 'verified', '');
+                                                            }}
+                                                            className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-green-600 hover:border-green-200 hover:shadow-md rounded-2xl transition-all" title="Quick Approve">
+                                                            <Check size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openViewModal(req)}
+                                                            className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:shadow-md rounded-2xl transition-all" title="Review & Reject">
+                                                            <X size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -139,7 +170,10 @@ const KycVerification = () => {
                                 <p className="text-slate-500 font-medium italic">Comprehensive review for {selectedKyc.name}</p>
                             </div>
                             <button
-                                onClick={() => setIsViewModalOpen(false)}
+                                onClick={() => {
+                                    setIsViewModalOpen(false);
+                                    setAdminNote('');
+                                }}
                                 className="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-colors"
                             >
                                 <X size={24} className="text-slate-400" />
@@ -159,7 +193,7 @@ const KycVerification = () => {
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                     <div className="lg:col-span-1">
                                         <div className="aspect-square rounded-[3rem] overflow-hidden border-8 border-slate-50 shadow-inner group">
-                                            <img src={selectedKyc.userPhoto} alt="User" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            <img src={getFullImageUrl(selectedKyc.userPhoto)} alt="User" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                         </div>
                                     </div>
 
@@ -227,7 +261,7 @@ const KycVerification = () => {
                                         <div key={i} className="space-y-3 group cursor-pointer" onClick={() => window.open(doc.src, '_blank')}>
                                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{doc.label}</p>
                                             <div className="aspect-video bg-slate-50 rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-sm relative group">
-                                                <img src={doc.src} alt={doc.label} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
+                                                <img src={getFullImageUrl(doc.src)} alt={doc.label} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
                                                 <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                                                     <Eye className="text-white" size={32} />
                                                 </div>
@@ -250,7 +284,7 @@ const KycVerification = () => {
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <button
-                                        onClick={() => handleVerify(selectedKyc._id, 'verified')}
+                                        onClick={() => handleVerify(selectedKyc._id, 'verified', adminNote)}
                                         className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-green-600/20 transition-all flex items-center justify-center gap-3 active:scale-95"
                                     >
                                         <Check size={24} />
@@ -259,7 +293,7 @@ const KycVerification = () => {
                                     <button
                                         onClick={() => {
                                             if (!adminNote) return toast.error('Please provide a note for rejection');
-                                            handleVerify(selectedKyc._id, 'rejected')
+                                            handleVerify(selectedKyc._id, 'rejected', adminNote)
                                         }}
                                         className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-red-600/20 transition-all flex items-center justify-center gap-3 active:scale-95"
                                     >

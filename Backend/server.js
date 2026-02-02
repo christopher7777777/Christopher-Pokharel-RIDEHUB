@@ -15,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // Add request logging middleware (put this after express.json())
 app.use((req, res, next) => {
@@ -26,8 +27,11 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/bikes', require('./routes/bikeRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/kyc', require('./routes/kycRoutes'));
+app.use('/api/valuation', require('./routes/valuationRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
