@@ -142,14 +142,14 @@ const BrowseBikes = () => {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
                                     type="text"
-                                    placeholder="Search bikes..."
+                                    placeholder="Search For Bikes"
                                     className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500 transition-all font-medium"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-500 font-medium">Sort by:</span>
+                                <span className="text-sm text-gray-500 font-medium tracking-tight">Sort Your Way</span>
                                 <select className="bg-transparent border-none text-sm font-bold text-gray-900 focus:ring-0 cursor-pointer">
                                     <option>Most Recent</option>
                                     <option>Price: Low to High</option>
@@ -160,15 +160,15 @@ const BrowseBikes = () => {
 
                         {/* Available Bikes Title */}
                         <div className="mb-6">
-                            <h2 className="text-2xl font-black text-gray-900">Available Bikes</h2>
-                            <p className="text-gray-500 text-sm">Showing {filteredBikes.length} results</p>
+                            <h2 className="text-2xl font-black text-gray-900">Bikes For You</h2>
+                            <p className="text-gray-500 text-sm">Found {filteredBikes.length} Bikes</p>
                         </div>
 
                         {/* Grid */}
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-20">
                                 <Loader2 size={40} className="text-orange-600 animate-spin mb-4" />
-                                <p className="text-gray-500 font-bold italic">Loading bikes...</p>
+                                <p className="text-gray-500 font-bold italic">Loading All Bikes</p>
                             </div>
                         ) : error ? (
                             <div className="bg-red-50 border border-red-100 p-8 rounded-[40px] text-center">
@@ -179,7 +179,7 @@ const BrowseBikes = () => {
                                     onClick={fetchBikes}
                                     className="bg-red-600 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-red-700 transition-all"
                                 >
-                                    Try Again
+                                    Reset Search Now
                                 </button>
                             </div>
                         ) : filteredBikes.length === 0 ? (
@@ -187,9 +187,9 @@ const BrowseBikes = () => {
                                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Bike size={40} className="text-gray-300" />
                                 </div>
-                                <h3 className="text-2xl font-black text-gray-900 mb-2">No bikes found</h3>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2">Zero Bikes Found</h3>
                                 <p className="text-gray-500 italic mb-8 mx-auto">
-                                    Try adjusting your filters or search terms.
+                                    No Match Found
                                 </p>
                             </div>
                         ) : (
@@ -217,9 +217,9 @@ const BrowseBikes = () => {
                                                 <div className="flex flex-col">
                                                     <span className="text-xs text-gray-400 font-bold uppercase">Price</span>
                                                     <span className="text-xl font-black text-orange-600">
-                                                        Rs {bike.price.toLocaleString()}
+                                                        NPR {bike.price.toLocaleString()}
                                                         <span className="text-xs text-gray-400 font-normal ml-1">
-                                                            {bike.listingType === 'Rental' ? '/day' : ''}
+                                                            {bike.listingType === 'Rental' ? '/ Day' : ''}
                                                         </span>
                                                     </span>
                                                 </div>
@@ -230,7 +230,7 @@ const BrowseBikes = () => {
                                                     onClick={() => navigate(`/bike/${bike._id}`)}
                                                     className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
                                                 >
-                                                    View Details
+                                                    Check This Bike
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/bike/${bike._id}`)}

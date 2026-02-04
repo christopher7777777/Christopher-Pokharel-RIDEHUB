@@ -56,8 +56,23 @@ const bikeSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['QR', 'Cash', 'Bank Transfer', 'None'],
+        enum: ['QR', 'Cash', 'Cash on Delivery', 'Bank Transfer', 'Online', 'None'],
         default: 'None'
+    },
+    deliveryMethod: {
+        type: String,
+        enum: ['Self Pickup', 'Home Delivery'],
+        default: 'Self Pickup'
+    },
+    deliveryCharge: {
+        type: Number,
+        default: 0
+    },
+    bookingDate: {
+        type: Date
+    },
+    serviceDay: {
+        type: String
     },
     userBankDetails: {
         type: String,
@@ -99,6 +114,35 @@ const bikeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    rentalPlan: {
+        type: String,
+        enum: ['Daily', 'Weekly', 'None'],
+        default: 'None'
+    },
+    rentalExpiry: {
+        type: Date
+    },
+    rentedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    isExchange: {
+        type: Boolean,
+        default: false
+    },
+    exchangeBikeDetails: {
+        type: Object, // Stores name, model, year etc. of the bike to be exchanged
+        default: null
+    },
+    exchangeValuation: {
+        type: Number,
+        default: 0
+    },
+    exchangeStatus: {
+        type: String,
+        enum: ['None', 'Pending', 'Valuated', 'Rejected'],
+        default: 'None'
     },
     createdAt: {
         type: Date,

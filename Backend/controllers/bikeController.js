@@ -315,7 +315,7 @@ exports.counterOffer = async (req, res) => {
 // @access  Private
 exports.confirmSale = async (req, res) => {
     try {
-        const { paymentMethod, userBankDetails } = req.body;
+        const { paymentMethod, userBankDetails, deliveryMethod, deliveryCharge, bookingDate, serviceDay } = req.body;
         let userQrImage = '';
 
         if (req.files && req.files.userQrImage) {
@@ -328,15 +328,14 @@ exports.confirmSale = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Listing not found' });
         }
 
-        // If the bike is listed by a USER (for sale to dealer), only that user can confirm the deal.
-        if (bike.status !== 'Available' && bike.seller.toString() !== req.user.id) {
-            return res.status(401).json({ success: false, message: 'Not authorized' });
-        }
-
         const updateData = {
             userConfirmed: true,
             paymentMethod,
             userBankDetails,
+            deliveryMethod,
+            deliveryCharge,
+            bookingDate,
+            serviceDay,
             // Only update status if it's not already purchased
             status: bike.status === 'Purchased' ? 'Purchased' : 'Approved'
         };
@@ -404,25 +403,47 @@ exports.completePayment = async (req, res) => {
     }
 };
 
-// @desc    User rents a bike
+// @desc    User rents/extends a bike
 // @route   PUT /api/bikes/rent/:id
 // @access  Private
 exports.rentBike = async (req, res) => {
     try {
+        const { paymentMethod, deliveryMethod, deliveryCharge, bookingDate, serviceDay, rentalPlan, rentalDuration } = req.body;
+
         let bike = await Bike.findById(req.params.id);
 
         if (!bike) {
             return res.status(404).json({ success: false, message: 'Listing not found' });
         }
 
-        if (bike.status !== 'Available') {
-            return res.status(400).json({ success: false, message: 'Bike is not available for rent' });
+        // Check if bike is already rented by someone else
+        if (bike.status === 'Rented' && bike.rentedBy.toString() !== req.user.id.toString()) {
+            return res.status(400).json({ success: false, message: 'Bike is currently rented by another user' });
         }
 
-        bike = await Bike.findByIdAndUpdate(req.params.id, {
+        // Calculate rental expiry
+        let expiryDate = new Date(bookingDate || Date.now());
+        const duration = parseInt(rentalDuration) || 1;
+
+        if (rentalPlan === 'Weekly') {
+            expiryDate.setDate(expiryDate.getDate() + (duration * 7));
+        } else {
+            expiryDate.setDate(expiryDate.getDate() + duration);
+        }
+
+        const updateData = {
             status: 'Rented',
-            paymentMethod: 'Cash'
-        }, { new: true, runValidators: true }).populate('seller', 'name email');
+            paymentMethod: paymentMethod || 'Cash',
+            deliveryMethod,
+            deliveryCharge,
+            bookingDate,
+            serviceDay,
+            rentalPlan: rentalPlan || 'Daily',
+            rentalExpiry: expiryDate,
+            rentedBy: req.user.id
+        };
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
         res.status(200).json({
             success: true,
@@ -435,6 +456,122 @@ exports.rentBike = async (req, res) => {
         });
     }
 };
+
+// @desc    Request bike exchange before purchase
+// @route   PUT /api/bikes/exchange/:id
+// @access  Private
+exports.requestExchange = async (req, res) => {
+    try {
+        const { exchangeBikeDetails } = req.body;
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        if (bike.listingType !== 'Sale' && bike.listingType !== 'Purchase') {
+            return res.status(400).json({ success: false, message: 'Exchange is only available for bike purchases' });
+        }
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, {
+            isExchange: true,
+            exchangeBikeDetails,
+            exchangeStatus: 'Pending'
+        }, { new: true });
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Admin valuates an exchange request
+// @route   PUT /api/bikes/admin/valuate-exchange/:id
+// @access  Private/Admin
+exports.valuateExchange = async (req, res) => {
+    try {
+        const { exchangeValuation, status } = req.body;
+
+        let bike = await Bike.findById(req.params.id);
+
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Listing not found' });
+        }
+
+        const updateData = {
+            exchangeValuation,
+            exchangeStatus: status || 'Valuated'
+        };
+
+        // If valuated, we might want to update the negotiatedPrice or finalPrice
+        // For now, we'll just store the valuation. The frontend will handle the deduction display.
+
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+// @desc    Get dashboard stats for seller
+// @route   GET /api/bikes/seller/stats
+// @access  Private/Seller
+exports.getSellerStats = async (req, res) => {
+    try {
+        const myBikes = await Bike.find({ seller: req.user.id });
+
+        const activeListings = myBikes.filter(b => b.status === 'Available').length;
+        const newOrders = myBikes.filter(b => b.status === 'Rented').length;
+
+        // Calculate earnings from bikes SOLD by the dealer
+        const soldBikes = myBikes.filter(b => b.status === 'Purchased');
+        const totalEarnings = soldBikes.reduce((sum, b) => sum + (b.negotiatedPrice || b.price), 0);
+
+        // Recent activity
+        const recentBikes = await Bike.find({
+            $or: [
+                { seller: req.user.id },
+                { rentedBy: req.user.id }
+            ]
+        })
+            .populate('seller', 'name')
+            .populate('rentedBy', 'name')
+            .sort('-updatedAt')
+            .limit(5);
+
+        const recentActivity = recentBikes.map(b => ({
+            bike: b.name,
+            customer: b.rentedBy ? b.rentedBy.name : (b.status === 'Purchased' ? 'Buyer Name' : 'New Client'),
+            type: b.listingType === 'Rental' ? 'Bike Rent' : 'Bike Sale',
+            amount: b.listingType === 'Rental' ? `NPR ${b.price}/DAY` : `NPR ${b.price.toLocaleString()}`,
+            status: b.status,
+            time: b.updatedAt
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: {
+                totalEarnings,
+                activeListings,
+                newOrders,
+                recentActivity
+            }
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 // @desc    Get all bikes (Admin)
 // @route   GET /api/bikes/admin/all
 // @access  Private/Admin
@@ -468,5 +605,8 @@ module.exports = {
     confirmSale: exports.confirmSale,
     completePayment: exports.completePayment,
     rentBike: exports.rentBike,
-    getAdminBikes: exports.getAdminBikes
+    requestExchange: exports.requestExchange,
+    valuateExchange: exports.valuateExchange,
+    getAdminBikes: exports.getAdminBikes,
+    getSellerStats: exports.getSellerStats
 };

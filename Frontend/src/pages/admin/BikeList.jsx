@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { Bike, Search, Trash2, Eye, MapPin, Tag, Loader2, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
+import ValuationModal from '../../components/ValuationModal';
 
 const BikeList = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -10,6 +11,8 @@ const BikeList = () => {
     const [typeFilter, setTypeFilter] = useState('All Types');
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedBike, setSelectedBike] = useState(null);
+    const [isValuationModalOpen, setIsValuationModalOpen] = useState(false);
 
     useEffect(() => {
         fetchBikes();
@@ -38,6 +41,20 @@ const BikeList = () => {
             fetchBikes();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to remove listing');
+        }
+    };
+
+    const handleValuateExchange = async (bikeId, valuation) => {
+        try {
+            await api.put(`/api/bikes/admin/valuate-exchange/${bikeId}`, {
+                exchangeValuation: valuation,
+                status: 'Valuated'
+            });
+            toast.success('Valuation submitted successfully');
+            fetchBikes();
+        } catch (error) {
+            toast.error('Failed to submit valuation');
+            throw error;
         }
     };
 
@@ -127,6 +144,16 @@ const BikeList = () => {
                                         <span className={`px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-sm ${getStatusColor(bike.status)}`}>
                                             {bike.status}
                                         </span>
+                                        {bike.exchangeStatus === 'Pending' && (
+                                            <span className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-sm bg-red-600 text-white animate-pulse">
+                                                Exchange Req
+                                            </span>
+                                        )}
+                                        {bike.exchangeStatus === 'Valuated' && (
+                                            <span className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-sm bg-green-600 text-white">
+                                                Valuated
+                                            </span>
+                                        )}
                                     </div>
                                     {bike.images && bike.images[0] ? (
                                         <img src={bike.images[0]} alt={bike.model} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -155,6 +182,17 @@ const BikeList = () => {
                                         <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold">
                                             <Eye size={14} /> VIEW
                                         </button>
+                                        {bike.exchangeStatus === 'Pending' && (
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedBike(bike);
+                                                    setIsValuationModalOpen(true);
+                                                }}
+                                                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold shadow-lg shadow-orange-200"
+                                            >
+                                                VALUATE
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleDeleteBike(bike._id)}
                                             className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-all flex items-center justify-center"
@@ -173,6 +211,13 @@ const BikeList = () => {
                     </div>
                 )}
             </div>
+
+            <ValuationModal
+                isOpen={isValuationModalOpen}
+                onClose={() => setIsValuationModalOpen(false)}
+                bike={selectedBike}
+                onValuate={handleValuateExchange}
+            />
         </AdminLayout>
     );
 };

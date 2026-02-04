@@ -17,9 +17,11 @@ import {
     ArrowRightLeft,
     Clock,
     Tag,
+    ChevronLeft,
     ChevronRight,
-    ChevronLeft
 } from 'lucide-react';
+import BookingModal from '../../components/BookingModal';
+import ExchangeModal from '../../components/ExchangeModal';
 
 const BikeDetails = () => {
     const { id } = useParams();
@@ -30,6 +32,8 @@ const BikeDetails = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchBike = async () => {
@@ -49,17 +53,47 @@ const BikeDetails = () => {
         fetchBike();
     }, [id]);
 
-    const handleAction = async () => {
+    const handleAction = () => {
+        setIsBookingModalOpen(true);
+    };
+
+    const handleConfirmBooking = async (bookingData) => {
         try {
             setActionLoading(true);
             const endpoint = isBuyBike ? `/api/bikes/confirm-sale/${id}` : `/api/bikes/rent/${id}`;
-            await api.put(endpoint);
-            setSuccessMessage(isBuyBike ? 'Purchase successful! Dealer will contact you.' : 'Rental booked! Pick up your bike at the showroom.');
+            await api.put(endpoint, bookingData);
+            setSuccessMessage(isBuyBike ? 'Bike Purchase Done' : 'Bike Rental Done');
+
+            // If online payment selected, maybe redirect or show msg (user said "payment option online")
+            if (bookingData.paymentMethod === 'Online') {
+                setSuccessMessage(prev => prev + ' Please proceed with online payment.');
+            }
+
             // Refresh bike status
             const response = await api.get(`/api/bikes/${id}`);
             setBike(response.data.data);
+            setIsBookingModalOpen(false);
         } catch (err) {
             setError(err.response?.data?.message || 'Transaction failed');
+            throw err; // So the modal can show the error
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleConfirmExchange = async (exchangeData) => {
+        try {
+            setActionLoading(true);
+            await api.put(`/api/bikes/exchange/${id}`, { exchangeBikeDetails: exchangeData });
+            setSuccessMessage('Swap Request Sent');
+
+            // Refresh bike details to show exchange status
+            const response = await api.get(`/api/bikes/${id}`);
+            setBike(response.data.data);
+            setIsExchangeModalOpen(false);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Exchange request failed');
+            throw err;
         } finally {
             setActionLoading(false);
         }
@@ -69,7 +103,7 @@ const BikeDetails = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-white">
                 <Loader2 size={48} className="text-orange-600 animate-spin mb-4" />
-                <p className="text-gray-500 font-bold italic">Gathering bike performance data...</p>
+                <p className="text-gray-500 font-bold italic">Loading Bike Data</p>
             </div>
         );
     }
@@ -82,9 +116,9 @@ const BikeDetails = () => {
                     <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <BikeIcon size={40} className="text-red-500" />
                     </div>
-                    <h2 className="text-3xl font-black text-gray-900 mb-4">{error || 'Bike not found'}</h2>
+                    <h2 className="text-3xl font-black text-gray-900 mb-4">{error || 'No Bike Found'}</h2>
                     <button onClick={() => navigate('/browse')} className="bg-orange-600 text-white px-8 py-3 rounded-2xl font-black text-sm shadow-lg hover:bg-orange-700 transition-all">
-                        BACK TO EXPLORE
+                        GO BACK NOW
                     </button>
                 </div>
                 <Footer />
@@ -117,11 +151,11 @@ const BikeDetails = () => {
                                     <CheckCircle2 size={24} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-black text-gray-900 uppercase tracking-tight">Well Done!</p>
+                                    <p className="text-sm font-black text-gray-900 uppercase tracking-tight">Action Was Done</p>
                                     <p className="text-xs text-green-700 font-medium italic">{successMessage}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setSuccessMessage(null)} className="text-green-500 hover:text-green-700 font-bold text-xs uppercase tracking-widest px-4 py-2 hover:bg-white rounded-xl transition-all">Dismiss</button>
+                            <button onClick={() => setSuccessMessage(null)} className="text-green-500 hover:text-green-700 font-bold text-xs uppercase tracking-widest px-4 py-2 hover:bg-white rounded-xl transition-all">Dismiss Now</button>
                         </div>
                     )}
                     <div className="space-y-6">
@@ -153,7 +187,7 @@ const BikeDetails = () => {
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-200">
                                     <BikeIcon size={80} strokeWidth={1} />
-                                    <p className="mt-4 font-bold uppercase tracking-widest text-sm">No Preview Available</p>
+                                    <p className="mt-4 font-bold uppercase tracking-widest text-sm">No Photo Here</p>
                                 </div>
                             )}
                             <div className="absolute top-8 left-8">
@@ -193,12 +227,24 @@ const BikeDetails = () => {
                             <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-4 leading-tight">
                                 {bike.name}
                             </h1>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-black text-orange-600">
-                                    Rs {bike.price.toLocaleString()}
-                                </span>
-                                {bike.listingType === 'Rental' && (
-                                    <span className="text-gray-400 font-bold uppercase text-xs tracking-widest">/ Per Day</span>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-baseline gap-2">
+                                    <span className={`text-4xl font-black ${bike.exchangeValuation > 0 ? 'text-gray-400 line-through text-2xl' : 'text-orange-600'}`}>
+                                        NPR {bike.price.toLocaleString()}
+                                    </span>
+                                    {bike.listingType === 'Rental' && (
+                                        <span className="text-gray-400 font-bold uppercase text-xs tracking-widest">/ Per Day</span>
+                                    )}
+                                </div>
+                                {bike.exchangeValuation > 0 && (
+                                    <div className="flex items-baseline gap-3">
+                                        <span className="text-4xl font-black text-orange-600">
+                                            NPR {(bike.price - bike.exchangeValuation).toLocaleString()}
+                                        </span>
+                                        <span className="text-[10px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-lg">
+                                            New Low Price
+                                        </span>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -206,10 +252,10 @@ const BikeDetails = () => {
                         {/* Specs Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                             {[
-                                { icon: Calendar, label: "Model Year", value: bike.modelYear },
-                                { icon: Zap, label: "Engine (CC)", value: `${bike.engineCapacity} CC` },
-                                { icon: Gauge, label: "Mileage", value: `${bike.mileage} KM` },
-                                { icon: ShieldCheck, label: "Condition", value: bike.condition }
+                                { icon: Calendar, label: "Year Of Build", value: bike.modelYear },
+                                { icon: Zap, label: "Engine Size CC", value: `${bike.engineCapacity} CC` },
+                                { icon: Gauge, label: "Mileage In KM", value: `${bike.mileage} KM` },
+                                { icon: ShieldCheck, label: "Bike State", value: bike.condition }
                             ].map((spec, idx) => (
                                 <div key={idx} className="bg-gray-50 rounded-3xl p-5 border border-gray-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                     <spec.icon className="text-orange-600 mb-3" size={20} />
@@ -222,7 +268,7 @@ const BikeDetails = () => {
                         {/* Description */}
                         <div className="mb-10 text-gray-500 leading-relaxed space-y-4">
                             <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Tag size={18} className="text-orange-600" /> Description
+                                <Tag size={18} className="text-orange-600" /> About This Bike
                             </h3>
                             <p className="text-sm">
                                 This {bike.name} is a {bike.condition} condition {bike.category} motorcycle, meticulously maintained and ready for its next owner.
@@ -247,18 +293,20 @@ const BikeDetails = () => {
                                     {actionLoading ? (
                                         <Loader2 size={18} className="animate-spin" />
                                     ) : (
-                                        bike.status !== 'Available' ? bike.status.toUpperCase() : (isBuyBike ? 'Inquire for Purchase' : 'Book Rental Now')
+                                        bike.status !== 'Available' ? bike.status.toUpperCase() : (isBuyBike ? 'Buy This Bike' : 'Rent This Bike')
                                     )}
                                     {bike.status === 'Available' && !actionLoading && <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                                 </button>
 
                                 {isBuyBike && (
                                     <button
-                                        onClick={() => navigate('/sell')}
-                                        className="flex-1 bg-gray-900 text-white py-5 rounded-[25px] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group border border-transparent hover:border-orange-500/30"
+                                        onClick={() => setIsExchangeModalOpen(true)}
+                                        disabled={bike.status !== 'Available' || bike.exchangeStatus === 'Pending' || bike.exchangeStatus === 'Valuated'}
+                                        className="flex-1 bg-gray-900 text-white py-5 rounded-[25px] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group border border-transparent hover:border-orange-500/30 disabled:opacity-50"
                                     >
                                         <ArrowRightLeft size={18} className="text-orange-500 group-hover:rotate-180 transition-transform duration-500" />
-                                        Exchange Bike
+                                        {bike.exchangeStatus === 'Pending' ? 'Swap Is Pending' :
+                                            bike.exchangeStatus === 'Valuated' ? 'Swap Ready Now' : 'Swap My Bike'}
                                     </button>
                                 )}
                             </div>
@@ -266,17 +314,17 @@ const BikeDetails = () => {
                             <div className="flex items-center justify-center gap-6 py-4 px-6 bg-gray-50 rounded-3xl border border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <CheckCircle2 size={16} className="text-green-500" />
-                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Verified Specs</span>
+                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Specs Are Real</span>
                                 </div>
                                 <div className="w-1.5 h-1.5 bg-gray-200 rounded-full"></div>
                                 <div className="flex items-center gap-2">
                                     <ShieldCheck size={16} className="text-blue-500" />
-                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Safe Transaction</span>
+                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Money Is Safe</span>
                                 </div>
                                 <div className="w-1.5 h-1.5 bg-gray-200 rounded-full"></div>
                                 <div className="flex items-center gap-2">
                                     <Clock size={16} className="text-orange-500" />
-                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Fast Approval</span>
+                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Quick Deal Done</span>
                                 </div>
                             </div>
                         </div>
@@ -285,6 +333,20 @@ const BikeDetails = () => {
             </main>
 
             <Footer />
+
+            <BookingModal
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                bike={bike}
+                onConfirm={handleConfirmBooking}
+            />
+
+            <ExchangeModal
+                isOpen={isExchangeModalOpen}
+                onClose={() => setIsExchangeModalOpen(false)}
+                bike={bike}
+                onConfirm={handleConfirmExchange}
+            />
         </div>
     );
 };

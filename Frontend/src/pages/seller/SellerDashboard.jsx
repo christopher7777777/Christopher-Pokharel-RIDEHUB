@@ -42,21 +42,37 @@ const SellerDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [messages, setMessages] = useState([]);
-    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [stats, setStats] = useState({
+        totalEarnings: 0,
+        activeListings: 0,
+        newOrders: 0,
+        recentActivity: []
+    });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchMessages = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const response = await api.get('/api/messages');
-                setMessages(response.data.data);
+                setLoading(true);
+                const [msgRes, statsRes] = await Promise.all([
+                    api.get('/api/messages'),
+                    api.get('/api/bikes/seller/stats')
+                ]);
+                setMessages(msgRes.data.data || []);
+                setStats(statsRes.data.data || {
+                    totalEarnings: 0,
+                    activeListings: 0,
+                    newOrders: 0,
+                    recentActivity: []
+                });
             } catch (err) {
-                console.error('Failed to fetch messages', err);
+                console.error('Failed to fetch dashboard data', err);
             } finally {
-                setLoadingMessages(false);
+                setLoading(false);
             }
         };
 
-        fetchMessages();
+        fetchDashboardData();
     }, []);
 
     return (
@@ -71,11 +87,11 @@ const SellerDashboard = () => {
                                     <AlertCircle size={24} />
                                 </div>
                                 <div>
-                                    <p className="text-lg font-black tracking-tight uppercase">Account Verification Required</p>
+                                    <p className="text-lg font-black tracking-tight uppercase">Verify Your Account</p>
                                     <p className="text-sm text-orange-100 italic">
                                         {user?.kycStatus === 'pending'
-                                            ? "Your identity documents are being reviewed. You'll be notified via email soon."
-                                            : "Please complete your KYC to unlock all seller features including bike listings and rent management."}
+                                            ? "Review is pending. We will email you soon."
+                                            : "Complete KYC now to unlock all seller features."}
                                     </p>
                                 </div>
                             </div>
@@ -94,8 +110,8 @@ const SellerDashboard = () => {
                 {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
-                        <p className="text-gray-500 text-sm italic">Welcome back! Here's what's happening today.</p>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Main Seller Dashboard</h1>
+                        <p className="text-gray-500 text-sm italic">Track your stats.</p>
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all">
@@ -113,34 +129,34 @@ const SellerDashboard = () => {
                 {/* Main Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <StatCard
-                        title="Total Earnings"
-                        value="RS 0"
-                        trend="0 %"
+                        title="Total Sales Cash"
+                        value={`NPR ${stats.totalEarnings.toLocaleString()}`}
+                        trend="Real Data"
                         isPositive={true}
                         icon={TrendingUp}
                         color="bg-green-600"
                     />
                     <StatCard
-                        title="Active Listings"
-                        value="0"
-                        trend="0"
+                        title="Live Bike Stock"
+                        value={stats.activeListings}
+                        trend="Stock Count"
                         isPositive={true}
                         icon={Bike}
                         color="bg-orange-600"
                     />
                     <StatCard
-                        title="New Orders"
-                        value="0"
-                        trend="0%"
-                        isPositive={false}
+                        title="Active Rent Deals"
+                        value={stats.newOrders}
+                        trend="Live Deals"
+                        isPositive={stats.newOrders > 0}
                         icon={ShoppingBag}
                         color="bg-blue-600"
                     />
                     <div onClick={() => navigate('/seller/messages')} className="cursor-pointer">
                         <StatCard
-                            title="Inquiries"
+                            title="Total Client Mails"
                             value={messages.length}
-                            trend="New"
+                            trend="Inbox Now"
                             isPositive={true}
                             icon={MessageSquare}
                             color="bg-purple-600"
@@ -153,7 +169,7 @@ const SellerDashboard = () => {
                     {/* Recent Orders Section */}
                     <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                         <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-xl font-black text-gray-900">Recent Activity</h2>
+                            <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Recent Seller Action</h2>
                             <button
                                 onClick={() => navigate('/seller/bikes')}
                                 className="text-orange-600 text-[10px] font-black uppercase tracking-widest hover:underline italic"
@@ -163,35 +179,37 @@ const SellerDashboard = () => {
                         </div>
 
                         <div className="space-y-6">
-                            {[
-                                { bike: 'Ducati Panigale V4', customer: 'John Doe', type: 'Sale', amount: 'RS 24,000', status: 'Processing', time: '2h ago' },
-                                { bike: 'Vespa Sprint 150', customer: 'Sarah Smith', type: 'Rental', amount: 'RS 450/day', status: 'Completed', time: '5h ago' },
-                                { bike: 'BMW R1250 GS', customer: 'Mike Johnson', type: 'Exchange', amount: 'N/A', status: 'Pending', time: '1d ago' },
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-4 rounded-3xl hover:bg-gray-50 transition-all group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all">
-                                            🏍️
+                            {stats.recentActivity.length === 0 ? (
+                                <p className="text-center text-gray-400 text-xs italic py-8">Zero Actions Found</p>
+                            ) : (
+                                stats.recentActivity.map((item, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-4 rounded-3xl hover:bg-gray-50 transition-all group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all">
+                                                🏍️
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900">{item.bike}</h4>
+                                                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wide">{item.customer} • {item.type}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900">{item.bike}</h4>
-                                            <p className="text-[11px] text-gray-500 font-medium">{item.customer} • {item.type}</p>
+                                        <div className="text-right">
+                                            <p className="font-black text-gray-900 mb-1">{item.amount}</p>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${item.status === 'Completed' || item.status === 'Purchased' ? 'bg-green-100 text-green-700' :
+                                                    item.status === 'Processing' || item.status === 'Approved' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                    } `}>
+                                                    {item.status}
+                                                </span>
+                                                <span className="text-[10px] text-gray-400 font-bold">
+                                                    {new Date(item.time).toLocaleDateString()}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-black text-gray-900 mb-1">{item.amount}</p>
-                                        <div className="flex items-center justify-end gap-2">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                                item.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-orange-100 text-orange-700'
-                                                } `}>
-                                                {item.status}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 italic">{item.time}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
 
@@ -203,12 +221,12 @@ const SellerDashboard = () => {
                                 <MessageSquare size={20} className="text-purple-600" /> Client Inquiries
                             </h3>
 
-                            {loadingMessages ? (
+                            {loading ? (
                                 <div className="flex justify-center py-8">
                                     <Loader2 className="animate-spin text-purple-600" />
                                 </div>
                             ) : messages.length === 0 ? (
-                                <p className="text-center text-gray-400 text-xs italic py-8">No messages yet.</p>
+                                <p className="text-center text-gray-400 text-[10px] font-bold uppercase tracking-widest py-8">Zero Mails Now</p>
                             ) : (
                                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
                                     {messages.map((msg) => (

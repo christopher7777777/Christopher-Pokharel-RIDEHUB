@@ -13,13 +13,19 @@ const {
     counterOffer,
     completePayment,
     rentBike,
-    getAdminBikes
+    requestExchange,
+    valuateExchange,
+    getAdminBikes,
+    getSellerStats
 } = require('../controllers/bikeController');
 const { protect, isSeller, isVerified, isAdmin } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
 
 router.route('/admin/all')
     .get(protect, isAdmin, getAdminBikes);
+
+router.route('/admin/valuate-exchange/:id')
+    .put(protect, isAdmin, valuateExchange);
 
 router.route('/')
     .get(getAllBikes)
@@ -32,6 +38,9 @@ router.route('/my-listings')
     .get(protect, getMyBikes);
 
 // Seller specific hubs
+router.route('/seller/stats')
+    .get(protect, isSeller, getSellerStats);
+
 router.route('/sale-requests')
     .get(protect, isSeller, getSaleRequests);
 
@@ -50,6 +59,9 @@ router.route('/counter-offer/:id')
 
 router.route('/rent/:id')
     .put(protect, rentBike);
+
+router.route('/exchange/:id')
+    .put(protect, requestExchange);
 
 router.route('/:id')
     .get(getBike)
