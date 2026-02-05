@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Save, Info, ChevronDown, Trash2, Edit2, Plus } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
@@ -102,7 +102,7 @@ const ValuationRules = () => {
     return (
         <AdminLayout>
             <div className="space-y-8 max-w-5xl mx-auto py-4">
-                {/* Page Title Header */}
+                {/* Header */}
                 <div className="flex justify-between items-center">
                     <div className="space-y-1">
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Valuation Rules</h1>
@@ -120,7 +120,7 @@ const ValuationRules = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Configuration Form */}
+                    {/* Config form */}
                     <div className="lg:col-span-5">
                         <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden sticky top-8">
                             <div className="px-8 py-6 border-b border-slate-100">
@@ -220,7 +220,7 @@ const ValuationRules = () => {
                         </div>
                     </div>
 
-                    {/* Saved Rules List */}
+                    {/* Saved rules */}
                     <div className="lg:col-span-7 space-y-6">
                         <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-100 border border-slate-200/60 overflow-hidden">
                             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
@@ -282,7 +282,7 @@ const ValuationRules = () => {
                             </div>
                         </div>
 
-                        {/* Informational Box */}
+                        {/* Info box */}
                         <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-6 flex items-start gap-4">
                             <div className="p-2 bg-emerald-100/50 rounded-xl">
                                 <Info className="text-emerald-600" size={18} />

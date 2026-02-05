@@ -14,8 +14,8 @@ import {
     ChevronDown,
     Loader2
 } from 'lucide-react';
-import Footer from '../../components/Footer';
-import Header from '../../components/Header';
+import Footer from '../../components/layout/Footer';
+import Header from '../../components/layout/Header';
 
 const ListBike = () => {
     const { logout, user } = useAuth();
@@ -104,10 +104,10 @@ const ListBike = () => {
         try {
             const data = new FormData();
 
-            // Derive Name
+            // Set name
             data.append('name', `${formData.brand} ${formData.model}`);
 
-            // Append other info
+            // Append info
             Object.keys(formData).forEach(key => {
                 data.append(key, formData[key]);
             });
@@ -163,7 +163,7 @@ const ListBike = () => {
                 )}
 
                 <div className="space-y-8">
-                    {/* Basic Info */}
+                    {/* Basic info */}
                     <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp">
                         <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
                             <FileText className="text-orange-600" size={24} /> 1. Basic Info
@@ -194,7 +194,7 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Condition */}
+                    {/* Bike condition */}
                     <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.1s' }}>
                         <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
                             <CheckCircle className="text-orange-600" size={24} /> 2. Condition
@@ -209,7 +209,7 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Pricing */}
+                    {/* Bike pricing */}
                     <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.2s' }}>
                         <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
                             <Plus className="text-orange-600" size={24} /> 3. Pricing
@@ -226,7 +226,7 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Bluebook */}
+                    {/* Bluebook photo */}
                     <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.25s' }}>
                         <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
                             <FileText className="text-orange-600" size={24} /> 4. Bluebook Photo
@@ -254,7 +254,7 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Photos */}
+                    {/* Bike photos */}
                     <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.3s' }}>
                         <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
                             <Camera className="text-orange-600" size={24} /> 5. Bike Photos
@@ -275,7 +275,7 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Submit */}
+                    {/* Submit button */}
                     <button
                         onClick={handleSubmit}
                         disabled={loading}

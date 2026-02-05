@@ -1,6 +1,6 @@
 import { AlertCircle, Bike, Calendar, DollarSign, Gauge, Loader2, Package, Tag, Trash2, Upload, X, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import api from '../utils/api';
+import api from '../../utils/api';
 
 const BikeFormModal = ({ isOpen, onClose, bike, onSuccess }) => {
     const [loading, setLoading] = useState(false);

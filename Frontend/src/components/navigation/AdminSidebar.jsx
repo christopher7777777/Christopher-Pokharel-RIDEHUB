@@ -11,7 +11,7 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     const location = useLocation();

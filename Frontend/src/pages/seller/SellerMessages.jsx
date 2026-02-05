@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../../components/SellerLayout';
+import SellerLayout from '../../components/layout/SellerLayout';
 import api from '../../utils/api';
 import {
     MessageSquare,
@@ -52,7 +52,7 @@ const SellerMessages = () => {
         <SellerLayout>
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left Side: Message List */}
+                    {/* List */}
                     <div className={`${selectedMessage ? 'hidden lg:block lg:w-1/3' : 'w-full'}`}>
                         <div className="mb-6">
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Inquiries</h1>
@@ -104,11 +104,11 @@ const SellerMessages = () => {
                         </div>
                     </div>
 
-                    {/* Right Side: Message Detail */}
+                    {/* Detail */}
                     <div className={`flex-1 ${!selectedMessage ? 'hidden lg:flex' : 'flex'} flex-col`}>
                         {selectedMessage ? (
                             <div className="animate-fadeIn space-y-6">
-                                {/* Detail Header */}
+                                {/* Header */}
                                 <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                                     <button
                                         onClick={() => setSelectedMessage(null)}
@@ -140,7 +140,7 @@ const SellerMessages = () => {
                                     </div>
                                 </div>
 
-                                {/* Message Content */}
+                                {/* Content */}
                                 <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                                     <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
                                         <MessageCircle size={20} className="text-orange-600" /> Customer Message

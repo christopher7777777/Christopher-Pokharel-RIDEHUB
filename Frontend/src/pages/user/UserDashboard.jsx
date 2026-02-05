@@ -2,25 +2,26 @@ import {
     Bike,
     Loader2
 } from 'lucide-react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
-import Footer from '../../components/Footer';
-import Header from '../../components/Header';
+import Footer from '../../components/layout/Footer';
+import Header from '../../components/layout/Header';
 import api from '../../utils/api';
+import SupportChat from '../../components/chat/SupportChat';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
-    const [bikes, setBikes] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    useAuth();
+    const [bikes, setBikes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchBikes = async () => {
             try {
                 const response = await api.get('/api/bikes');
-                // Show latest 3 for featured
+                // Limit featured units
                 setBikes(response.data.data.slice(0, 3));
             } catch (err) {
                 console.error('Failed to fetch bikes', err);
@@ -37,7 +38,7 @@ const UserDashboard = () => {
 
             <main className="pt-32">
 
-                {/* Hero Section */}
+                {/* Hero section */}
                 <section className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8 animate-slideInLeft">
@@ -59,7 +60,7 @@ const UserDashboard = () => {
                         </div>
 
                         <div className="relative animate-slideInRight lg:translate-x-10">
-                            {/* Background Shape */}
+                            {/* Background shape */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-orange-100/50 to-blue-50/50 rounded-full blur-3xl -z-10"></div>
 
                             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white">
@@ -68,14 +69,14 @@ const UserDashboard = () => {
                                     alt="Motorcycle"
                                     className="w-full h-auto object-cover transform hover:scale-105 transition-duration-700"
                                 />
-                                {/* Overlay Gradient */}
+                                {/* Overlay gradient */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Featured Motorcycles */}
+                {/* Featured motorcycles */}
                 <section className="bg-slate-50 py-24">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center max-w-2xl mx-auto mb-16">
@@ -137,7 +138,7 @@ const UserDashboard = () => {
                     </div>
                 </section>
 
-                {/* How It Works */}
+                {/* How it works */}
                 <section className="py-24 bg-white">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-20">
@@ -146,7 +147,7 @@ const UserDashboard = () => {
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-12 relative">
-                            {/* Connecting Line (Desktop) */}
+                            {/* Desktop connecting line */}
                             <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-orange-100 via-orange-200 to-orange-100 -z-10"></div>
 
                             {[
@@ -170,6 +171,7 @@ const UserDashboard = () => {
             </main>
 
             <Footer />
+            <SupportChat />
         </div>
     );
 };

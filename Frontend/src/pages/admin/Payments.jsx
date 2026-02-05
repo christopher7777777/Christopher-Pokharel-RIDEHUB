@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { CreditCard, ArrowUpRight, ArrowDownLeft, Clock, Search, Download } from 'lucide-react';
 
 const Payments = () => {
@@ -24,7 +24,7 @@ const Payments = () => {
                     </button>
                 </div>
 
-                {/* Financial Summary Cards */}
+                {/* Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-4">
@@ -56,7 +56,7 @@ const Payments = () => {
                     </div>
                 </div>
 
-                {/* Transaction List */}
+                {/* Transactions */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                         <h4 className="font-bold text-slate-800">Recent Transactions</h4>

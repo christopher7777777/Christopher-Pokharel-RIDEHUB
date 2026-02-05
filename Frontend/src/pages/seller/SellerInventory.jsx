@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../../components/SellerLayout';
+import SellerLayout from '../../components/layout/SellerLayout';
 import api from '../../utils/api';
 import {
     Plus,
@@ -13,7 +13,7 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import BikeFormModal from '../../components/BikeFormModal';
+import BikeFormModal from '../../components/models/BikeFormModal';
 
 const SellerInventory = () => {
     const [bikes, setBikes] = useState([]);
@@ -85,7 +85,7 @@ const SellerInventory = () => {
                     </button>
                 </div>
 
-                {/* Filters & Search */}
+                {/* Search filters */}
                 <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-1 w-full">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -104,7 +104,7 @@ const SellerInventory = () => {
                     </div>
                 </div>
 
-                {/* Inventory Grid/List */}
+                {/* Inventory list */}
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <Loader2 size={40} className="text-orange-600 animate-spin mb-4" />

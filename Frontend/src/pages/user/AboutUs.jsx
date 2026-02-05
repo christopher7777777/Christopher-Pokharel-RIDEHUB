@@ -1,6 +1,6 @@
-import React from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+// About Us page
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 const AboutUs = () => {
     return (
@@ -10,7 +10,7 @@ const AboutUs = () => {
             <main className="max-w-7xl mx-auto px-6 pt-32 pb-12 lg:pb-20">
                 <h1 className="text-4xl font-black text-slate-900 mb-16 uppercase tracking-tight">About Us</h1>
 
-                {/* Section 1 */}
+                {/* About details */}
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-24">
                     <div className="order-2 lg:order-1">
                         <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
@@ -52,7 +52,7 @@ const AboutUs = () => {
                     </div>
                 </div>
 
-                {/* Section 2 */}
+                {/* Our mission */}
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-24">
                     <div className="order-1">
                         <img
@@ -94,13 +94,13 @@ const AboutUs = () => {
                     </div>
                 </div>
 
-                {/* Section 3 (Optional / Extra Content to match layout flow) */}
+                {/* Community section */}
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
                     <div className="order-2 lg:order-1">
                         <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
                             <h3 className="text-lg font-bold text-slate-900 mb-4">Join The Ride</h3>
                             <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                                Start your journey with us today. RIDEHUB is more than just a marketplace; it's a community of passionate riders.
+                                Start your journey with us today. RIDEHUB is more than just a marketplace; it&apos;s a community of passionate riders.
                                 Share your experiences, find riding buddies, and discover new routes.
                             </p>
                             <div className="space-y-2">

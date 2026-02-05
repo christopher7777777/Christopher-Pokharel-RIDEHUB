@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../../components/SellerLayout';
+import SellerLayout from '../../components/layout/SellerLayout';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import {
@@ -40,7 +40,7 @@ const StatCard = ({ title, value, trend, isPositive, icon: Icon, color }) => (
 
 const SellerDashboard = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, loadUser, loading: authLoading } = useAuth();
     const [messages, setMessages] = useState([]);
     const [stats, setStats] = useState({
         totalEarnings: 0,
@@ -54,6 +54,9 @@ const SellerDashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
+                // Refresh user data too
+                await loadUser();
+
                 const [msgRes, statsRes] = await Promise.all([
                     api.get('/api/messages'),
                     api.get('/api/bikes/seller/stats')
@@ -78,8 +81,8 @@ const SellerDashboard = () => {
     return (
         <SellerLayout>
             <div className="animate-fadeIn">
-                {/* KYC Notification Banner */}
-                {user?.kycStatus !== 'verified' && (
+                {/* KYC banner */}
+                {!authLoading && user && user.kycStatus !== 'verified' && (
                     <div className="mb-8 bg-orange-600 text-white p-4 rounded-3xl shadow-lg shadow-orange-900/10">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-4">
@@ -107,7 +110,7 @@ const SellerDashboard = () => {
                     </div>
                 )}
 
-                {/* Header Actions */}
+                {/* Header actions */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-black text-gray-900 tracking-tight">Main Seller Dashboard</h1>
@@ -126,7 +129,7 @@ const SellerDashboard = () => {
                     </div>
                 </div>
 
-                {/* Main Stats Grid */}
+                {/* Stats grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <StatCard
                         title="Total Sales Cash"
@@ -164,9 +167,9 @@ const SellerDashboard = () => {
                     </div>
                 </div>
 
-                {/* Content Sections */}
+                {/* Content sections */}
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Recent Orders Section */}
+                    {/* Recent actions */}
                     <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Recent Seller Action</h2>
@@ -213,9 +216,9 @@ const SellerDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Right Column: Messages & Alerts */}
+                    {/* Sidebar info */}
                     <div className="flex flex-col gap-8">
-                        {/* Messages Section */}
+                        {/* Messages list */}
                         <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
                                 <MessageSquare size={20} className="text-purple-600" /> Client Inquiries
@@ -252,7 +255,7 @@ const SellerDashboard = () => {
                             )}
                         </div>
 
-                        {/* Quick Tips */}
+                        {/* Urgent alerts */}
                         <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
                                 <Clock size={20} className="text-orange-600" /> Urgent Alerts

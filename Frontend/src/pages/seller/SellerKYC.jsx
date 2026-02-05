@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     User as UserIcon, Mail, Phone, FileText, MapPin, Upload,
@@ -12,9 +12,9 @@ import L from 'leaflet';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from '../../context/AuthContext';
-import SellerLayout from '../../components/SellerLayout';
+import SellerLayout from '../../components/layout/SellerLayout';
 
-// Fix for default marker icon in leaflet
+// Leaflet fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -23,7 +23,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const LocationMarker = ({ position, setPosition }) => {
-    const map = useMapEvents({
+    useMapEvents({
         click(e) {
             setPosition(e.latlng);
         },
@@ -149,7 +149,7 @@ const SellerKYC = () => {
             return toast.error('Please provide your date of birth');
         }
 
-        // Manual validation for files if first time or rejected
+        // Validate files
         if (!kycStatus || kycStatus.status === 'rejected') {
             if (!files.userPhoto) return toast.error('Please upload your passport size photo');
             if (!files.nagriktaFront) return toast.error('Please upload citizenship front');
@@ -278,14 +278,14 @@ const SellerKYC = () => {
                                     <h3 className="text-red-800 font-black text-lg">Verification Rejected</h3>
                                     <p className="text-red-700 mb-2 font-medium">Unfortunately, your previous KYC request was rejected.</p>
                                     <div className="p-3 bg-white/50 rounded-xl border border-red-200">
-                                        <p className="text-red-900 italic">" {kycStatus.adminNote} "</p>
+                                        <p className="text-red-900 italic">&quot; {kycStatus.adminNote} &quot;</p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Left Column: Form Fields */}
+                            {/* Form fields */}
                             <div className="lg:col-span-2 space-y-6">
                                 <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8">
                                     <div className="space-y-6">
@@ -474,7 +474,7 @@ const SellerKYC = () => {
                                 </div>
                             </div>
 
-                            {/* Right Column: Files */}
+                            {/* File uploads */}
                             <div className="space-y-6">
                                 <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8 h-full">
                                     <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">

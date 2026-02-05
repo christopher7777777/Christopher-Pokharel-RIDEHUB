@@ -12,10 +12,10 @@ import L from 'leaflet';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from '../../context/AuthContext';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
-// Fix for default marker icon in leaflet
+// Leaflet fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -58,11 +58,11 @@ const UserKYC = () => {
         phoneNumber: '',
         dob: null,
         permanentAddress: '',
-        address: '', // Current location address
+        address: '', // Current address
         declaration: false
     });
 
-    const [location, setLocation] = useState({ lat: 27.7172, lng: 85.3240 }); // Default Kathmandu
+    const [location, setLocation] = useState({ lat: 27.7172, lng: 85.3240 }); // Default location
     const [files, setFiles] = useState({
         nagriktaFront: null,
         nagriktaBack: null,
@@ -140,7 +140,7 @@ const UserKYC = () => {
             return toast.error('Please provide your date of birth');
         }
 
-        // Manual validation for files if first time or rejected
+        // File validation
         if (!kycStatus || kycStatus.status === 'rejected') {
             if (!files.userPhoto) return toast.error('Please upload your passport size photo');
             if (!files.nagriktaFront) return toast.error('Please upload citizenship front');

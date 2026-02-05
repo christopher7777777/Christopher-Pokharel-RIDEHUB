@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import SellerSidebar from './SellerSidebar';
-import SellerHeader from './SellerHeader';
-import SellerMobileNav from './SellerMobileNav';
+import SellerSidebar from '../navigation/SellerSidebar';
+import SellerHeader from '../navigation/SellerHeader';
+import SellerMobileNav from '../navigation/SellerMobileNav';
 import { X } from 'lucide-react';
 
 const SellerLayout = ({ children }) => {

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { AlertCircle, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
-    const { logout, user, loadUser } = useAuth();
+    const { logout, user, loadUser, loading: authLoading } = useAuth();
     const location = useLocation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
-            loadUser(); // Periodically refresh user data to sync KYC status
+            loadUser(); // Periodically refresh user data 
         }
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
@@ -35,11 +35,11 @@ const Header = () => {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || user?.kycStatus !== 'verified' ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || (user && user.kycStatus !== 'verified') ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
                 }`}
         >
             {/* KYC Notification Banner */}
-            {user && user.role !== 'admin' && user.kycStatus !== 'verified' && (
+            {!authLoading && user && user.role !== 'admin' && user.kycStatus !== 'verified' && (
                 <div className="bg-orange-600 text-white py-2">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2">
                         <div className="flex items-center gap-2">

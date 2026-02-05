@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SellerLayout from '../../components/SellerLayout';
+import SellerLayout from '../../components/layout/SellerLayout';
 import api from '../../utils/api';
 import {
     Bike as BikeIcon,
@@ -77,7 +77,7 @@ const SellerBikes = () => {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {[
                         { label: 'Total Items', value: stats.total, icon: BikeIcon, color: 'text-gray-900', bg: 'bg-white' },
@@ -96,7 +96,7 @@ const SellerBikes = () => {
                     ))}
                 </div>
 
-                {/* Filters & Search */}
+                {/* Filter/Search */}
                 <div className="bg-white p-4 rounded-[32px] border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-1 w-full">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -134,7 +134,7 @@ const SellerBikes = () => {
                     </div>
                 )}
 
-                {/* Bikes Grid */}
+                {/* Bikes */}
                 {filteredBikes.length === 0 ? (
                     <div className="bg-white rounded-[40px] border border-dashed border-gray-200 p-20 text-center">
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">

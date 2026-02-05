@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import SellerLayout from '../../components/SellerLayout';
+import { useState, useEffect } from 'react';
+import SellerLayout from '../../components/layout/SellerLayout';
 import api from '../../utils/api';
 import {
     Package,
     Clock,
     CheckCircle2,
     XCircle,
-    MessageSquare,
     DollarSign,
     Search,
-    Filter,
     ArrowUpRight,
     Loader2,
     Upload,
@@ -188,14 +186,14 @@ const SellerPurchaseHub = () => {
 
                                             {request.status === 'Countered' && (
                                                 <div className="mb-4 p-3 bg-pink-50 border border-pink-100 rounded-2xl">
-                                                    <p className="text-[9px] text-pink-500 font-black uppercase tracking-widest mb-1">User's Counter Price</p>
+                                                    <p className="text-[9px] text-pink-500 font-black uppercase tracking-widest mb-1">User&apos;s Counter Price</p>
                                                     <p className="font-black text-pink-700">NPR {request.userCounterPrice?.toLocaleString()}</p>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Additional info section: Documents & Specs */}
+                                    {/* Additional bike info */}
                                     <div className="px-6 py-4 bg-gray-50/30 flex items-center justify-between border-b border-gray-50">
                                         <div className="flex gap-4">
                                             <div className="text-center">
@@ -457,7 +455,7 @@ const SellerPurchaseHub = () => {
                     </div>
                 )}
 
-                {/* QR Code Viewer Modal */}
+                {/* QR viewer modal */}
                 {showQrModal && qrImageUrl && (
                     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowQrModal(false)}>
                         <div className="relative bg-white rounded-[40px] shadow-2xl overflow-hidden max-w-lg w-full animate-zoomIn" onClick={(e) => e.stopPropagation()}>

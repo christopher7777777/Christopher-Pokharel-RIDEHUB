@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Bike, Search, Trash2, Eye, MapPin, Tag, Loader2, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
-import ValuationModal from '../../components/ValuationModal';
+import ValuationModal from '../../components/models/ValuationModal';
 
 const BikeList = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -126,7 +126,7 @@ const BikeList = () => {
                     </div>
                 </div>
 
-                {/* Bike Grid */}
+                {/* Bikes */}
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <Loader2 className="animate-spin text-orange-600" size={40} />

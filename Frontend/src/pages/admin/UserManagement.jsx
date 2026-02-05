@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Search, Shield, UserX, Mail, Loader2, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -35,7 +35,7 @@ const UserManagement = () => {
         try {
             await api.delete(`/api/auth/users/${userId}`);
             toast.success('User removed successfully');
-            fetchUsers(); // Refresh list
+            fetchUsers(); // Refresh
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to remove user');
         }
@@ -54,7 +54,7 @@ const UserManagement = () => {
                     <p className="text-slate-500">Monitor and manage all user accounts and roles.</p>
                 </div>
 
-                {/* Filters and Search */}
+                {/* Filters/Search */}
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                     <div className="relative w-full md:w-96">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -68,7 +68,7 @@ const UserManagement = () => {
                     </div>
                 </div>
 
-                {/* User Table */}
+                {/* User table */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">

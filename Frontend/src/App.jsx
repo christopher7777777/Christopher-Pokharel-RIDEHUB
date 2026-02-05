@@ -27,7 +27,7 @@ import ValuationRules from './pages/admin/ValuationRules';
 import UserManagement from './pages/admin/UserManagement';
 import Payments from './pages/admin/Payments';
 import BikeList from './pages/admin/BikeList';
-import AdminLayout from './components/AdminLayout';
+import AdminLayout from './components/layout/AdminLayout';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();

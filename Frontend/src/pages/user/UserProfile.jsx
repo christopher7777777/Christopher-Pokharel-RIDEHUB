@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import {
-    User as UserIcon,
-    Mail,
-    Calendar,
     ShieldCheck,
     ShieldAlert,
-    Key,
     UserCircle,
     CheckCircle2,
-    XCircle,
     ArrowRight,
     AlertCircle,
-    Loader2
+    Loader2,
+    Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -30,8 +26,8 @@ const UserProfile = () => {
         confirmPassword: ''
     });
 
-    // Mock KYC status - in a real app, this would come from the user object
-    const isKYCVerified = user?.isKYCVerified || false;
+    // KYC status
+
 
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
@@ -87,14 +83,14 @@ const UserProfile = () => {
 
             <main className="flex-1 pt-32 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    {/* Page Header */}
+                    {/* Page header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
                         <div className="animate-fadeIn">
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Profile Settings</h1>
                             <p className="text-gray-500 text-sm italic">Manage your personal information, security, and verification status.</p>
                         </div>
 
-                        {/* Avatar Section */}
+                        {/* Avatar section */}
                         <div className="relative animate-zoomIn">
                             <div className="w-24 h-24 bg-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-200">
                                 <span className="text-4xl font-black text-white">
@@ -106,7 +102,7 @@ const UserProfile = () => {
                     </div>
 
                     <div className="space-y-6">
-                        {/* Profile Summary Card */}
+                        {/* Profile summary */}
                         <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp">
                             <div className="mb-8">
                                 <h2 className="text-xl font-black text-gray-900 mb-1">Profile Summary</h2>

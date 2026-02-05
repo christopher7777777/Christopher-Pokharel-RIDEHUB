@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Users, Bike, CheckCircle, CreditCard, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {/* Additional sections like Recent Activity or Charts can go here */}
+                {/* Future sections */}
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 min-h-[300px] flex flex-col">
                     <h2 className="text-xl font-bold text-slate-800 mb-4">System Overview</h2>
                     <div className="flex-1 flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-100 rounded-xl bg-slate-50/50">

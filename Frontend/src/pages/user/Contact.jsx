@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -44,10 +44,10 @@ const Contact = () => {
                     <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Contact Form</h1>
                 </div>
 
-                {/* Contact Form Section */}
+                {/* Contact form */}
                 <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 lg:p-12 mb-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        {/* Left: Image */}
+                        {/* Form image */}
                         <div className="relative flex justify-center items-center p-8 bg-gray-50 rounded-3xl">
                             <img
                                 src="/image2.png"
@@ -56,7 +56,7 @@ const Contact = () => {
                             />
                         </div>
 
-                        {/* Right: Form */}
+                        {/* Form fields */}
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 mb-6 uppercase text-sm tracking-wide">Provide Detail For Contact With US</h2>
 
@@ -156,7 +156,7 @@ const Contact = () => {
                     </div>
                 </div>
 
-                {/* How To Contact Us Section */}
+                {/* Contact steps */}
                 <div className="text-center mb-16">
                     <h2 className="text-2xl font-black text-slate-900 mb-4">How To Contact Us ?</h2>
                     <p className="text-gray-500 text-sm">Get started in just three simple steps</p>

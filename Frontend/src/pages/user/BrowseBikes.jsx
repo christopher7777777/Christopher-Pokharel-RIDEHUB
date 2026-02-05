@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import { Search, Filter, Bike, Loader2, AlertCircle } from 'lucide-react';
+import SupportChat from '../../components/chat/SupportChat';
 
 const BrowseBikes = () => {
     const navigate = useNavigate();
@@ -12,9 +13,9 @@ const BrowseBikes = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filter states
+    // Filter state
     const [filters, setFilters] = useState({
-        type: 'all', // 'Sale' or 'Rental' or 'all'
+        type: 'all', // Listing type filter
         minPrice: '',
         maxPrice: '',
         brand: 'all'
@@ -38,24 +39,24 @@ const BrowseBikes = () => {
         fetchBikes();
     }, []);
 
-    // Derived values for filters
+    // Filter derived values
     const brands = ['all', ...new Set(bikes.map(bike => bike.brand))];
 
     const filteredBikes = bikes.filter(bike => {
-        // Search Term
+        // Search term
         const matchesSearch = bike.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bike.brand.toLowerCase().includes(searchTerm.toLowerCase());
 
-        // Type Filter (Sale / Rental)
-        // Note: Backend likely saves 'Sale' or 'Rental' in listingType
+        // Type filter
+        // Backend type mapping
         const matchesType = filters.type === 'all' ||
             bike.listingType === filters.type ||
             (filters.type === 'Sale' && bike.listingType === 'Purchase');
 
-        // Brand Filter
+        {/* Brand filter */ }
         const matchesBrand = filters.brand === 'all' || bike.brand === filters.brand;
 
-        // Price Filter
+        // Price filter
         const matchesMinPrice = !filters.minPrice || bike.price >= Number(filters.minPrice);
         const matchesMaxPrice = !filters.maxPrice || bike.price <= Number(filters.maxPrice);
 
@@ -68,7 +69,7 @@ const BrowseBikes = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 md:pt-32">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar Filters */}
+                    {/* Filters */}
                     <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
                         <div>
                             <h3 className="font-black text-xl text-gray-900 mb-4">Filters</h3>
@@ -79,7 +80,7 @@ const BrowseBikes = () => {
                                 Clear All
                             </button>
 
-                            {/* Type Filter */}
+                            {/* Type */}
                             <div className="mb-6">
                                 <label className="block text-sm font-bold text-gray-700 mb-2">Type</label>
                                 <select
@@ -93,7 +94,7 @@ const BrowseBikes = () => {
                                 </select>
                             </div>
 
-                            {/* Brand Filter */}
+                            {/* Brand */}
                             <div className="mb-6">
                                 <label className="block text-sm font-bold text-gray-700 mb-2">Brand</label>
                                 <select
@@ -107,7 +108,7 @@ const BrowseBikes = () => {
                                 </select>
                             </div>
 
-                            {/* Price Range */}
+                            {/* Price */}
                             <div className="mb-6">
                                 <label className="block text-sm font-bold text-gray-700 mb-2">Price Range</label>
                                 <div className="flex gap-2">
@@ -134,9 +135,9 @@ const BrowseBikes = () => {
                         </div>
                     </div>
 
-                    {/* Main Content */}
+                    {/* Content */}
                     <div className="flex-1">
-                        {/* Search and Sort */}
+                        {/* Search/Sort */}
                         <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
                             <div className="relative flex-1 w-full md:max-w-md">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -158,13 +159,13 @@ const BrowseBikes = () => {
                             </div>
                         </div>
 
-                        {/* Available Bikes Title */}
+                        {/* Results */}
                         <div className="mb-6">
                             <h2 className="text-2xl font-black text-gray-900">Bikes For You</h2>
                             <p className="text-gray-500 text-sm">Found {filteredBikes.length} Bikes</p>
                         </div>
 
-                        {/* Grid */}
+                        {/* Bikes */}
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-20">
                                 <Loader2 size={40} className="text-orange-600 animate-spin mb-4" />
@@ -248,6 +249,7 @@ const BrowseBikes = () => {
                 </div>
             </div>
             <Footer />
+            <SupportChat />
         </div>
     );
 };

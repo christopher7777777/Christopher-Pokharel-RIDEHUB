@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import { useState, useEffect } from 'react';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import {
     Clock,
     CheckCircle2,
-    XCircle,
     CreditCard,
-    Wallet,
     ArrowRight,
     ShieldCheck,
     MessageSquare,
@@ -39,7 +37,7 @@ const UserSellingStatus = () => {
             const sales = response.data.data.filter(bike => bike.listingType === 'Sale' || bike.listingType === 'Purchase');
             setListings(sales);
             if (sales.length > 0) {
-                // Keep selected listing if it still exists
+                // Persist listing
                 const current = sales.find(s => s._id === selectedListing?._id);
                 setSelectedListing(current || sales[0]);
             }
@@ -81,7 +79,7 @@ const UserSellingStatus = () => {
             setShowCounterModal(false);
             setCounterPrice('');
             fetchMySales();
-        } catch (err) {
+        } catch {
             alert('Counter offer failed');
         }
     };
@@ -115,7 +113,7 @@ const UserSellingStatus = () => {
                         <Package className="text-gray-200" size={40} />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900 mb-2">No active bike sales</h2>
-                    <p className="text-gray-500 mb-8 italic">You haven't listed any bikes for sale yet.</p>
+                    <p className="text-gray-500 mb-8 italic">You haven&apos;t listed any bikes for sale yet.</p>
                     <a href="/sell" className="inline-block bg-orange-600 text-white px-8 py-3 rounded-2xl font-black text-sm shadow-lg hover:bg-orange-700 transition-all">
                         LIST A BIKE NOW
                     </a>
@@ -212,7 +210,7 @@ const UserSellingStatus = () => {
                                         <MessageSquare size={20} className="text-orange-600" /> Message from Dealer
                                     </h3>
                                     <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100 text-sm text-gray-700 leading-relaxed italic">
-                                        "{listing.dealerNote}"
+                                        &quot;{listing.dealerNote}&quot;
                                     </div>
                                 </div>
                             )}
@@ -248,7 +246,7 @@ const UserSellingStatus = () => {
                                     </div>
                                     <h3 className="text-xl font-black mb-2">Countered</h3>
                                     <p className="text-xs text-pink-50 leading-relaxed">
-                                        You've proposed NPR {listing.userCounterPrice?.toLocaleString()}. Waiting for the dealer to review and respond.
+                                        You&apos;ve proposed NPR {listing.userCounterPrice?.toLocaleString()}. Waiting for the dealer to review and respond.
                                     </p>
                                 </div>
                             )}
@@ -260,7 +258,7 @@ const UserSellingStatus = () => {
                                     </div>
                                     <h3 className="text-xl font-black mb-2">Awaiting Payment</h3>
                                     <p className="text-xs text-orange-50 leading-relaxed">
-                                        You've confirmed the deal via {listing.paymentMethod}. Waiting for the dealer to process your payment and upload proof.
+                                        You&apos;ve confirmed the deal via {listing.paymentMethod}. Waiting for the dealer to process your payment and upload proof.
                                     </p>
                                 </div>
                             )}
@@ -291,7 +289,7 @@ const UserSellingStatus = () => {
                 </div>
             </main>
 
-            {/* Counter Offer Modal */}
+            {/* Counter modal */}
             {showCounterModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={() => setShowCounterModal(false)}></div>
@@ -320,7 +318,7 @@ const UserSellingStatus = () => {
                 </div>
             )}
 
-            {/* Sale Confirmation Modal */}
+            {/* Sale modal */}
             {showPaymentModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={() => setShowPaymentModal(false)}></div>

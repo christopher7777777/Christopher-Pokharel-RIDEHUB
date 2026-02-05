@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Search, Check, X, Eye, FileText, MapPin, Phone, Mail, Calendar, Building2, Camera } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
@@ -160,7 +160,7 @@ const KycVerification = () => {
                 </div>
             </div>
 
-            {/* View KYC Modal */}
+            {/* View modal */}
             {isViewModalOpen && selectedKyc && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
                     <div className="bg-white rounded-[3rem] w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in duration-300 border border-white">
@@ -181,7 +181,7 @@ const KycVerification = () => {
                         </div>
 
                         <div className="p-10 space-y-12">
-                            {/* Personal Details Section */}
+                            {/* Personal details */}
                             <div className="space-y-8">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
@@ -216,7 +216,7 @@ const KycVerification = () => {
                                 </div>
                             </div>
 
-                            {/* Business Details Section (If Seller) */}
+                            {/* Business details */}
                             {selectedKyc.user?.role === 'seller' && (
                                 <div className="space-y-8 pt-12 border-t border-slate-50">
                                     <div className="flex items-center gap-3">
@@ -243,7 +243,7 @@ const KycVerification = () => {
                                 </div>
                             )}
 
-                            {/* Documents Section */}
+                            {/* Document list */}
                             <div className="space-y-8 pt-12 border-t border-slate-50">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600">
@@ -271,7 +271,7 @@ const KycVerification = () => {
                                 </div>
                             </div>
 
-                            {/* Verification Actions */}
+                            {/* Action panel */}
                             <div className="pt-12 border-t border-slate-100 space-y-8">
                                 <div className="space-y-3">
                                     <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Admin Action Note</label>

@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import {
-    Menu,
-    Bell,
-    User,
-    LogOut,
-    CheckCircle2,
-    XCircle
+    Menu
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const SellerHeader = ({ onMenuToggle }) => {
     const { user, logout } = useAuth();
@@ -29,13 +23,6 @@ const SellerHeader = ({ onMenuToggle }) => {
             </div>
 
             <div className="flex items-center gap-4">
-                <button className="relative p-2 text-gray-400 hover:text-orange-600 transition-colors hidden sm:block">
-                    <Bell size={20} />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                </button>
-
-                <div className="h-8 w-px bg-gray-100 hidden sm:block"></div>
-
                 <div className="relative">
                     <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -51,19 +38,10 @@ const SellerHeader = ({ onMenuToggle }) => {
 
                     {isUserMenuOpen && (
                         <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-1 animate-fadeIn">
-                            <div className="px-4 py-3 border-b border-gray-50">
+                            <div className="px-4 py-3">
                                 <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
                                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                             </div>
-                            <Link to="/seller/settings/profile" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-orange-600">
-                                <User size={16} /> Profile
-                            </Link>
-                            <button
-                                onClick={logout}
-                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 text-left"
-                            >
-                                <LogOut size={16} /> Logout
-                            </button>
                         </div>
                     )}
                 </div>

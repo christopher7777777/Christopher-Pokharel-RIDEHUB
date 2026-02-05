@@ -40,6 +40,7 @@ const register = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isAdmin: user.isAdmin,
+                kycStatus: user.kycStatus,
                 token: token,
             },
             message: 'Registration successful'
@@ -80,6 +81,7 @@ const login = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     isAdmin: user.isAdmin,
+                    kycStatus: user.kycStatus,
                     token: token,
                 },
                 message: 'Login successful'

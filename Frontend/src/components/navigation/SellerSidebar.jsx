@@ -15,7 +15,7 @@ import {
     User,
     UserCheck
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const SellerSidebar = ({ isOpen, toggleSidebar }) => {
     const location = useLocation();

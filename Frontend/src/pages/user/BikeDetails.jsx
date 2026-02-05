@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import {
     Bike as BikeIcon,
@@ -20,8 +20,8 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import BookingModal from '../../components/BookingModal';
-import ExchangeModal from '../../components/ExchangeModal';
+import BookingModal from '../../components/models/BookingModal';
+import ExchangeModal from '../../components/models/ExchangeModal';
 
 const BikeDetails = () => {
     const { id } = useParams();
@@ -64,18 +64,18 @@ const BikeDetails = () => {
             await api.put(endpoint, bookingData);
             setSuccessMessage(isBuyBike ? 'Bike Purchase Done' : 'Bike Rental Done');
 
-            // If online payment selected, maybe redirect or show msg (user said "payment option online")
+            // Online payment
             if (bookingData.paymentMethod === 'Online') {
                 setSuccessMessage(prev => prev + ' Please proceed with online payment.');
             }
 
-            // Refresh bike status
+            // Refresh status
             const response = await api.get(`/api/bikes/${id}`);
             setBike(response.data.data);
             setIsBookingModalOpen(false);
         } catch (err) {
             setError(err.response?.data?.message || 'Transaction failed');
-            throw err; // So the modal can show the error
+            throw err; // Propagate error
         } finally {
             setActionLoading(false);
         }
@@ -87,7 +87,7 @@ const BikeDetails = () => {
             await api.put(`/api/bikes/exchange/${id}`, { exchangeBikeDetails: exchangeData });
             setSuccessMessage('Swap Request Sent');
 
-            // Refresh bike details to show exchange status
+            // Refresh state
             const response = await api.get(`/api/bikes/${id}`);
             setBike(response.data.data);
             setIsExchangeModalOpen(false);
@@ -133,7 +133,7 @@ const BikeDetails = () => {
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 lg:pb-20">
-                {/* Breadcrumbs */}
+                {/* Nav breadcrumbs */}
                 <nav className="flex items-center gap-2 mb-8 text-[10px] font-black uppercase tracking-widest text-gray-400 overflow-x-auto whitespace-nowrap pb-2">
                     <Link to="/dashboard" className="hover:text-orange-600 transition-colors">Home</Link>
                     <ChevronRight size={12} />
@@ -143,7 +143,7 @@ const BikeDetails = () => {
                 </nav>
 
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-                    {/* Visual Section */}
+                    {/* Visual section */}
                     {successMessage && (
                         <div className="lg:col-span-2 bg-green-50 border border-green-100 p-6 rounded-[30px] flex items-center justify-between animate-fadeInScale">
                             <div className="flex items-center gap-4">
@@ -197,7 +197,7 @@ const BikeDetails = () => {
                             </div>
                         </div>
 
-                        {/* Thumbnails */}
+                        {/* Thumbnail list */}
                         {bike.images && bike.images.length > 1 && (
                             <div className="flex gap-4 overflow-x-auto py-2 scrollbar-none">
                                 {bike.images.map((img, idx) => (
@@ -213,7 +213,7 @@ const BikeDetails = () => {
                         )}
                     </div>
 
-                    {/* Content Section */}
+                    {/* Content section */}
                     <div className="flex flex-col">
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-4">
@@ -249,7 +249,7 @@ const BikeDetails = () => {
                             </div>
                         </div>
 
-                        {/* Specs Grid */}
+                        {/* Specs grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                             {[
                                 { icon: Calendar, label: "Year Of Build", value: bike.modelYear },
@@ -265,7 +265,7 @@ const BikeDetails = () => {
                             ))}
                         </div>
 
-                        {/* Description */}
+                        {/* Bike description */}
                         <div className="mb-10 text-gray-500 leading-relaxed space-y-4">
                             <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <Tag size={18} className="text-orange-600" /> About This Bike
@@ -282,7 +282,7 @@ const BikeDetails = () => {
                             </p>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Action buttons */}
                         <div className="mt-auto space-y-4">
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <button
