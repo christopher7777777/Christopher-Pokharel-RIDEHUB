@@ -106,9 +106,9 @@ const UserSellingStatus = () => {
 
     if (listings.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen flex flex-col bg-gray-50">
                 <Header />
-                <main className="pt-32 pb-20 px-4 text-center">
+                <main className="pt-32 pb-20 px-4 text-center flex-grow">
                     <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100">
                         <Package className="text-gray-200" size={40} />
                     </div>
@@ -127,10 +127,10 @@ const UserSellingStatus = () => {
     const statusInfo = getStatusInfo(listing.status);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen flex flex-col bg-gray-50">
             <Header />
 
-            <main className="pt-32 pb-12 px-4 sm:px-6 lg:px-8">
+            <main className="pt-32 pb-12 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="max-w-4xl mx-auto">
                     {listings.length > 1 && (
                         <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">

@@ -104,7 +104,7 @@ const login = async (req, res) => {
 // Get user profile
 const getMe = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id).populate('kycId', 'userPhoto');
         res.json({
             success: true,
             data: user

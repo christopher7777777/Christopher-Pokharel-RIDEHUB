@@ -94,29 +94,82 @@ const SupportChat = () => {
     const generateResponse = (message) => {
         const lowerMsg = message.toLowerCase();
 
-        if (lowerMsg.match(/\b(hi|hello|hey|namaste|greetings)\b/)) {
-            return "Hello! 👋 How can I assist you with RIDEHUB today?";
-        }
-        if (lowerMsg.includes('sell') || lowerMsg.includes('list')) {
-            return "To sell your bike, go to your Dashboard and click 'Sell Bike'. You'll need to upload photos and provide details.";
-        }
-        if (lowerMsg.includes('buy') || lowerMsg.includes('purchase')) {
-            return "You can browse verified bikes in the 'Browse' section. Use filters to find your perfect ride!";
-        }
-        if (lowerMsg.includes('rent')) {
-            return "To rent a bike, simply browse our listings, select the rental period you need, and send a request to the owner. It's that easy!";
-        }
-        if (lowerMsg.includes('kyc') || lowerMsg.includes('verify')) {
-            return "KYC verification is mandatory for safety. Go to 'Profile' > 'KYC' to upload your documents.";
-        }
-        if (lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('fee')) {
-            return "Listing is free for the first 3 bikes! We charge a small 5% commission only when your bike sells.";
-        }
-        if (lowerMsg.includes('contact') || lowerMsg.includes('support')) {
-            return "You can email us at support@ridehub.com or call our helpline at +977-9800000000.";
+        // Greetings - Natural and friendly
+        if (lowerMsg.match(/\b(hi|hello|hey|namaste|greetings|kasto cha)\b/)) {
+            return "Namaste! 👋 How can I help you with RIDEHUB today?";
         }
 
-        return "I'm not sure about that. You can try searching our Help Center above, or a human agent will be with you shortly.";
+        // Selling & Listing
+        if (lowerMsg.includes('sell') || lowerMsg.includes('list')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 1);
+            return matchedFaq ? matchedFaq.answer : "Go to 'Sell Bike' in your dashboard, upload photos, and add details. Our team will review it shortly.";
+        }
+
+        if (lowerMsg.includes('promote') || lowerMsg.includes('feature') || lowerMsg.includes('visibility')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 6);
+            return matchedFaq ? matchedFaq.answer : "You can promote your listing from your seller dashboard to boost visibility.";
+        }
+
+        // Buying & Browsing
+        if (lowerMsg.includes('buy') || lowerMsg.includes('purchase') || lowerMsg.includes('browse')) {
+            return "Browse verified bikes in the 'Browse' section. Use filters to find your perfect ride! 🚲";
+        }
+
+        if (lowerMsg.includes('contact seller') || lowerMsg.includes('inquiry')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 5);
+            return matchedFaq ? matchedFaq.answer : "On any bike details page, click 'Inquiry' to message the seller or view their contact info.";
+        }
+
+        // Renting
+        if (lowerMsg.includes('rent')) {
+            return "Browse rental listings, select your period, and send a request to the owner. Simple and fast!";
+        }
+
+        // KYC & Security
+        if (lowerMsg.includes('kyc') || lowerMsg.includes('verify') || lowerMsg.includes('verification') || lowerMsg.includes('document')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 2);
+            return matchedFaq ? matchedFaq.answer : "KYC is mandatory for safety. Go to 'Profile' > 'KYC' to upload your citizenship/ID and selfie. 🔐";
+        }
+
+        // Payments & Fees
+        if (lowerMsg.includes('payment') || lowerMsg.includes('escrow') || lowerMsg.includes('secure')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 3);
+            return matchedFaq ? matchedFaq.answer : "Payments are secure via escrow. Funds release only after delivery confirmation. 💳";
+        }
+
+        if (lowerMsg.includes('fee') || lowerMsg.includes('commission') || lowerMsg.includes('cost') || lowerMsg.includes('charge')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 7);
+            return matchedFaq ? matchedFaq.answer : "First 3 bike listings are free! We charge 5% commission only on successful sales.";
+        }
+
+        // Account & Profile
+        if (lowerMsg.includes('profile') || lowerMsg.includes('edit') || lowerMsg.includes('account') || lowerMsg.includes('password')) {
+            const matchedFaq = FAQ_DATA.find(faq => faq.id === 4);
+            return matchedFaq ? matchedFaq.answer : "Head to 'Profile' to update your info, photo, or change your password.";
+        }
+
+        // Support & Contact
+        if (lowerMsg.includes('contact') || lowerMsg.includes('support') || lowerMsg.includes('help') || lowerMsg.includes('email') || lowerMsg.includes('phone')) {
+            return "You can reach us at support@ridehub.com or call +977-9800000000. We're here to help!";
+        }
+
+        // Exchange/Swap
+        if (lowerMsg.includes('exchange') || lowerMsg.includes('swap') || lowerMsg.includes('trade')) {
+            return "You can exchange your old bike! Submit a request on the bike details page, and we'll valuate it for you.";
+        }
+
+        // Delivery
+        if (lowerMsg.includes('delivery') || lowerMsg.includes('shipping')) {
+            return "Delivery is arranged after payment confirmation. You'll receive tracking details via email.";
+        }
+
+        // Off-topic redirect
+        if (lowerMsg.match(/\b(weather|news|cricket|football|movie|song|recipe|game)\b/)) {
+            return "I'm here to help with RIDEHUB-related questions only. Is there anything about buying, selling, or renting bikes I can assist with?";
+        }
+
+        // Default - Not sure
+        return "I'm not fully sure about that. Try searching our Help Center above, or contact us at support@ridehub.com for assistance.";
     };
 
     const handleSendMessage = (text) => {

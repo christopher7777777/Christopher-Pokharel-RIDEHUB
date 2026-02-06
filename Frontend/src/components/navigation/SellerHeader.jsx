@@ -28,8 +28,16 @@ const SellerHeader = ({ onMenuToggle }) => {
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                         className="flex items-center gap-3 p-1.5 md:pr-4 rounded-full border border-gray-100 hover:shadow-md transition-all bg-white"
                     >
-                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
-                            {user?.name?.charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden">
+                            {user?.kycStatus === 'verified' && user?.kycId?.userPhoto ? (
+                                <img
+                                    src={user.kycId.userPhoto}
+                                    alt={user.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                user?.name?.charAt(0).toUpperCase()
+                            )}
                         </div>
                         <span className="text-sm font-medium text-gray-700 hidden md:block">
                             {user?.name}

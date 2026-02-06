@@ -22,7 +22,7 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
         bookingDate: new Date().toISOString().split('T')[0],
         serviceDay: new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date()),
         deliveryMethod: 'Self Pickup',
-        paymentMethod: 'Cash At Pickup',
+        paymentMethod: 'Cash',
         rentalPlan: 'Daily',
         rentalDuration: 1
     });
@@ -30,7 +30,7 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
     if (!isOpen) return null;
 
     const deliveryCharge = formData.deliveryMethod === 'Home Delivery' ? 10 : 0;
-    const basePrice = bike.price;
+    const basePrice = (bike.exchangeValuation && bike.exchangeValuation > 0) ? (bike.price - bike.exchangeValuation) : bike.price;
     const planMultiplier = formData.rentalPlan === 'Weekly' ? 7 : 1;
     const rentalCost = basePrice * planMultiplier * formData.rentalDuration;
     const totalAmount = rentalCost + deliveryCharge;
@@ -225,10 +225,10 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
                         <div className="flex flex-wrap gap-4">
                             <button
                                 type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'Cash At Pickup' }))}
-                                className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${formData.paymentMethod === 'Cash At Pickup' ? 'bg-orange-500 text-white shadow-orange-200 scale-105' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                                onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'Cash' }))}
+                                className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${formData.paymentMethod === 'Cash' ? 'bg-orange-500 text-white shadow-orange-200 scale-105' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
                             >
-                                Cash At Pickup
+                                {formData.deliveryMethod === 'Home Delivery' ? 'Cash On Delivery' : 'Cash At Pickup'}
                             </button>
                             <button
                                 type="button"
@@ -249,14 +249,28 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-400">
-                                    Base Ride Cost
+                                    {bike.listingType === 'Rental'
+                                        ? `Base Price (${formData.rentalPlan === 'Weekly' ? 'Weekly' : 'Daily'})`
+                                        : 'Bike Price'
+                                    }
                                 </span>
-                                <span className="font-bold">NPR {rentalCost.toLocaleString()}</span>
+                                <span className="font-bold">NPR {(bike.price * planMultiplier).toLocaleString()}</span>
                             </div>
+
+                            {bike.exchangeValuation > 0 && (
+                                <div className="flex justify-between text-sm text-green-400">
+                                    <span className="flex items-center gap-2">
+                                        <CheckCircle2 size={14} /> Swap Valuation
+                                    </span>
+                                    <span className="font-bold">- NPR {bike.exchangeValuation.toLocaleString()}</span>
+                                </div>
+                            )}
+
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-400">Extra Delivery Fee</span>
                                 <span className="font-bold">NPR {deliveryCharge.toLocaleString()}</span>
                             </div>
+
                             <div className="pt-3 border-t border-gray-800 flex justify-between items-baseline">
                                 <span className="text-lg font-black uppercase tracking-tighter">Total Price Due</span>
                                 <span className="text-2xl font-black text-orange-500 tracking-tight">NPR {totalAmount.toLocaleString()}</span>

@@ -1,7 +1,4 @@
-import {
-    Bike,
-    Loader2
-} from 'lucide-react';
+import { Bike, Loader2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

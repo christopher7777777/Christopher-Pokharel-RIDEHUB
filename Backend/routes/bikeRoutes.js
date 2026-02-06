@@ -61,7 +61,12 @@ router.route('/rent/:id')
     .put(protect, rentBike);
 
 router.route('/exchange/:id')
-    .put(protect, requestExchange);
+    .put(protect, upload.fields([
+        { name: 'blueBookPhoto', maxCount: 1 },
+        { name: 'bikeModelPhoto', maxCount: 1 },
+        { name: 'fullBikePhoto', maxCount: 1 },
+        { name: 'meterPhoto', maxCount: 1 }
+    ]), requestExchange);
 
 router.route('/:id')
     .get(getBike)

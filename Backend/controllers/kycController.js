@@ -22,12 +22,12 @@ exports.submitKYC = async (req, res) => {
             longitude
         } = req.body;
 
-        // Check if user already has a pending or verified KYC
+        // Check if user already has a verified KYC
         const existingKYC = await KYC.findOne({ user: req.user.id });
-        if (existingKYC && (existingKYC.status === 'pending' || existingKYC.status === 'verified')) {
+        if (existingKYC && existingKYC.status === 'verified') {
             return res.status(400).json({
                 success: false,
-                message: `You already have a ${existingKYC.status} KYC request.`
+                message: 'You already have a verified KYC. Contact support if you need to update your information.'
             });
         }
 
@@ -51,27 +51,41 @@ exports.submitKYC = async (req, res) => {
             status: 'pending'
         };
 
-        // Handle file uploads
-        if (req.files) {
-            if (req.files.nagriktaFront) {
-                kycData.nagriktaFront = req.files.nagriktaFront[0].path;
-            }
-            if (req.files.nagriktaBack) {
-                kycData.nagriktaBack = req.files.nagriktaBack[0].path;
-            }
-            if (req.files.userPhoto) {
-                kycData.userPhoto = req.files.userPhoto[0].path;
-            }
-            if (req.files.panPhoto) {
-                kycData.panPhoto = req.files.panPhoto[0].path;
-            }
-        }
-
         let kyc;
         if (existingKYC) {
-            // Update existing rejected KYC
+            // Update existing rejected or pending KYC
+            // Preserve existing file paths if new files are not uploaded
+            if (req.files) {
+                if (req.files.nagriktaFront) {
+                    kycData.nagriktaFront = req.files.nagriktaFront[0].path;
+                }
+                if (req.files.nagriktaBack) {
+                    kycData.nagriktaBack = req.files.nagriktaBack[0].path;
+                }
+                if (req.files.userPhoto) {
+                    kycData.userPhoto = req.files.userPhoto[0].path;
+                }
+                if (req.files.panPhoto) {
+                    kycData.panPhoto = req.files.panPhoto[0].path;
+                }
+            }
             kyc = await KYC.findByIdAndUpdate(existingKYC._id, kycData, { new: true });
         } else {
+            // Handle file uploads for new KYC
+            if (req.files) {
+                if (req.files.nagriktaFront) {
+                    kycData.nagriktaFront = req.files.nagriktaFront[0].path;
+                }
+                if (req.files.nagriktaBack) {
+                    kycData.nagriktaBack = req.files.nagriktaBack[0].path;
+                }
+                if (req.files.userPhoto) {
+                    kycData.userPhoto = req.files.userPhoto[0].path;
+                }
+                if (req.files.panPhoto) {
+                    kycData.panPhoto = req.files.panPhoto[0].path;
+                }
+            }
             kyc = await KYC.create(kycData);
         }
 

@@ -64,10 +64,10 @@ const BrowseBikes = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans text-slate-800">
+        <div className="min-h-screen flex flex-col bg-gray-50 font-sans text-slate-800">
             <Header />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 md:pt-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 md:pt-32 flex-grow w-full">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Filters */}
                     <div className="w-full lg:w-64 flex-shrink-0 space-y-8">

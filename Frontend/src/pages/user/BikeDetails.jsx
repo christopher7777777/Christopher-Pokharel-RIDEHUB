@@ -81,22 +81,35 @@ const BikeDetails = () => {
         }
     };
 
-    const handleConfirmExchange = async (exchangeData) => {
+    const handleConfirmExchange = async (formData) => {
         try {
             setActionLoading(true);
-            await api.put(`/api/bikes/exchange/${id}`, { exchangeBikeDetails: exchangeData });
-            setSuccessMessage('Swap Request Sent');
+            // formData is now passed directly. 
+            // We need to ensure the header is multipart/form-data, 
+            // but usually axios/api instance handles it if data is FormData.
+            // If the previous code sent JSON object { exchangeBikeDetails: exchangeData }, 
+            // we rely on the component to send FormData now.
 
-            // Refresh state
-            const response = await api.get(`/api/bikes/${id}`);
-            setBike(response.data.data);
-            setIsExchangeModalOpen(false);
+            const response = await api.put(`/api/bikes/exchange/${id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const updatedBike = response.data.data;
+
+            setBike(updatedBike);
+            // We do NOT close the modal here anymore. 
+            // We return the updated data so the modal can show the confirmation step.
+            return updatedBike;
         } catch (err) {
             setError(err.response?.data?.message || 'Exchange request failed');
             throw err;
         } finally {
             setActionLoading(false);
         }
+    };
+
+    const handleProceedAfterExchange = () => {
+        setIsExchangeModalOpen(false);
+        setIsBookingModalOpen(true);
     };
 
     if (loading) {
@@ -345,6 +358,7 @@ const BikeDetails = () => {
                 isOpen={isExchangeModalOpen}
                 onClose={() => setIsExchangeModalOpen(false)}
                 bike={bike}
+                onProceed={handleProceedAfterExchange}
                 onConfirm={handleConfirmExchange}
             />
         </div>

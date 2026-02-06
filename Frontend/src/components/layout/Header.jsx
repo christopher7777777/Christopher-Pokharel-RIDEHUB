@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight } from 'lucide-react';
+import { AlertCircle, ArrowRight, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -98,10 +98,18 @@ const Header = () => {
                     <div className="hidden md:flex items-center gap-4">
                         <div className="relative group/profile">
                             <Link to="/profile" className="flex items-center gap-2 group">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-orange-200 group-hover:border-orange-500 transition-all">
-                                    <span className="text-orange-600 font-bold text-xs">
-                                        {user?.name?.charAt(0).toUpperCase()}
-                                    </span>
+                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border-2 border-orange-200 group-hover:border-orange-500 transition-all overflow-hidden">
+                                    {user?.kycStatus === 'verified' && user?.kycId?.userPhoto ? (
+                                        <img
+                                            src={user.kycId.userPhoto}
+                                            alt={user.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-orange-600 font-bold text-xs">
+                                            {user?.name?.charAt(0).toUpperCase()}
+                                        </span>
+                                    )}
                                 </div>
                                 <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
                                     Profile
@@ -173,8 +181,16 @@ const Header = () => {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="flex items-center gap-3 px-3 py-2 text-gray-600"
                             >
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                                    <span className="text-orange-600 font-bold">{user?.name?.charAt(0).toUpperCase()}</span>
+                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden">
+                                    {user?.kycStatus === 'verified' && user?.kycId?.userPhoto ? (
+                                        <img
+                                            src={user.kycId.userPhoto}
+                                            alt={user.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-orange-600 font-bold">{user?.name?.charAt(0).toUpperCase()}</span>
+                                    )}
                                 </div>
                                 <span>Profile</span>
                             </Link>
