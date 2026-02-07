@@ -20,6 +20,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import BikeDetails from './pages/user/BikeDetails';
 import SellerBikes from './pages/seller/SellerBikes';
 import SellerKYC from './pages/seller/SellerKYC';
+import SellerPayments from './pages/seller/SellerPayments';
 import UserKYC from './pages/user/UserKYC';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import KycVerification from './pages/admin/KycVerification';
@@ -28,6 +29,13 @@ import UserManagement from './pages/admin/UserManagement';
 import Payments from './pages/admin/Payments';
 import BikeList from './pages/admin/BikeList';
 import AdminLayout from './components/layout/AdminLayout';
+import SupportChat from './components/chat/SupportChat';
+
+const GlobalSupportChat = () => {
+  const { user, loading } = useAuth();
+  if (loading || !user) return null;
+  return <SupportChat />;
+};
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -160,6 +168,14 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/seller/payments"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerPayments />
+                </PrivateRoute>
+              }
+            />
 
             {/* Admin specific routes */}
             <Route
@@ -211,6 +227,7 @@ function App() {
               }
             />
           </Routes>
+          <GlobalSupportChat />
         </div>
       </Router>
     </AuthProvider>

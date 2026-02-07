@@ -21,7 +21,7 @@ const SellerBikes = () => {
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filter, setFilter] = useState('all'); // all, Sale, Rental
+    const [filter, setFilter] = useState('all'); // all, Sale, Rental, Exchange, Purchased
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchBikes = async () => {
@@ -46,14 +46,44 @@ const SellerBikes = () => {
         const matchesSearch = bike.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bike.brand.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = filter === 'all' ||
-            (filter === 'Purchased' ? bike.status === 'Purchased' : bike.listingType === filter);
+            (filter === 'Purchased' ? bike.status === 'Purchased' :
+                filter === 'Exchange' ? bike.exchangeStatus === 'Valuated' :
+                    bike.listingType === filter);
         return matchesSearch && matchesFilter;
+    });
+
+    const displayBikes = filteredBikes.map(bike => {
+        const isExchangeView = filter === 'Exchange' && bike.exchangeBikeDetails;
+        if (isExchangeView) {
+            return {
+                ...bike,
+                _isExchange: true,
+                displayName: bike.exchangeBikeDetails.name,
+                displayBrand: bike.exchangeBikeDetails.brand,
+                displayYear: bike.exchangeBikeDetails.modelYear,
+                displayImage: bike.exchangeBikeDetails.fullBikePhoto || bike.images[0],
+                displayPrice: bike.exchangeValuation,
+                displayPriceLabel: 'Swap Valuation',
+                originalBikeName: bike.name
+            };
+        }
+        return {
+            ...bike,
+            _isExchange: false,
+            displayName: bike.name,
+            displayBrand: bike.brand,
+            displayYear: bike.modelYear,
+            displayImage: bike.images?.[0],
+            displayPrice: bike.price,
+            displayPriceLabel: bike.listingType === 'Rental' ? 'Per Day' : 'Full Sale'
+        };
     });
 
     const stats = {
         total: bikes.length,
         rentals: bikes.filter(b => b.listingType === 'Rental').length,
         sales: bikes.filter(b => b.listingType === 'Sale').length,
+        exchanges: bikes.filter(b => b.exchangeStatus === 'Valuated').length,
         sold: bikes.filter(b => b.status === 'Purchased').length
     };
 
@@ -82,6 +112,7 @@ const SellerBikes = () => {
                     {[
                         { label: 'Total Items', value: stats.total, icon: BikeIcon, color: 'text-gray-900', bg: 'bg-white' },
                         { label: 'For Rent', value: stats.rentals, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50/50' },
+                        { label: 'For Exchange', value: stats.exchanges, icon: ArrowUpRight, color: 'text-orange-600', bg: 'bg-orange-50/50' },
                         { label: 'Completed Sales', value: stats.sold, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50/50' },
                     ].map((stat, idx) => (
                         <div key={idx} className={`${stat.bg} p-6 rounded-[32px] border border-gray-100 shadow-sm flex items-center justify-between group transition-all`}>
@@ -108,12 +139,12 @@ const SellerBikes = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl w-full md:w-auto">
-                        {['all', 'Rental', 'Sale', 'Purchased'].map((t) => (
+                    <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl w-full md:w-auto overflow-x-auto">
+                        {['all', 'Rental', 'Sale', 'Exchange', 'Purchased'].map((t) => (
                             <button
                                 key={t}
                                 onClick={() => setFilter(t)}
-                                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === t
+                                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filter === t
                                     ? 'bg-white text-gray-900 shadow-sm'
                                     : 'text-gray-400 hover:text-gray-600'
                                     }`}
@@ -135,7 +166,7 @@ const SellerBikes = () => {
                 )}
 
                 {/* Bikes */}
-                {filteredBikes.length === 0 ? (
+                {displayBikes.length === 0 ? (
                     <div className="bg-white rounded-[40px] border border-dashed border-gray-200 p-20 text-center">
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                             <BikeIcon className="text-gray-200" size={40} />
@@ -145,35 +176,44 @@ const SellerBikes = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredBikes.map((bike) => (
-                            <div key={bike._id} className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden group hover:border-orange-200 transition-all">
+                        {displayBikes.map((bike) => (
+                            <div key={bike._isExchange ? `swap-${bike._id}` : bike._id} className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden group hover:border-orange-200 transition-all">
                                 <div className="aspect-[16/10] relative overflow-hidden">
                                     <img
-                                        src={bike.images[0] || 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=2070&auto=format&fit=crop'}
-                                        alt={bike.name}
+                                        src={bike.displayImage || 'https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=2070&auto=format&fit=crop'}
+                                        alt={bike.displayName}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    <div className="absolute top-4 left-4 flex gap-2">
-                                        <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider backdrop-blur-md border border-white/20 ${bike.listingType === 'Rental'
-                                            ? 'bg-blue-600/80 text-white'
-                                            : 'bg-orange-600/80 text-white'
-                                            }`}>
-                                            {bike.listingType}
-                                        </span>
-                                        <span className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider bg-black/50 backdrop-blur-md text-white border border-white/10">
-                                            {bike.status || 'Active'}
-                                        </span>
+                                    <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
+                                        <div className="flex gap-2">
+                                            <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider backdrop-blur-md border border-white/20 ${bike.listingType === 'Rental'
+                                                ? 'bg-blue-600/80 text-white'
+                                                : 'bg-orange-600/80 text-white'
+                                                }`}>
+                                                {bike.listingType}
+                                            </span>
+                                            {bike.exchangeStatus === 'Valuated' && (
+                                                <span className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider bg-purple-600 text-white border border-white/20 shadow-sm">
+                                                    Valuated Swap
+                                                </span>
+                                            )}
+                                        </div>
+                                        {bike._isExchange && (
+                                            <span className="px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-wider bg-black/60 backdrop-blur-md text-white border border-white/10">
+                                                Received for: {bike.originalBikeName}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <h3 className="text-lg font-black text-gray-900 group-hover:text-orange-600 transition-colors uppercase tracking-tight">{bike.name}</h3>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{bike.brand} • {bike.modelYear}</p>
+                                            <h3 className="text-lg font-black text-gray-900 group-hover:text-orange-600 transition-colors uppercase tracking-tight">{bike.displayName}</h3>
+                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{bike.displayBrand} • {bike.displayYear}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-lg font-black text-gray-900">Rs. {bike.price?.toLocaleString()}</p>
-                                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{bike.listingType === 'Rental' ? 'Per Day' : 'Full Sale'}</p>
+                                            <p className="text-lg font-black text-gray-900">Rs {bike.displayPrice?.toLocaleString()}</p>
+                                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{bike.displayPriceLabel}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 pt-4 border-t border-gray-50">
@@ -181,7 +221,7 @@ const SellerBikes = () => {
                                             to={`/bike/${bike._id}`}
                                             className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2"
                                         >
-                                            View Details <ArrowUpRight size={14} />
+                                            View {bike._isExchange ? 'Original' : 'Details'} <ArrowUpRight size={14} />
                                         </Link>
                                         <Link
                                             to="/seller/inventory"

@@ -29,7 +29,7 @@ router.route('/admin/valuate-exchange/:id')
 
 router.route('/')
     .get(getAllBikes)
-    .post(protect, isSeller, isVerified, upload.fields([
+    .post(protect, isVerified, upload.fields([
         { name: 'images', maxCount: 10 },
         { name: 'bluebook', maxCount: 1 }
     ]), createBike);

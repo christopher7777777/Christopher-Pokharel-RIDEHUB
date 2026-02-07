@@ -6,7 +6,6 @@ import { AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import Header from '../../components/layout/Header';
 import api from '../../utils/api';
-import SupportChat from '../../components/chat/SupportChat';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -168,7 +167,6 @@ const UserDashboard = () => {
             </main>
 
             <Footer />
-            <SupportChat />
         </div>
     );
 };

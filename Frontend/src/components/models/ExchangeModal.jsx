@@ -97,7 +97,7 @@ const ExchangeModal = ({ isOpen, onClose, bike, onConfirm, onProceed }) => {
                         <div className="flex flex-col items-center justify-center py-6 text-center animate-fadeIn space-y-6">
                             <div className="w-24 h-24 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-2 mx-auto shadow-lg shadow-orange-100">
                                 <Zap size={48} fill="currentColor" className="opacity-20 hidden" />
-                                <span className="text-3xl font-black">NPR</span>
+                                <span className="text-3xl font-black">Rs</span>
                             </div>
 
                             <div className="space-y-2">
@@ -231,8 +231,8 @@ const ExchangeModal = ({ isOpen, onClose, bike, onConfirm, onProceed }) => {
                                             <label
                                                 htmlFor={field.name}
                                                 className={`flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${files[field.name]
-                                                        ? 'border-green-500 bg-green-50 text-green-700'
-                                                        : 'border-gray-200 bg-gray-50 text-gray-400 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-500'
+                                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                                    : 'border-gray-200 bg-gray-50 text-gray-400 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-500'
                                                     }`}
                                             >
                                                 {files[field.name] ? (

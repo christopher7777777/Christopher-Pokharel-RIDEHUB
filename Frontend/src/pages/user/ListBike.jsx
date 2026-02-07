@@ -216,7 +216,7 @@ const ListBike = () => {
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Asking Price (NPR)</label>
+                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Asking Price (Rs)</label>
                                 <input type="number" name="price" value={formData.price} onChange={handleInputChange} placeholder="e.g. 280000" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all" />
                             </div>
                             <div>

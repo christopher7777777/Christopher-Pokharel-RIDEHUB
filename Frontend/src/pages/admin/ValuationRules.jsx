@@ -153,7 +153,7 @@ const ValuationRules = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-slate-700">Base Price *</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Rs</span>
                                         <input
                                             type="number"
                                             placeholder="0.00"
@@ -247,7 +247,7 @@ const ValuationRules = () => {
                                                             {rule.ccRange.replace('-', ' ')}
                                                         </h4>
                                                         <span className="text-xs font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md not-italic">
-                                                            ${rule.basePrice}
+                                                            Rs {rule.basePrice}
                                                         </span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 font-bold uppercase tracking-tighter">

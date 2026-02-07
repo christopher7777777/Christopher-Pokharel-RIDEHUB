@@ -31,7 +31,7 @@ const Payments = () => {
                             <CreditCard size={24} />
                         </div>
                         <p className="text-sm font-medium text-slate-500">Total System Revenue</p>
-                        <h3 className="text-2xl font-bold text-slate-800">Rs. {stats.totalRevenue.toLocaleString()}</h3>
+                        <h3 className="text-2xl font-bold text-slate-800">Rs {stats.totalRevenue.toLocaleString()}</h3>
                         <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">
                             <ArrowUpRight size={14} /> +0% from last month
                         </p>
@@ -41,7 +41,7 @@ const Payments = () => {
                             <ArrowUpRight size={24} />
                         </div>
                         <p className="text-sm font-medium text-slate-500">Pending Payouts</p>
-                        <h3 className="text-2xl font-bold text-slate-800">Rs. {stats.pendingPayouts.toLocaleString()}</h3>
+                        <h3 className="text-2xl font-bold text-slate-800">Rs {stats.pendingPayouts.toLocaleString()}</h3>
                         <p className="text-xs text-slate-400 font-medium mt-2 italic">Scheduled for verification</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -49,7 +49,7 @@ const Payments = () => {
                             <Clock size={24} />
                         </div>
                         <p className="text-sm font-medium text-slate-500">Commission Earned</p>
-                        <h3 className="text-2xl font-bold text-slate-800">Rs. {stats.commissionEarned.toLocaleString()}</h3>
+                        <h3 className="text-2xl font-bold text-slate-800">Rs {stats.commissionEarned.toLocaleString()}</h3>
                         <p className="text-xs text-blue-600 font-bold mt-2 flex items-center gap-1">
                             <ArrowUpRight size={14} /> 5% fee on all sales
                         </p>

@@ -54,7 +54,6 @@ exports.submitKYC = async (req, res) => {
         let kyc;
         if (existingKYC) {
             // Update existing rejected or pending KYC
-            // Preserve existing file paths if new files are not uploaded
             if (req.files) {
                 if (req.files.nagriktaFront) {
                     kycData.nagriktaFront = req.files.nagriktaFront[0].path;

@@ -27,7 +27,11 @@ const SellerInventory = () => {
         try {
             setLoading(true);
             const response = await api.get('/api/bikes/my-listings');
-            setBikes(response.data.data);
+            // Filter to show only available bikes (exclude rented and purchased)
+            const availableBikes = response.data.data.filter(bike =>
+                bike.status === 'Available'
+            );
+            setBikes(availableBikes);
             setError(null);
         } catch (err) {
             setError('Failed to fetch bike listings');
@@ -97,11 +101,7 @@ const SellerInventory = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all">
-                            <Filter size={18} /> Filters
-                        </button>
-                    </div>
+
                 </div>
 
                 {/* Inventory list */}

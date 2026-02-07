@@ -168,7 +168,7 @@ const UserSellingStatus = () => {
                                     {listing.status === 'Countered' ? "Your Counter Price" : "Current Dealer Offer"}
                                 </p>
                                 <p className={`text-3xl font-black ${listing.status === 'Countered' ? 'text-pink-600' : 'text-orange-600'}`}>
-                                    NPR {listing.status === 'Countered' ? listing.userCounterPrice?.toLocaleString() : (listing.negotiatedPrice > 0 ? listing.negotiatedPrice.toLocaleString() : '--')}
+                                    Rs {listing.status === 'Countered' ? listing.userCounterPrice?.toLocaleString() : (listing.negotiatedPrice > 0 ? listing.negotiatedPrice.toLocaleString() : '--')}
                                 </p>
                             </div>
                         </div>
@@ -246,7 +246,7 @@ const UserSellingStatus = () => {
                                     </div>
                                     <h3 className="text-xl font-black mb-2">Countered</h3>
                                     <p className="text-xs text-pink-50 leading-relaxed">
-                                        You&apos;ve proposed NPR {listing.userCounterPrice?.toLocaleString()}. Waiting for the dealer to review and respond.
+                                        You&apos;ve proposed Rs {listing.userCounterPrice?.toLocaleString()}. Waiting for the dealer to review and respond.
                                     </p>
                                 </div>
                             )}
@@ -270,7 +270,7 @@ const UserSellingStatus = () => {
                                     </div>
                                     <h3 className="text-xl font-black mb-2">Sold Successfully!</h3>
                                     <p className="text-xs text-green-100 opacity-90 leading-relaxed">
-                                        Your bike has been sold to the dealer for NPR {listing.negotiatedPrice.toLocaleString()}. Payment: {listing.paymentMethod} on delivery.
+                                        Your bike has been sold to the dealer for Rs {listing.negotiatedPrice.toLocaleString()}. Payment: {listing.paymentMethod} on delivery.
                                     </p>
                                 </div>
                             )}
@@ -300,7 +300,7 @@ const UserSellingStatus = () => {
                         </div>
                         <div className="p-8">
                             <div className="relative mb-6">
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-400">NPR</span>
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-400">Rs</span>
                                 <input
                                     type="number"
                                     placeholder="0.00"

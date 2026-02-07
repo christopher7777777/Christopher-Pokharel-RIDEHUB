@@ -65,9 +65,9 @@ const ValuationModal = ({ isOpen, onClose, bike, onValuate }) => {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-600">Valuation Amount (NPR)</label>
+                            <label className="text-xs font-bold text-slate-600">Valuation Amount (Rs)</label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rs.</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rs</span>
                                 <input
                                     type="number"
                                     required

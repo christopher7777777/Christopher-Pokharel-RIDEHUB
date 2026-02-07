@@ -4,7 +4,6 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import { Search, Filter, Bike, Loader2, AlertCircle } from 'lucide-react';
-import SupportChat from '../../components/chat/SupportChat';
 
 const BrowseBikes = () => {
     const navigate = useNavigate();
@@ -39,6 +38,8 @@ const BrowseBikes = () => {
         fetchBikes();
     }, []);
 
+    const [sortOption, setSortOption] = useState('recent');
+
     // Filter derived values
     const brands = ['all', ...new Set(bikes.map(bike => bike.brand))];
 
@@ -61,6 +62,14 @@ const BrowseBikes = () => {
         const matchesMaxPrice = !filters.maxPrice || bike.price <= Number(filters.maxPrice);
 
         return matchesSearch && matchesType && matchesBrand && matchesMinPrice && matchesMaxPrice;
+    }).sort((a, b) => {
+        if (sortOption === 'low-high') {
+            return a.price - b.price;
+        } else if (sortOption === 'high-low') {
+            return b.price - a.price;
+        } else {
+            return new Date(b.createdAt || b.updatedAt) - new Date(a.createdAt || a.updatedAt);
+        }
     });
 
     return (
@@ -151,10 +160,14 @@ const BrowseBikes = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-gray-500 font-medium tracking-tight">Sort Your Way</span>
-                                <select className="bg-transparent border-none text-sm font-bold text-gray-900 focus:ring-0 cursor-pointer">
-                                    <option>Most Recent</option>
-                                    <option>Price: Low to High</option>
-                                    <option>Price: High to Low</option>
+                                <select
+                                    className="bg-transparent border-none text-sm font-bold text-gray-900 focus:ring-0 cursor-pointer outline-none"
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                >
+                                    <option value="recent">Most Recent</option>
+                                    <option value="low-high">Price: Low to High</option>
+                                    <option value="high-low">Price: High to Low</option>
                                 </select>
                             </div>
                         </div>
@@ -218,7 +231,7 @@ const BrowseBikes = () => {
                                                 <div className="flex flex-col">
                                                     <span className="text-xs text-gray-400 font-bold uppercase">Price</span>
                                                     <span className="text-xl font-black text-orange-600">
-                                                        NPR {bike.price.toLocaleString()}
+                                                        Rs {bike.price.toLocaleString()}
                                                         <span className="text-xs text-gray-400 font-normal ml-1">
                                                             {bike.listingType === 'Rental' ? '/ Day' : ''}
                                                         </span>
@@ -249,7 +262,6 @@ const BrowseBikes = () => {
                 </div>
             </div>
             <Footer />
-            <SupportChat />
         </div>
     );
 };

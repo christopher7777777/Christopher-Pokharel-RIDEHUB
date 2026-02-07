@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
-// Add request logging middleware (put this after express.json())
+// Add request logging middleware
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     console.log('Headers:', req.headers);
@@ -32,6 +32,7 @@ app.use('/api/bikes', require('./routes/bikeRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/kyc', require('./routes/kycRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -53,7 +54,32 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+// Socket.io Setup
+const io = require('socket.io')(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+
+    socket.on('join_conversation', (conversationId) => {
+        socket.join(conversationId);
+        console.log(`User joined conversation: ${conversationId}`);
+    });
+
+    socket.on('send_message', (data) => {
+        // data should contain conversationId, sender, text
+        io.to(data.conversationId).emit('receive_message', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
 });

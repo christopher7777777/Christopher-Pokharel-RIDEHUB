@@ -254,7 +254,7 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
                                         : 'Bike Price'
                                     }
                                 </span>
-                                <span className="font-bold">NPR {(bike.price * planMultiplier).toLocaleString()}</span>
+                                <span className="font-bold">Rs {(bike.price * planMultiplier).toLocaleString()}</span>
                             </div>
 
                             {bike.exchangeValuation > 0 && (
@@ -262,18 +262,18 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
                                     <span className="flex items-center gap-2">
                                         <CheckCircle2 size={14} /> Swap Valuation
                                     </span>
-                                    <span className="font-bold">- NPR {bike.exchangeValuation.toLocaleString()}</span>
+                                    <span className="font-bold">- Rs {bike.exchangeValuation.toLocaleString()}</span>
                                 </div>
                             )}
 
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-400">Extra Delivery Fee</span>
-                                <span className="font-bold">NPR {deliveryCharge.toLocaleString()}</span>
+                                <span className="font-bold">Rs {deliveryCharge.toLocaleString()}</span>
                             </div>
 
                             <div className="pt-3 border-t border-gray-800 flex justify-between items-baseline">
                                 <span className="text-lg font-black uppercase tracking-tighter">Total Price Due</span>
-                                <span className="text-2xl font-black text-orange-500 tracking-tight">NPR {totalAmount.toLocaleString()}</span>
+                                <span className="text-2xl font-black text-orange-500 tracking-tight">Rs {totalAmount.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { Bike, Search, Trash2, Eye, MapPin, Tag, Loader2, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
@@ -172,16 +173,19 @@ const BikeList = () => {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <p className="font-black text-orange-600">Rs. {bike.price.toLocaleString()}</p>
+                                        <p className="font-black text-orange-600">Rs {bike.price.toLocaleString()}</p>
                                         <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">
                                             <MapPin size={10} /> {bike.location}
                                         </div>
                                     </div>
 
                                     <div className="pt-3 border-t border-slate-100 flex gap-2">
-                                        <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold">
+                                        <Link
+                                            to={`/bike/${bike._id}`}
+                                            className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 p-2 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-bold"
+                                        >
                                             <Eye size={14} /> VIEW
-                                        </button>
+                                        </Link>
                                         {bike.exchangeStatus === 'Pending' && (
                                             <button
                                                 onClick={() => {

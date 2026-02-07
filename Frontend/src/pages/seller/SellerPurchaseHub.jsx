@@ -174,12 +174,12 @@ const SellerPurchaseHub = () => {
                                             <div className="grid grid-cols-2 gap-3 mb-4">
                                                 <div className="bg-gray-50/80 p-3 rounded-2xl border border-gray-100/50">
                                                     <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Asking Price</p>
-                                                    <p className="font-black text-gray-900 text-xs">NPR {request.price.toLocaleString()}</p>
+                                                    <p className="font-black text-gray-900 text-xs">Rs {request.price.toLocaleString()}</p>
                                                 </div>
                                                 <div className="bg-gray-50/80 p-3 rounded-2xl border border-gray-100/50">
                                                     <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Last Offer</p>
                                                     <p className={`font-black text-xs ${request.negotiatedPrice > 0 ? 'text-green-600' : 'text-gray-300'}`}>
-                                                        {request.negotiatedPrice > 0 ? `NPR ${request.negotiatedPrice.toLocaleString()}` : 'No offer yet'}
+                                                        {request.negotiatedPrice > 0 ? `Rs ${request.negotiatedPrice.toLocaleString()}` : 'No offer yet'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -187,7 +187,7 @@ const SellerPurchaseHub = () => {
                                             {request.status === 'Countered' && (
                                                 <div className="mb-4 p-3 bg-pink-50 border border-pink-100 rounded-2xl">
                                                     <p className="text-[9px] text-pink-500 font-black uppercase tracking-widest mb-1">User&apos;s Counter Price</p>
-                                                    <p className="font-black text-pink-700">NPR {request.userCounterPrice?.toLocaleString()}</p>
+                                                    <p className="font-black text-pink-700">Rs {request.userCounterPrice?.toLocaleString()}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -226,7 +226,7 @@ const SellerPurchaseHub = () => {
                                                     <div className="flex-1 space-y-3 animate-slideIn">
                                                         <div className="flex items-center gap-2">
                                                             <div className="flex-1 relative">
-                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase tracking-widest">NPR</span>
+                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Rs</span>
                                                                 <input
                                                                     type="number"
                                                                     placeholder="OFFER PRICE"
@@ -401,7 +401,7 @@ const SellerPurchaseHub = () => {
                                 <div className="bg-gray-50 p-4 rounded-2xl">
                                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Transaction Details</p>
                                     <p className="text-sm font-bold text-gray-900">{selectedBike.name}</p>
-                                    <p className="text-xs text-gray-500 mt-1">Amount: NPR {selectedBike.negotiatedPrice?.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500 mt-1">Amount: Rs {selectedBike.negotiatedPrice?.toLocaleString()}</p>
                                     <p className="text-xs text-gray-500">Method: {selectedBike.paymentMethod}</p>
                                 </div>
 

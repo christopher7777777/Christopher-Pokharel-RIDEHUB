@@ -117,9 +117,7 @@ const SellerDashboard = () => {
                         <p className="text-gray-500 text-sm italic">Track your stats.</p>
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-2xl font-bold text-sm hover:bg-gray-50 transition-all">
-                            <Filter size={18} /> Filters
-                        </button>
+
                         <button
                             onClick={() => navigate('/seller/inventory')}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-orange-700 shadow-lg shadow-orange-900/20 transform active:scale-95 transition-all"
@@ -133,7 +131,7 @@ const SellerDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <StatCard
                         title="Total Sales Cash"
-                        value={`NPR ${stats.totalEarnings.toLocaleString()}`}
+                        value={`Rs ${stats.totalEarnings.toLocaleString()}`}
                         trend="Real Data"
                         isPositive={true}
                         icon={TrendingUp}
@@ -174,7 +172,7 @@ const SellerDashboard = () => {
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Recent Seller Action</h2>
                             <button
-                                onClick={() => navigate('/seller/bikes')}
+                                onClick={() => navigate('/seller/payments')}
                                 className="text-orange-600 text-[10px] font-black uppercase tracking-widest hover:underline italic"
                             >
                                 View all transactions

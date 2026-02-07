@@ -6,22 +6,18 @@ const ValuationRule = require('../models/ValuationRule');
 const notifyUserUpdate = async (bike, subject, message) => {
     if (bike && bike.seller && bike.seller.email) {
         try {
-            // Construct embedded image attachment if available
             let attachments = [];
             let imageHtml = '';
 
             if (bike.images && bike.images.length > 0) {
-                // Assuming local file path, we can attach it
-                // If it's a URL, we can use an img tag with src
                 const imagePath = bike.images[0];
                 const isUrl = imagePath.startsWith('http');
 
                 if (!isUrl) {
-                    // Attach local file with CID
                     attachments.push({
                         filename: 'bike.jpg',
                         path: imagePath,
-                        cid: 'bikeimage' // same cid value as in the html img src
+                        cid: 'bikeimage'
                     });
                     imageHtml = `<img src="cid:bikeimage" alt="Bike Image" style="width: 100%; max-width: 600px; border-radius: 10px; margin-bottom: 20px;" />`;
                 } else {
@@ -128,8 +124,6 @@ exports.createBike = async (req, res) => {
 // @access  Private/Seller
 exports.getMyBikes = async (req, res) => {
     try {
-        // Show only bikes listed by the current dealer/seller
-        // This includes their inventory available for rent/sale
         const bikes = await Bike.find({ seller: req.user.id }).sort('-createdAt');
 
         res.status(200).json({
@@ -580,13 +574,6 @@ exports.rentBike = async (req, res) => {
     }
 };
 
-// @desc    Request bike exchange before purchase
-// @route   PUT /api/bikes/exchange/:id
-// @access  Private
-
-
-// ... existing imports ...
-
 // @desc    Request bike exchange (User)
 // @route   PUT /api/bikes/exchange/:id
 // @access  Private
@@ -599,9 +586,7 @@ exports.requestExchange = async (req, res) => {
             try {
                 exchangeBikeDetails = JSON.parse(exchangeBikeDetails);
             } catch (e) {
-                // If not JSON, maybe it's just flattened fields, but let's assume JSON for complex objects
-                // Or if we sent individual fields, we'd construct it here.
-                // For now, assume frontend sends JSON string.
+
             }
         }
 
@@ -656,16 +641,10 @@ exports.requestExchange = async (req, res) => {
                     conditionDepreciationPercent = rule.conditionC;
             }
 
-            // Calculate total depreciation percentage
-            // Formula: Age Depreciation + Condition Penalty
-            // We apply them as deductions from the base price.
-            // Using a simple linear model: Value = Base * (1 - (Age * Yearly%) - Condition%)
-
             const ageDepreciationTotal = age * (rule.yearlyDepreciation / 100);
             const conditionDepreciationTotal = conditionDepreciationPercent / 100;
             const totalDepreciationFactor = ageDepreciationTotal + conditionDepreciationTotal;
 
-            // Ensure we don't go below 10% of base price or 0
             const calculatedValue = rule.basePrice * (1 - totalDepreciationFactor);
             valuation = Math.max(rule.basePrice * 0.1, calculatedValue);
 

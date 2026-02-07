@@ -9,7 +9,7 @@ const AdminDashboard = () => {
         { label: 'Total Users', value: '0', icon: Users, color: 'bg-blue-500', key: 'totalUsers' },
         { label: 'Total Bikes', value: '0', icon: Bike, color: 'bg-orange-500', key: 'totalBikes' },
         { label: 'Pending KYC', value: '0', icon: CheckCircle, color: 'bg-purple-500', key: 'pendingKYC' },
-        { label: 'Revenue', value: 'Rs. 0', icon: CreditCard, color: 'bg-green-500', key: 'revenue' },
+        { label: 'Revenue', value: 'Rs 0', icon: CreditCard, color: 'bg-green-500', key: 'revenue' },
     ]);
     const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,7 @@ const AdminDashboard = () => {
             setStats(prevStats => prevStats.map(stat => ({
                 ...stat,
                 value: stat.key === 'revenue'
-                    ? `Rs. ${data[stat.key].toLocaleString()}`
+                    ? `Rs ${data[stat.key].toLocaleString()}`
                     : data[stat.key].toString()
             })));
             setLoading(false);
