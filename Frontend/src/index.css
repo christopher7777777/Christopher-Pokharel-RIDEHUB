@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,9 +9,34 @@ html {
 }
 
 body {
-    @apply text-gray-900 overflow-x-hidden font-['Inter'];
+    @apply text-gray-900 overflow-x-hidden;
+    font-family: 'Inter', sans-serif;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+    background-color: #f8fafc;
 }
 
+/* Form controls: Allow typing and text selection */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+textarea,
+[contenteditable="true"] {
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* Navigation and Buttons: Hand pointer */
+a,
+button,
+[role="button"],
+select,
+input[type="checkbox"],
+input[type="radio"] {
+    cursor: pointer;
+}
+
+/* Headers */
 h1,
 h2,
 h3,
@@ -29,13 +56,11 @@ h6 {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    /* slate-300 */
     border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
-    /* slate-400 */
 }
 
 @keyframes fadeInScale {

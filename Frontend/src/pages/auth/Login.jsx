@@ -91,11 +91,12 @@ const Login = () => {
                 {/* Right Side - Login Form */}
                 <div className="bg-white border-l border-gray-200 p-12 flex flex-col justify-center shadow-xl">
                     <div className="text-center mb-8">
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                            <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-                            </svg>
-                            <h1 className="text-2xl font-bold text-gray-900">RIDEHUB</h1>
+                        <div className="flex items-center justify-center mb-6">
+                            <img
+                                src="/image5.png"
+                                alt="RIDEHUB Logo"
+                                className="h-20 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                            />
                         </div>
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">Welcome Back</h2>
                         <p className="text-sm text-gray-600">Sign in to continue your journey</p>
@@ -152,10 +153,6 @@ const Login = () => {
                         </div>
 
                         <div className="flex items-center justify-between text-sm">
-                            <label className="flex items-center text-gray-700 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                                <span className="ml-2">Remember me</span>
-                            </label>
                             <Link to="/forgotpassword" size="sm" className="text-red-600 hover:text-red-700 font-medium transition-colors">
                                 Forgot password?
                             </Link>

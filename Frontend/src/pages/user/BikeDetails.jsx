@@ -63,7 +63,9 @@ const BikeDetails = () => {
             setActionLoading(true);
             const endpoint = isBuyBike ? `/api/bikes/confirm-sale/${id}` : `/api/bikes/rent/${id}`;
             await api.put(endpoint, bookingData);
-            setSuccessMessage(isBuyBike ? 'Bike Purchase Done' : 'Bike Rental Done');
+
+            const message = isBuyBike ? 'Bike Purchase Successful!' : 'Bike Rental Confirmed!';
+            setSuccessMessage(message);
 
             // Online payment
             if (bookingData.paymentMethod === 'Online') {
@@ -74,9 +76,15 @@ const BikeDetails = () => {
             const response = await api.get(`/api/bikes/${id}`);
             setBike(response.data.data);
             setIsBookingModalOpen(false);
+
+            // Redirect automatically after success
+            setTimeout(() => {
+                navigate('/browse');
+            }, 3000);
+
         } catch (err) {
             setError(err.response?.data?.message || 'Transaction failed');
-            throw err; // Propagate error
+            throw err;
         } finally {
             setActionLoading(false);
         }

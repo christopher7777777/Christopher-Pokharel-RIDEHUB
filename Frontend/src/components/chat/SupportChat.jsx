@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, ChevronRight, HelpCircle, Shield, CreditCard, Bike, User, Home, Search, MessageSquare, Menu, Edit2, Mail, Volume2, ExternalLink, XCircle, ThumbsUp, Paperclip, Smile, Loader2, Zap } from 'lucide-react';
+import { Bike, ChevronRight, CreditCard, HelpCircle, Home, Loader2, MessageCircle, MessageSquare, Send, Shield, User, X, Zap } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import socket from '../../utils/socket';
-import { useAuth } from '../../context/AuthContext';
 
 const FAQ_DATA = [
     {
@@ -53,8 +53,11 @@ const SupportChat = () => {
     const [activeConversation, setActiveConversation] = useState(null);
     const [realMessages, setRealMessages] = useState([]);
     const [isLoadingChats, setIsLoadingChats] = useState(false);
+    const [sellers, setSellers] = useState([]);
+    const [isLoadingSellers, setIsLoadingSellers] = useState(false);
 
     const chatEndRef = useRef(null);
+
 
     const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,7 +72,7 @@ const SupportChat = () => {
                 if (activeConversation && message.conversationId === activeConversation._id) {
                     setRealMessages(prev => [...prev, message]);
                 }
-                // Refresh conversations list to show last message
+                // Refresh conversations
                 fetchConversations();
             });
 
@@ -80,7 +83,6 @@ const SupportChat = () => {
         }
     }, [user, activeConversation]);
 
-    // Listen for external chat trigger (from BikeDetails)
     useEffect(() => {
         const handleOpenChat = async (e) => {
             const { sellerId, bikeId, bikeName } = e.detail;
@@ -103,6 +105,21 @@ const SupportChat = () => {
             setIsLoadingChats(false);
         }
     };
+
+    const fetchSellers = async () => {
+        try {
+            setIsLoadingSellers(true);
+            const response = await api.get('/api/auth/sellers');
+            // Filter out current user if they are a seller
+            const filteredSellers = response.data.data.filter(s => s._id !== user?._id);
+            setSellers(filteredSellers);
+        } catch (err) {
+            console.error('Failed to fetch sellers', err);
+        } finally {
+            setIsLoadingSellers(false);
+        }
+    };
+
 
     const startConversation = async (participantId, bikeId) => {
         try {
@@ -172,8 +189,6 @@ const SupportChat = () => {
             // Save to DB
             await api.post('/api/chat/message', messageData);
 
-            // Local update (optional if sync via socket, but socket should handle it)
-            // But usually we add locally for instant feedback if socket is slow
             setRealMessages(prev => [...prev, { ...messageData, sender: { _id: user._id, name: user.name } }]);
         } catch (err) {
             console.error('Failed to send message', err);
@@ -281,13 +296,22 @@ const SupportChat = () => {
 
                             {view === 'conversations' && (
                                 <div className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden animate-slideUp">
-                                    <div className="bg-orange-600 p-4 flex items-center gap-3 text-white">
-                                        <button onClick={() => setView('home')} className="p-1 hover:bg-white/10 rounded-lg">
-                                            <ChevronRight className="rotate-180" size={20} />
+                                    <div className="bg-orange-600 p-4 flex items-center justify-between text-white">
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={() => setView('home')} className="p-1 hover:bg-white/10 rounded-lg">
+                                                <ChevronRight className="rotate-180" size={20} />
+                                            </button>
+                                            <h3 className="font-bold">Recent Messages</h3>
+                                        </div>
+                                        <button
+                                            onClick={() => { setView('browse-sellers'); fetchSellers(); }}
+                                            className="text-[10px] font-black uppercase bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors"
+                                        >
+                                            Find Sellers
                                         </button>
-                                        <h3 className="font-bold">Recent Messages</h3>
                                     </div>
                                     <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+
                                         {isLoadingChats ? (
                                             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-orange-600" /></div>
                                         ) : conversations.length > 0 ? (
@@ -320,7 +344,74 @@ const SupportChat = () => {
                                 </div>
                             )}
 
+                            {view === 'browse-sellers' && (
+                                <div className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden animate-slideUp">
+                                    <div className="bg-orange-600 p-4 flex items-center gap-3 text-white font-sans">
+                                        <button onClick={() => setView('conversations')} className="p-1 hover:bg-white/10 rounded-lg">
+                                            <ChevronRight className="rotate-180" size={20} />
+                                        </button>
+                                        <div>
+                                            <h3 className="font-bold">Available Sellers</h3>
+                                            <p className="text-[10px] opacity-80 uppercase font-black">Chat directly with experts</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 border-b bg-gray-50/50">
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Search sellers by name..."
+                                                className="w-full bg-white border border-gray-100 rounded-2xl py-2.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                                        {isLoadingSellers ? (
+                                            <div className="flex flex-col items-center justify-center p-20 gap-3 grayscale opacity-50">
+                                                <Loader2 className="animate-spin text-orange-600" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Searching Network</p>
+                                            </div>
+                                        ) : sellers.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
+                                            sellers.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map(seller => (
+                                                <button
+                                                    key={seller._id}
+                                                    onClick={() => startConversation(seller._id, null)}
+                                                    className="w-full flex items-center gap-4 p-4 hover:bg-orange-50 rounded-2xl transition-all border-b border-gray-50 text-left group"
+                                                >
+                                                    <div className="relative">
+                                                        <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-full flex items-center justify-center text-orange-600 font-black shadow-inner">
+                                                            {seller.name.charAt(0)}
+                                                        </div>
+                                                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="font-bold text-gray-900 text-sm group-hover:text-orange-700 transition-colors">{seller.name}</h4>
+                                                            {seller.kycStatus === 'verified' && (
+                                                                <Shield size={10} className="text-blue-500 fill-blue-500" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[10px] text-gray-400 font-medium">Verified RIDEHUB Seller</p>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all">
+                                                        <MessageCircle size={14} />
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-20 grayscale opacity-40">
+                                                <User className="mx-auto text-gray-200 mb-4" size={48} />
+                                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest">No Sellers Found</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {view === 'seller-chat' && (
+
                                 <div className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden animate-slideUp">
                                     <div className="bg-orange-600 p-4 flex items-center justify-between text-white">
                                         <div className="flex items-center gap-3">

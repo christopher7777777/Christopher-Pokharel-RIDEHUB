@@ -11,8 +11,6 @@ const getAdminStats = async (req, res) => {
         const totalBikes = await Bike.countDocuments();
         const pendingKYC = await KYC.countDocuments({ status: 'pending' });
 
-        // For now revenue is 0 as we don't have a transaction model yet
-        // or a clear logic for platform commission
         const revenue = 0;
 
         res.json({

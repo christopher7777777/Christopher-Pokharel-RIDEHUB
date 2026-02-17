@@ -11,7 +11,7 @@ const Header = () => {
 
     useEffect(() => {
         if (user) {
-            loadUser(); // Periodically refresh user data 
+            loadUser();
         }
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
@@ -44,15 +44,15 @@ const Header = () => {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <AlertCircle size={14} className="flex-shrink-0" />
-                            <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider">
+                            <p className="text-[11px] md:text-sm font-bold tracking-tight">
                                 {user.kycStatus === 'pending'
-                                    ? "KYC Under Review"
-                                    : "Identity Verification Required"}
+                                    ? "Verification in Progress"
+                                    : "Complete Identity Verification"}
                             </p>
-                            <span className="hidden md:inline text-[10px] text-orange-100 opacity-80">
+                            <span className="hidden md:inline text-[11px] text-orange-100 font-medium">
                                 {user.kycStatus === 'pending'
-                                    ? "Your documents are being reviewed by our team. Please wait 24-48 hours."
-                                    : "Please complete your KYC to unlock all features including bike listings and management."}
+                                    ? "Our team is reviewing your documents. Usually takes 24-48 hours."
+                                    : "Unlock full selling features by verifying your identity."}
                             </span>
                         </div>
                         {user.kycStatus !== 'pending' && (
@@ -69,15 +69,12 @@ const Header = () => {
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isScrolled ? 'py-3' : 'py-5'}`}>
                 <div className="flex justify-between items-center">
                     {/* Logo */}
-                    <Link to="/dashboard" className="flex items-center gap-2 group">
-                        <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-orange-200 shadow-lg">
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-                            </svg>
-                        </div>
-                        <span className={`text-2xl font-black tracking-tighter ${isScrolled ? 'text-gray-900' : 'text-gray-800'}`}>
-                            RIDE<span className="text-orange-600">HUB</span>
-                        </span>
+                    <Link to="/dashboard" className="flex items-center group">
+                        <img
+                            src="/image5.png"
+                            alt="RIDEHUB Logo"
+                            className={`transition-all duration-300 ${isScrolled ? 'h-10' : 'h-14'} w-auto object-contain`}
+                        />
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -111,32 +108,37 @@ const Header = () => {
                                         </span>
                                     )}
                                 </div>
-                                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
-                                    Profile
+                                <span className="text-sm font-semibold text-gray-700 group-hover:text-orange-600 transition-colors">
+                                    {user?.name?.split(' ')[0] || 'Account'}
                                 </span>
                             </Link>
                             {/* Dropdown Menu */}
                             <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300">
-                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2 w-48 overflow-hidden">
-                                    <Link to="/profile" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
-                                        My Profile
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2 w-52 overflow-hidden animate-fadeInScale">
+                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Account</p>
+                                    </div>
+                                    <Link to="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                        View Profile
                                     </Link>
                                     {user?.role !== 'seller' && (
                                         <>
-                                            <Link to="/kyc-verification" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors border-b border-gray-50">
-                                                Identity Verification
+                                            <Link to="/kyc-verification" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                                Verify Identity
                                             </Link>
-                                            <Link to="/my-selling" className="block px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 uppercase tracking-wider transition-colors">
-                                                My Selling Status
+                                            <Link to="/my-selling" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                                Listing Status
                                             </Link>
                                         </>
                                     )}
-                                    <button
-                                        onClick={logout}
-                                        className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 uppercase tracking-wider transition-colors"
-                                    >
-                                        Logout
-                                    </button>
+                                    <div className="mt-2 pt-2 border-t border-gray-50">
+                                        <button
+                                            onClick={logout}
+                                            className="w-full text-left px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

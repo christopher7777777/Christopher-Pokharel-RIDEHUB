@@ -11,18 +11,30 @@ import {
     CheckCircle2,
     XCircle,
     ExternalLink,
+    CalendarDays
 } from 'lucide-react';
 
 const SellerPayments = () => {
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'Pending';
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString();
+    };
+
+    const formatDateTime = (dateStr) => {
+        if (!dateStr) return 'Pending';
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? 'Pending' : date.toLocaleString();
+    };
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [stats, setStats] = useState({
-        totalIncome: 0,
+        totalRentalIncome: 0,
         totalPayout: 0,
-        pendingIncome: 0
+        grandTotalIncome: 0
     });
 
     const fetchPayments = async () => {
@@ -40,18 +52,22 @@ const SellerPayments = () => {
 
             // Process Rental and Sale Income
             listings.forEach(bike => {
-                if (bike.status === 'Rented' || bike.status === 'Purchased') {
+                if (bike.status === 'Rented' || bike.status === 'Purchased' || bike.status === 'Approved') {
                     processedData.push({
                         id: bike._id,
                         bikeName: bike.name,
                         user: bike.rentedBy?.name || (bike.status === 'Rented' ? 'Renter' : 'Buyer'),
                         amount: bike.totalAmount || bike.negotiatedPrice || bike.price,
+                        bookPrice: bike.price,
+                        paidPrice: bike.negotiatedPrice || bike.price,
                         type: bike.status === 'Rented' ? 'Rental Income' : 'Sale Income',
                         method: bike.paymentMethod || (bike.status === 'Rented' ? 'Portal' : 'Bank Transfer'),
-                        status: 'Completed',
-                        date: bike.updatedAt,
+                        status: (bike.status === 'Purchased' || bike.status === 'Rented') ? 'Completed' : 'Pending',
+                        date: bike.updatedAt || bike.createdAt,
                         proof: bike.paymentScreenshot,
-                        isIncoming: true
+                        isIncoming: true,
+                        isExchange: bike.isExchange,
+                        exchangeValuation: bike.exchangeValuation
                     });
                 }
             });
@@ -64,12 +80,16 @@ const SellerPayments = () => {
                         bikeName: req.name,
                         user: req.seller?.name || 'User',
                         amount: req.totalAmount || req.negotiatedPrice || req.price,
+                        bookPrice: req.price, // Original bike price from user
+                        paidPrice: req.negotiatedPrice || req.price, // Final price paid to user
                         type: req.status === 'Purchased' ? 'Bike Purchase' : 'Pending Buy',
                         method: req.paymentMethod || (req.status === 'Purchased' ? 'Bank Transfer' : 'Pending'),
                         status: req.status === 'Purchased' ? 'Completed' : 'Pending',
-                        date: req.updatedAt,
+                        date: req.updatedAt || req.createdAt,
                         proof: req.paymentScreenshot,
-                        isIncoming: false
+                        isIncoming: false,
+                        isExchange: req.isExchange,
+                        exchangeValuation: req.exchangeValuation
                     });
                 }
             });
@@ -78,14 +98,15 @@ const SellerPayments = () => {
             setTransactions(processedData);
 
             // Calculate card stats
+            const rentalIncome = processedData.filter(t => t.isIncoming && t.status === 'Completed' && t.type === 'Rental Income').reduce((acc, t) => acc + (t.amount || 0), 0);
             const income = processedData.filter(t => t.isIncoming && t.status === 'Completed').reduce((acc, t) => acc + (t.amount || 0), 0);
             const payout = processedData.filter(t => !t.isIncoming && t.status === 'Completed').reduce((acc, t) => acc + (t.amount || 0), 0);
-            const pending = processedData.filter(t => t.status === 'Pending').reduce((acc, t) => acc + (t.amount || 0), 0);
+            const pendingIncome = processedData.filter(t => t.isIncoming && t.status === 'Pending').reduce((acc, t) => acc + (t.amount || 0), 0);
 
             setStats({
-                totalIncome: income,
+                totalRentalIncome: rentalIncome,
                 totalPayout: payout,
-                pendingIncome: pending
+                grandTotalIncome: income + pendingIncome
             });
 
         } catch (err) {
@@ -122,10 +143,10 @@ const SellerPayments = () => {
                         <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4">
                             <ArrowDownLeft size={24} />
                         </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Revenue</p>
-                        <h3 className="text-2xl font-black text-slate-800">Rs {stats.totalIncome.toLocaleString()}</h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Rental Income</p>
+                        <h3 className="text-2xl font-black text-slate-800">Rs {stats.totalRentalIncome.toLocaleString()}</h3>
                         <div className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1 italic">
-                            <CheckCircle2 size={14} /> Rentals & Sales
+                            <CheckCircle2 size={14} /> Completed Rentals
                         </div>
                     </div>
 
@@ -144,9 +165,9 @@ const SellerPayments = () => {
                         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
                             <span className="text-xl font-black">Rs</span>
                         </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pending Payouts</p>
-                        <h3 className="text-2xl font-black text-slate-800">Rs {stats.pendingIncome.toLocaleString()}</h3>
-                        <div className="text-xs text-blue-600 font-bold mt-2 italic">Awaiting verification</div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Income</p>
+                        <h3 className="text-2xl font-black text-slate-800">Rs {stats.grandTotalIncome.toLocaleString()}</h3>
+                        <div className="text-xs text-blue-600 font-bold mt-2 italic">Lifetime Earnings</div>
                     </div>
                 </div>
 
@@ -196,9 +217,10 @@ const SellerPayments = () => {
                                     <tr>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">ID</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset / User</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Book Price</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Exchange</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Paid Price</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Date</th>
                                     </tr>
                                 </thead>
@@ -221,22 +243,19 @@ const SellerPayments = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 font-black text-slate-800">Rs {item.amount?.toLocaleString()}</td>
+                                            <td className="px-6 py-4 font-black text-slate-600 italic">Rs {item.bookPrice?.toLocaleString()}</td>
+                                            <td className="px-6 py-4 font-black text-orange-600">
+                                                {item.isExchange ? `Rs ${item.exchangeValuation?.toLocaleString()}` : '-'}
+                                            </td>
+                                            <td className="px-6 py-4 font-black text-slate-800">Rs {item.paidPrice?.toLocaleString()}</td>
                                             <td className="px-6 py-4">
                                                 <div className={`flex items-center gap-1 text-[10px] font-black uppercase ${item.isIncoming ? 'text-green-600' : 'text-orange-600'}`}>
                                                     {item.isIncoming ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
                                                     {item.type}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                                    item.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                                                    }`}>
-                                                    {item.status}
-                                                </span>
-                                            </td>
                                             <td className="px-6 py-4 text-right text-xs font-bold text-slate-400 italic">
-                                                {new Date(item.date).toLocaleDateString()}
+                                                {formatDate(item.date)}
                                             </td>
                                         </tr>
                                     ))}
@@ -263,15 +282,22 @@ const SellerPayments = () => {
 
                         <div className="p-8 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Amount</p>
-                                    <p className="text-xl font-black text-slate-800">Rs {selectedTransaction.amount?.toLocaleString()}</p>
+                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 col-span-2">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Book Price</p>
+                                    <p className="text-xl font-black text-slate-600">Rs {selectedTransaction.bookPrice?.toLocaleString()}</p>
                                 </div>
-                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                    <span className={`text-sm font-black uppercase ${selectedTransaction.status === 'Completed' ? 'text-green-600' : 'text-orange-600'}`}>
-                                        {selectedTransaction.status}
-                                    </span>
+                                {selectedTransaction.isExchange && (
+                                    <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 col-span-2 flex justify-between items-center">
+                                        <div>
+                                            <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-1">Exchange Valuation (-)</p>
+                                            <p className="text-xl font-black text-orange-600">Rs {selectedTransaction.exchangeValuation?.toLocaleString()}</p>
+                                        </div>
+                                        <div className="bg-orange-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase">Exchanged</div>
+                                    </div>
+                                )}
+                                <div className="p-4 bg-green-50 rounded-2xl border border-green-100 col-span-2">
+                                    <p className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-1">Final Paid Price</p>
+                                    <p className="text-2xl font-black text-green-800">Rs {selectedTransaction.paidPrice?.toLocaleString()}</p>
                                 </div>
                             </div>
 
@@ -280,7 +306,7 @@ const SellerPayments = () => {
                                     ['Bike', selectedTransaction.bikeName],
                                     ['User', selectedTransaction.user],
                                     ['Method', selectedTransaction.method],
-                                    ['Date', new Date(selectedTransaction.date).toLocaleString()]
+                                    ['Date', formatDateTime(selectedTransaction.date)]
                                 ].map(([label, value]) => (
                                     <div key={label} className="flex justify-between items-center text-sm font-bold border-b border-slate-50 pb-4 last:border-0 uppercase">
                                         <span className="text-slate-400 text-[10px] tracking-widest">{label}</span>

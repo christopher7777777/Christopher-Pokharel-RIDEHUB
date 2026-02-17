@@ -130,10 +130,10 @@ const updatePassword = async (req, res) => {
             });
         }
 
-        // 1) Find user and get password
+        //  Find user and get password
         const user = await User.findById(req.user.id).select('+password');
 
-        // 2) Check if current password is correct
+        // Check if current password is correct
         if (!(await user.comparePassword(currentPassword))) {
             return res.status(401).json({
                 success: false,
@@ -141,7 +141,7 @@ const updatePassword = async (req, res) => {
             });
         }
 
-        // 3) Update and save
+        //  Update and save
         user.password = newPassword;
         await user.save();
 
@@ -177,9 +177,6 @@ const forgotPassword = async (req, res) => {
         const resetToken = user.getResetPasswordToken();
 
         await user.save({ validateBeforeSave: false });
-
-        // Create reset url
-        // In local: http://localhost:5173/resetpassword/TOKEN
         const resetUrl = `${req.protocol}://${req.get('host').replace('5000', '5173')}/resetpassword/${resetToken}`;
 
         const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
@@ -314,6 +311,22 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const getSellers = async (req, res) => {
+    try {
+        const sellers = await User.find({ role: 'seller' }).select('name email kycStatus');
+        res.json({
+            success: true,
+            data: sellers
+        });
+    } catch (error) {
+        console.error('Get sellers error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -322,5 +335,6 @@ module.exports = {
     forgotPassword,
     resetPassword,
     getAllUsers,
-    deleteUser
+    deleteUser,
+    getSellers
 };

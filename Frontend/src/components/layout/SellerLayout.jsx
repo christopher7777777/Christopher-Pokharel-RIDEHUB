@@ -8,7 +8,6 @@ const SellerLayout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-    // Close mobile drawer on resize if screen becomes large
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
@@ -40,7 +39,7 @@ const SellerLayout = ({ children }) => {
                     }`}
             >
                 <div className="p-6 flex items-center justify-between border-b border-gray-800">
-                    <span className="text-xl font-black text-white">RIDE<span className="text-orange-500">HUB</span></span>
+                    <img src="/image5.png" alt="RIDEHUB Logo" className="h-10 w-auto object-contain" />
                     <button onClick={toggleMobileDrawer} className="p-2 text-gray-400 hover:text-white">
                         <X size={24} />
                     </button>

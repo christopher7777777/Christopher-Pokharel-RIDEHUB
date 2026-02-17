@@ -1,6 +1,6 @@
 // routes/auth.js
 const express = require('express');
-const router = express.Router(); // This is the key change!
+const router = express.Router();
 const {
     register,
     login,
@@ -9,7 +9,8 @@ const {
     forgotPassword,
     resetPassword,
     getAllUsers,
-    deleteUser
+    deleteUser,
+    getSellers
 } = require('../controllers/authController');
 const { protect, isAdmin } = require('../middleware/auth');
 
@@ -19,6 +20,7 @@ router.get('/me', protect, getMe);
 router.put('/updatepassword', protect, updatePassword);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);
+router.get('/sellers', protect, getSellers);
 
 // Admin routes
 router.get('/users', protect, isAdmin, getAllUsers);

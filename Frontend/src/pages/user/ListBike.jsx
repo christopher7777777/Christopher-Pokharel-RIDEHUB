@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import {
-    Upload,
     FileText,
     CheckCircle,
     AlertCircle,
@@ -11,7 +10,6 @@ import {
     Camera,
     Plus,
     X,
-    ChevronDown,
     Loader2
 } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
@@ -151,8 +149,8 @@ const ListBike = () => {
 
             <main className="pt-32 pb-12 px-4 max-w-4xl mx-auto">
                 <div className="text-center mb-10 animate-fadeIn">
-                    <h1 className="text-4xl font-black text-gray-900 mb-2">Sell Your Bike</h1>
-                    <p className="text-gray-500 italic">Get the best price from our verified dealers</p>
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">List Your Ride</h1>
+                    <p className="text-gray-500 font-medium">Connect with verified buyers and get the best value for your bike</p>
                 </div>
 
                 {error && (
@@ -164,29 +162,32 @@ const ListBike = () => {
 
                 <div className="space-y-8">
                     {/* Basic info */}
-                    <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp">
-                        <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                            <FileText className="text-orange-600" size={24} /> 1. Basic Info
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <FileText className="text-orange-600" size={20} />
+                            </div>
+                            Vehicle Essentials
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Brand</label>
-                                <select name="brand" value={formData.brand} onChange={handleInputChange} className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all appearance-none cursor-pointer">
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Brand</label>
+                                <select name="brand" value={formData.brand} onChange={handleInputChange} className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all appearance-none cursor-pointer">
                                     <option value="">Select Brand</option>
                                     {brands.map(b => <option key={b} value={b}>{b}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Model</label>
-                                <input name="model" value={formData.model} onChange={handleInputChange} placeholder="e.g. MT-15" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all" />
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Model Name</label>
+                                <input name="model" value={formData.model} onChange={handleInputChange} placeholder="e.g. MT-15 V2" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all" />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Engine (CC)</label>
-                                <input type="number" name="engineCapacity" value={formData.engineCapacity} onChange={handleInputChange} placeholder="e.g. 150" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all" />
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Engine (CC)</label>
+                                <input type="number" name="engineCapacity" value={formData.engineCapacity} onChange={handleInputChange} placeholder="e.g. 150" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all" />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Model Year</label>
-                                <select name="modelYear" value={formData.modelYear} onChange={handleInputChange} className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all">
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Model Year</label>
+                                <select name="modelYear" value={formData.modelYear} onChange={handleInputChange} className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all">
                                     <option value="">Select Year</option>
                                     {years.map(y => <option key={y} value={y}>{y}</option>)}
                                 </select>
@@ -195,9 +196,12 @@ const ListBike = () => {
                     </div>
 
                     {/* Bike condition */}
-                    <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.1s' }}>
-                        <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                            <CheckCircle className="text-orange-600" size={24} /> 2. Condition
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.1s' }}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <CheckCircle className="text-orange-600" size={20} />
+                            </div>
+                            Current Condition
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {conditionGrades.map((c) => (
@@ -210,26 +214,32 @@ const ListBike = () => {
                     </div>
 
                     {/* Bike pricing */}
-                    <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.2s' }}>
-                        <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                            <Plus className="text-orange-600" size={24} /> 3. Pricing
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.2s' }}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <Plus className="text-orange-600" size={20} />
+                            </div>
+                            Pricing & Valuation
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Asking Price (Rs)</label>
-                                <input type="number" name="price" value={formData.price} onChange={handleInputChange} placeholder="e.g. 280000" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all" />
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Asking Price (Rs)</label>
+                                <input type="number" name="price" value={formData.price} onChange={handleInputChange} placeholder="e.g. 280000" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all" />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Mileage (km)</label>
-                                <input type="number" name="mileage" value={formData.mileage} onChange={handleInputChange} placeholder="e.g. 12000" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 font-bold transition-all" />
+                                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Total Mileage (km)</label>
+                                <input type="number" name="mileage" value={formData.mileage} onChange={handleInputChange} placeholder="e.g. 12000" className="w-full px-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-orange-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 font-medium transition-all" />
                             </div>
                         </div>
                     </div>
 
                     {/* Bluebook photo */}
-                    <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.25s' }}>
-                        <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                            <FileText className="text-orange-600" size={24} /> 4. Bluebook Photo
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.25s' }}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <FileText className="text-orange-600" size={20} />
+                            </div>
+                            Ownership Documents
                         </h2>
                         <div className="relative aspect-[16/9] max-w-md mx-auto">
                             <input type="file" id="bluebook" className="hidden" onChange={(e) => handlePhotoUpload(e, 'bluebook')} />
@@ -255,9 +265,12 @@ const ListBike = () => {
                     </div>
 
                     {/* Bike photos */}
-                    <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.3s' }}>
-                        <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                            <Camera className="text-orange-600" size={24} /> 5. Bike Photos
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.3s' }}>
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <Camera className="text-orange-600" size={20} />
+                            </div>
+                            Visual Showcase
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {['frontView', 'sideView', 'dashboard', 'engine'].map((t) => (
@@ -279,9 +292,9 @@ const ListBike = () => {
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-5 rounded-[30px] font-black text-lg shadow-2xl shadow-orange-900/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-orange-900/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
                     >
-                        {loading ? <Loader2 className="animate-spin" size={24} /> : 'LIST BIKE FOR REVIEW'}
+                        {loading ? <Loader2 className="animate-spin" size={24} /> : 'Complete Listing'}
                     </button>
                 </div>
             </main>

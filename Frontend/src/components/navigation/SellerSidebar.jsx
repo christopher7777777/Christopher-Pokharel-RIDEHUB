@@ -37,15 +37,12 @@ const SellerSidebar = ({ isOpen, toggleSidebar }) => {
         >
             {/* Branding */}
             <div className="h-20 flex items-center justify-center border-b border-gray-100">
-                <Link to="/dashboard" className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                        <Bike size={24} />
-                    </div>
-                    {isOpen && (
-                        <span className="text-xl font-bold tracking-tight">
-                            RIDE<span className="text-orange-600">HUB</span>
-                        </span>
-                    )}
+                <Link to="/dashboard" className="flex items-center justify-center">
+                    <img
+                        src="/image5.png"
+                        alt="RIDEHUB Logo"
+                        className={`transition-all duration-300 ${isOpen ? 'h-14 px-4' : 'h-10 px-2'}`}
+                    />
                 </Link>
             </div>
 

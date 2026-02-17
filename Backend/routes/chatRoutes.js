@@ -6,7 +6,7 @@ const {
     saveMessage,
     getMyConversations
 } = require('../controllers/chatController');
-const { protect } = require('../middleware/auth'); // Assuming protect exists
+const { protect } = require('../middleware/auth');
 
 router.post('/conversation', protect, getOrCreateConversation);
 router.get('/conversations', protect, getMyConversations);

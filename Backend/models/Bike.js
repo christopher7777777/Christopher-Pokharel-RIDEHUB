@@ -127,6 +127,10 @@ const bikeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    purchasedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     isExchange: {
         type: Boolean,
         default: false
@@ -148,6 +152,6 @@ const bikeSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Bike', bikeSchema);

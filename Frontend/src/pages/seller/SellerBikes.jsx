@@ -216,19 +216,42 @@ const SellerBikes = () => {
                                             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{bike.displayPriceLabel}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 pt-4 border-t border-gray-50">
-                                        <Link
-                                            to={`/bike/${bike._id}`}
-                                            className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2"
-                                        >
-                                            View {bike._isExchange ? 'Original' : 'Details'} <ArrowUpRight size={14} />
-                                        </Link>
-                                        <Link
-                                            to="/seller/inventory"
-                                            className="w-12 h-11 flex items-center justify-center bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all"
-                                        >
-                                            <Filter size={16} />
-                                        </Link>
+                                    <div className="flex flex-col gap-2 pt-4 border-t border-gray-50">
+                                        <div className="flex items-center gap-2">
+                                            <Link
+                                                to={`/bike/${bike._id}`}
+                                                className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2"
+                                            >
+                                                View {bike._isExchange ? 'Original' : 'Details'} <ArrowUpRight size={14} />
+                                            </Link>
+                                            <Link
+                                                to="/seller/inventory"
+                                                className="w-12 h-11 flex items-center justify-center bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all"
+                                            >
+                                                <Filter size={16} />
+                                            </Link>
+                                        </div>
+                                        {bike.status === 'Approved' && (bike.listingType === 'Sale' || bike.listingType === 'Rental') && (
+                                            <button
+                                                onClick={async () => {
+                                                    const action = bike.listingType === 'Sale' ? 'sold' : 'rented';
+                                                    if (window.confirm(`Mark this bike as ${action} and payment received?`)) {
+                                                        try {
+                                                            await api.put(`/api/bikes/complete-payment/${bike._id}`, {
+                                                                paymentMessage: `Transaction completed and payment received by dealer.`
+                                                            });
+                                                            alert(`Successfully marked as ${action}! Notification sent to buyer.`);
+                                                            fetchBikes();
+                                                        } catch (err) {
+                                                            alert(`Failed to complete ${action}: ${err.response?.data?.message || err.message}`);
+                                                        }
+                                                    }
+                                                }}
+                                                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <CheckCircle2 size={14} /> MARK AS {bike.listingType === 'Sale' ? 'SOLD' : 'RENTED'}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

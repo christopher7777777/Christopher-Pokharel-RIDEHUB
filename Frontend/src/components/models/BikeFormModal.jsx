@@ -117,7 +117,7 @@ const BikeFormModal = ({ isOpen, onClose, bike, onSuccess }) => {
                 data.append('existingImages', img);
             });
 
-            // Append new files under 'images' (matching the backend upload field)
+            // Append new files under 'images'
             selectedFiles.forEach(file => {
                 data.append('images', file);
             });

@@ -2,9 +2,11 @@ const Bike = require('../models/Bike');
 const sendEmail = require('../utils/sendEmail');
 const ValuationRule = require('../models/ValuationRule');
 
-// @desc    Email helper handling updates
-const notifyUserUpdate = async (bike, subject, message) => {
-    if (bike && bike.seller && bike.seller.email) {
+// Email helper handling updates
+const notifyUserUpdate = async (bike, subject, message, targetEmail = null) => {
+    const emailToUse = targetEmail || (bike && bike.seller && bike.seller.email);
+
+    if (bike && emailToUse) {
         try {
             let attachments = [];
             let imageHtml = '';
@@ -32,7 +34,7 @@ const notifyUserUpdate = async (bike, subject, message) => {
                         <div style="background-color: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
                             ${imageHtml}
                             <h3 style="margin-top: 0;">${subject}</h3>
-                            <p style="white-space: pre-wrap;">${message.replace(/\n/g, '<br>')}</p>
+                            <p style="white-space: pre-wrap; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</p>
                             
                             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
                                 <h4 style="margin: 0 0 10px 0;">Bike Details:</h4>
@@ -60,9 +62,9 @@ const notifyUserUpdate = async (bike, subject, message) => {
             `;
 
             await sendEmail({
-                email: bike.seller.email,
+                email: emailToUse,
                 subject: subject,
-                message: message, // Fallback text
+                message: message,
                 html: htmlMessage,
                 attachments: attachments
             });
@@ -89,14 +91,12 @@ exports.createBike = async (req, res) => {
             if (req.files.bluebook) {
                 req.body.bluebookImage = req.files.bluebook[0].path;
             }
-            // If using upload.array() as fallback
             if (Array.isArray(req.files) && req.files.length > 0) {
                 req.body.images = req.files.map(file => file.path);
             }
         }
 
-        // If it's a seller, newly added bikes should be 'Available'
-        // If it's a user listing for 'Sale' or 'Purchase', it should be 'Pending Review'
+        //  seller newly added bikes
         if (req.user.role === 'seller') {
             req.body.status = 'Available';
         } else if (req.body.listingType === 'Sale' || req.body.listingType === 'Purchase') {
@@ -119,7 +119,7 @@ exports.createBike = async (req, res) => {
     }
 };
 
-// @desc    Get all bikes listed by the dealer (Seller -> User flow)
+// @desc    Get all bikes listed 
 // @route   GET /api/bikes/my-listings
 // @access  Private/Seller
 exports.getMyBikes = async (req, res) => {
@@ -183,11 +183,8 @@ exports.updateBike = async (req, res) => {
             }
         }
 
-        // Set the final images array for the model
+        // final images array for the model
         req.body.images = updatedImages;
-
-        // If a seller is updating a 'Pending Review' bike, it should probably become 'Available'
-        // (This handles bikes that were incorrectly set to Pending Review previously)
         if (req.user.role === 'seller' && bike.status === 'Pending Review') {
             req.body.status = 'Available';
         }
@@ -290,13 +287,11 @@ exports.getAllBikes = async (req, res) => {
     }
 };
 
-// @desc    Get bikes listed by users for the dealer to buy (User -> Seller flow)
+// @desc    Get bikes listed by users
 // @route   GET /api/bikes/sale-requests
 // @access  Private/Seller
 exports.getSaleRequests = async (req, res) => {
     try {
-        // Show bikes listed by OTHER users that the dealer can purchase
-        // Include 'Purchased' status so completed acquisitions show in the Purchase Hub
         const bikes = await Bike.find({
             seller: { $ne: req.user.id },
             listingType: { $in: ['Sale', 'Purchase'] },
@@ -335,8 +330,8 @@ exports.updateSaleStatus = async (req, res) => {
             dealerNote
         }, { new: true, runValidators: true });
 
-        // Notify the seller (User) about the status update
-        await notifyUserUpdate(
+        // Notify the seller (User) about the status update - Non-blocking for speed
+        notifyUserUpdate(
             bike,
             `Update on your Bike Listing: ${bike.name}`,
             `Your bike listing status has been updated to: ${status}.\n\nNegotiated Price: NPR ${negotiatedPrice || 'N/A'}\nDealer Note: ${dealerNote || 'None'}\n\nPlease check your dashboard for more details.`
@@ -376,16 +371,12 @@ exports.counterOffer = async (req, res) => {
             userCounterPrice,
             userConfirmed: false
         }, { new: true });
-
-        // Notify User confirming their counter offer was sent
-        // (Since we don't know the specific Dealer, we just confirm to the User)
         let populatedBike = await Bike.findById(req.params.id).populate('seller', 'name email');
-        await notifyUserUpdate(
+        notifyUserUpdate(
             populatedBike,
             `Counter Offer Sent: ${populatedBike.name}`,
-            `You have successfully sent a counter offer of NPR ${userCounterPrice}.\n\nWaiting for dealer response.`
+            `Hi ${populatedBike.seller.name},\n\nYou have successfully sent a counter offer of NPR ${userCounterPrice} for "${populatedBike.name}".\n\nWaiting for dealer response.`
         );
-
         res.status(200).json({
             success: true,
             data: bike
@@ -421,34 +412,42 @@ exports.confirmSale = async (req, res) => {
             deliveryCharge,
             bookingDate,
             serviceDay,
-            // Only update status if it's not already purchased
-            status: bike.status === 'Purchased' ? 'Purchased' : 'Approved'
+            status: bike.status === 'Purchased' ? 'Purchased' : 'Approved',
+            purchasedBy: req.user.id
         };
 
-        // Calculate and store final transaction price
+        // Calculate final transaction price
         let finalPrice = bike.price;
         if (bike.negotiatedPrice && bike.negotiatedPrice > 0) {
             finalPrice = bike.negotiatedPrice;
         }
 
-        // Deduct exchange valuation if applicable
+        // Deduct exchange valuation
         if (bike.isExchange && bike.exchangeValuation) {
             finalPrice = Math.max(0, finalPrice - bike.exchangeValuation);
         }
-
-        // Store the final calculated price
         updateData.negotiatedPrice = finalPrice;
 
         if (userQrImage) updateData.userQrImage = userQrImage;
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
-        // Notify User that sale is confirmed and pending/approved
-        await notifyUserUpdate(
+        // Notify Seller (Dealer or User who listed) - Non-blocking
+        notifyUserUpdate(
             bike,
             `Sale Confirmed: ${bike.name}`,
-            `You have confirmed the sale details for ${bike.name}.\n\nStatus: ${bike.status}\nBooking Date: ${new Date(bookingDate).toDateString()}\n\nPlease proceed with the next steps as instructed.`
+            `A sale confirmation has been received for "${bike.name}".\n\nStatus: ${bike.status}\nBooking Date: ${new Date(bookingDate).toDateString()}\n\nPlease check the portal for further actions.`
         );
+
+        // Notify Buyer (the person who just clicked confirm)
+        if (req.user && req.user.email && req.user.email !== bike.seller.email) {
+            notifyUserUpdate(
+                bike,
+                `Purchase Confirmation: ${bike.name}`,
+                `Dear ${req.user.name},\n\nYou have successfully confirmed the purchase details for ${bike.name}.\n\nTotal Price: NPR ${updateData.negotiatedPrice}\nBooking Date: ${new Date(bookingDate).toDateString()}\nPayment Method: ${paymentMethod}\n\nOur team will review the details and contact you soon.`,
+                req.user.email
+            );
+        }
 
         res.status(200).json({
             success: true,
@@ -487,19 +486,26 @@ exports.completePayment = async (req, res) => {
 
         if (paymentScreenshot) updateData.paymentScreenshot = paymentScreenshot;
 
-        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('seller', 'name email');
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true })
+            .populate('seller', 'name email')
+            .populate('purchasedBy', 'name email');
 
-        // Send confirmation email
-        try {
-            await sendEmail({
-                email: bike.seller.email,
-                subject: 'Payment Completed - Order Successful!',
-                message: `Congratulations! Your order is successful.\n\nPayment for your bike "${bike.name}" has been processed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Check the portal for details.'}`
-            });
-        } catch (err) {
-            console.error('Email error:', err);
+        // Send confirmation email to Seller - Non-blocking
+        notifyUserUpdate(
+            bike,
+            'Payment Completed - Order Successful!',
+            `Congratulations! Payment for your bike "${bike.name}" has been processed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Check the portal for details.'}`
+        );
+
+        // Send confirmation to Buyer
+        if (bike.purchasedBy && bike.purchasedBy.email) {
+            notifyUserUpdate(
+                bike,
+                'Payment Received - Item Purchased!',
+                `Dear ${bike.purchasedBy.name},\n\nGood news! Your payment for "${bike.name}" has been received and confirmed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Your order is now being processed for delivery.'}`,
+                bike.purchasedBy.email
+            );
         }
-
         res.status(200).json({
             success: true,
             data: bike
@@ -522,7 +528,7 @@ exports.rentBike = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Listing not found' });
         }
 
-        // Check if bike is already rented by someone else
+        // Check if bike is already 
         if (bike.status === 'Rented' && bike.rentedBy.toString() !== req.user.id.toString()) {
             return res.status(400).json({ success: false, message: 'Bike is currently rented by another user' });
         }
@@ -551,16 +557,20 @@ exports.rentBike = async (req, res) => {
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
-        // Email the Renter (req.user)
-        try {
-            await sendEmail({
-                email: req.user.email,
-                subject: 'Bike Rental Successful - Order Confirmed',
-                message: `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: ${paymentMethod}\n\nThank you for choosing RIDEHUB! Your order is successful.`
-            });
-        } catch (err) {
-            console.error('Rent email error:', err);
-        }
+        // Email the Renter (User) - Non-blocking
+        notifyUserUpdate(
+            bike,
+            'Bike Rental Successful - Order Confirmed',
+            `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: NPR ${deliveryCharge > 0 ? (bike.price + deliveryCharge) : bike.price}\n\nThank you for choosing RIDEHUB! Your order is successful.`,
+            req.user.email
+        );
+
+        // Notify the Seller (Dealer)
+        notifyUserUpdate(
+            bike,
+            `New Rental Booking: ${bike.name}`,
+            `Good news! Your bike "${bike.name}" has been rented by ${req.user.name}.\n\nRental Period: ${new Date(bookingDate).toDateString()} to ${expiryDate.toDateString()}\nCustomer Contact: ${req.user.email}\n\nPlease prepare the bike for delivery/pickup.`
+        );
 
         res.status(200).json({
             success: true,
@@ -608,7 +618,7 @@ exports.requestExchange = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Exchange is only available for bike purchases' });
         }
 
-        // --- Automatic Valuation Logic ---
+        // Automatic Valuation Logic 
         let valuation = 0;
         let ccRange = '';
         const cc = Number(exchangeBikeDetails.engineCapacity);
@@ -656,8 +666,23 @@ exports.requestExchange = async (req, res) => {
             isExchange: true,
             exchangeBikeDetails,
             exchangeValuation: valuation,
-            exchangeStatus: valuation > 0 ? 'Valuated' : 'Pending' // Use Pending if no rule found/valuation failed
-        }, { new: true });
+            exchangeStatus: valuation > 0 ? 'Valuated' : 'Pending'
+        }, { new: true }).populate('seller', 'name email');
+
+        // Notify User about exchange request - Non-blocking
+        notifyUserUpdate(
+            bike,
+            `Exchange Request Received: ${bike.name}`,
+            `Dear ${req.user.name},\n\nYour exchange request for "${bike.name}" has been received.\n\nExchanging: ${exchangeBikeDetails.brand} ${exchangeBikeDetails.model}\nEstimated Valuation: NPR ${valuation}\nStatus: ${bike.exchangeStatus}\n\nOur team will review your bike details and contact you if further information is needed.`,
+            req.user.email
+        );
+
+        // Notify Dealer/Admin
+        notifyUserUpdate(
+            bike,
+            `New Exchange Request: ${bike.name}`,
+            `A new exchange request has been submitted by ${req.user.name} for the bike "${bike.name}".\n\nUser Bike: ${exchangeBikeDetails.brand} ${exchangeBikeDetails.model} (${exchangeBikeDetails.modelYear})\nAuto-Valuation: NPR ${valuation}\n\nPlease check the admin panel to review the uploaded documents and confirm valuation.`
+        );
 
         res.status(200).json({
             success: true,
@@ -686,10 +711,14 @@ exports.valuateExchange = async (req, res) => {
             exchangeStatus: status || 'Valuated'
         };
 
-        // If valuated, we might want to update the negotiatedPrice or finalPrice
-        // For now, we'll just store the valuation. The frontend will handle the deduction display.
+        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('seller', 'name email');
 
-        bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        // Notify the User - Non-blocking
+        notifyUserUpdate(
+            bike,
+            `Exchange Valuation Updated: ${bike.name}`,
+            `Your exchange request for "${bike.name}" has been reviewed.\n\nNew Valuation: NPR ${exchangeValuation}\nStatus: ${status || 'Valuated'}\n\nPlease check your dashboard to proceed with the transaction.`
+        );
 
         res.status(200).json({
             success: true,

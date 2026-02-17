@@ -48,6 +48,12 @@ const SellerDashboard = () => {
         newOrders: 0,
         recentActivity: []
     });
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString();
+    };
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -90,11 +96,11 @@ const SellerDashboard = () => {
                                     <AlertCircle size={24} />
                                 </div>
                                 <div>
-                                    <p className="text-lg font-black tracking-tight uppercase">Verify Your Account</p>
-                                    <p className="text-sm text-orange-100 italic">
+                                    <p className="text-lg font-bold tracking-tight">Account Verification Required</p>
+                                    <p className="text-sm text-orange-100 font-medium">
                                         {user?.kycStatus === 'pending'
-                                            ? "Review is pending. We will email you soon."
-                                            : "Complete KYC now to unlock all seller features."}
+                                            ? "We're currently reviewing your documents. Check back soon!"
+                                            : "Verify your identity to start listing and managing your rides."}
                                     </p>
                                 </div>
                             </div>
@@ -113,8 +119,8 @@ const SellerDashboard = () => {
                 {/* Header actions */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Main Seller Dashboard</h1>
-                        <p className="text-gray-500 text-sm italic">Track your stats.</p>
+                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Seller Overview</h1>
+                        <p className="text-gray-500 text-sm font-medium">Monitor your sales and performance across the platform</p>
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
 
@@ -130,34 +136,34 @@ const SellerDashboard = () => {
                 {/* Stats grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <StatCard
-                        title="Total Sales Cash"
+                        title="Total Revenue"
                         value={`Rs ${stats.totalEarnings.toLocaleString()}`}
-                        trend="Real Data"
+                        trend="Live performance"
                         isPositive={true}
                         icon={TrendingUp}
                         color="bg-green-600"
                     />
                     <StatCard
-                        title="Live Bike Stock"
+                        title="Active Listings"
                         value={stats.activeListings}
-                        trend="Stock Count"
+                        trend="Portfolio size"
                         isPositive={true}
                         icon={Bike}
                         color="bg-orange-600"
                     />
                     <StatCard
-                        title="Active Rent Deals"
+                        title="Ongoing Rentals"
                         value={stats.newOrders}
-                        trend="Live Deals"
+                        trend="Active deals"
                         isPositive={stats.newOrders > 0}
                         icon={ShoppingBag}
                         color="bg-blue-600"
                     />
                     <div onClick={() => navigate('/seller/messages')} className="cursor-pointer">
                         <StatCard
-                            title="Total Client Mails"
+                            title="Recent Inquiries"
                             value={messages.length}
-                            trend="Inbox Now"
+                            trend="Customer reach"
                             isPositive={true}
                             icon={MessageSquare}
                             color="bg-purple-600"
@@ -170,10 +176,10 @@ const SellerDashboard = () => {
                     {/* Recent actions */}
                     <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
                         <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Recent Seller Action</h2>
+                            <h2 className="text-xl font-bold text-gray-900 tracking-tight">Recent Transactions</h2>
                             <button
                                 onClick={() => navigate('/seller/payments')}
-                                className="text-orange-600 text-[10px] font-black uppercase tracking-widest hover:underline italic"
+                                className="text-orange-600 text-xs font-semibold hover:underline"
                             >
                                 View all transactions
                             </button>
@@ -181,7 +187,7 @@ const SellerDashboard = () => {
 
                         <div className="space-y-6">
                             {stats.recentActivity.length === 0 ? (
-                                <p className="text-center text-gray-400 text-xs italic py-8">Zero Actions Found</p>
+                                <p className="text-center text-gray-400 text-sm font-medium py-12">No recent activity to show</p>
                             ) : (
                                 stats.recentActivity.map((item, idx) => (
                                     <div key={idx} className="flex items-center justify-between p-4 rounded-3xl hover:bg-gray-50 transition-all group">
@@ -204,7 +210,7 @@ const SellerDashboard = () => {
                                                     {item.status}
                                                 </span>
                                                 <span className="text-[10px] text-gray-400 font-bold">
-                                                    {new Date(item.time).toLocaleDateString()}
+                                                    {formatDate(item.time)}
                                                 </span>
                                             </div>
                                         </div>
@@ -218,8 +224,8 @@ const SellerDashboard = () => {
                     <div className="flex flex-col gap-8">
                         {/* Messages list */}
                         <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-8">
-                            <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
-                                <MessageSquare size={20} className="text-purple-600" /> Client Inquiries
+                            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <MessageSquare size={20} className="text-purple-600" /> Customer Messages
                             </h3>
 
                             {loading ? (
@@ -227,7 +233,7 @@ const SellerDashboard = () => {
                                     <Loader2 className="animate-spin text-purple-600" />
                                 </div>
                             ) : messages.length === 0 ? (
-                                <p className="text-center text-gray-400 text-[10px] font-bold uppercase tracking-widest py-8">Zero Mails Now</p>
+                                <p className="text-center text-gray-400 text-sm font-medium py-12">Your inbox is empty</p>
                             ) : (
                                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
                                     {messages.map((msg) => (
@@ -235,7 +241,7 @@ const SellerDashboard = () => {
                                             <div className="flex justify-between items-start mb-2">
                                                 <h4 className="text-sm font-black text-gray-900">{msg.name}</h4>
                                                 <span className="text-[10px] text-gray-400 italic">
-                                                    {new Date(msg.createdAt).toLocaleDateString()}
+                                                    {formatDate(msg.createdAt)}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-gray-600 line-clamp-2 mb-3 italic">"{msg.message}"</p>
