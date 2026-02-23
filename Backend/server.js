@@ -33,6 +33,7 @@ app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/kyc', require('./routes/kycRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -75,7 +76,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send_message', (data) => {
-        // data should contain conversationId, sender, text
+        // contain conversationId, sender, text
         io.to(data.conversationId).emit('receive_message', data);
     });
 

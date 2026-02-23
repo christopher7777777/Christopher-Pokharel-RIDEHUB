@@ -65,19 +65,66 @@ const BikeDetails = () => {
             await api.put(endpoint, bookingData);
 
             const message = isBuyBike ? 'Bike Purchase Successful!' : 'Bike Rental Confirmed!';
-            setSuccessMessage(message);
 
-            // Online payment
+            // Online payment logic
             if (bookingData.paymentMethod === 'Online') {
-                setSuccessMessage(prev => prev + ' Please proceed with online payment.');
+                setSuccessMessage('Initiating secure payment...');
+
+                try {
+                    // Call our initiation endpoint
+                    const initResponse = await api.post('/api/payment/initiate', {
+                        amount: bookingData.totalAmount,
+                        productName: bike.name,
+                        bikeId: bike._id
+                    });
+
+                    if (initResponse.data.success) {
+                        const { esewaConfig } = initResponse.data.data;
+
+                        // Create a hidden form and submit it to eSewa
+                        console.log('Redirecting to eSewa with config:', esewaConfig);
+
+                        const form = document.createElement('form');
+                        form.setAttribute('method', 'POST');
+                        form.setAttribute('action', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form');
+                        form.style.display = 'none';
+
+                        Object.entries(esewaConfig).forEach(([key, value]) => {
+                            const input = document.createElement('input');
+                            input.setAttribute('type', 'hidden');
+                            input.setAttribute('name', key);
+                            input.setAttribute('value', typeof value === 'number' ? value.toString() : value);
+                            form.appendChild(input);
+                        });
+
+                        document.body.appendChild(form);
+                        console.log('Submitting form to eSewa...');
+                        form.submit();
+
+                        // Clean up if somehow it stays (though it should redirect)
+                        setTimeout(() => {
+                            if (document.body.contains(form)) {
+                                document.body.removeChild(form);
+                            }
+                        }, 5000);
+                        return;
+                    }
+                } catch (payErr) {
+                    console.error('Payment initiation failed:', payErr);
+                    setError('Payment initiation failed. Please try again or choose another method.');
+                    setActionLoading(false);
+                    return;
+                }
             }
+
+            setSuccessMessage(message);
 
             // Refresh status
             const response = await api.get(`/api/bikes/${id}`);
             setBike(response.data.data);
             setIsBookingModalOpen(false);
 
-            // Redirect automatically after success
+            // Redirect automatically after success (only for non-online or if something went wrong)
             setTimeout(() => {
                 navigate('/browse');
             }, 3000);

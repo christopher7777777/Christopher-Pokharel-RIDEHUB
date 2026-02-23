@@ -4,11 +4,8 @@ import api from '../../utils/api';
 import {
     Plus,
     Search,
-    Filter,
-    MoreVertical,
     Edit2,
     Trash2,
-    Eye,
     Bike as BikeIcon,
     AlertCircle,
     Loader2
@@ -27,7 +24,7 @@ const SellerInventory = () => {
         try {
             setLoading(true);
             const response = await api.get('/api/bikes/my-listings');
-            // Filter to show only available bikes (exclude rented and purchased)
+            // Filter  available bikes
             const availableBikes = response.data.data.filter(bike =>
                 bike.status === 'Available'
             );

@@ -5,14 +5,10 @@ import {
     Bike as BikeIcon,
     Search,
     Filter,
-    Calendar,
-    Tag,
-    ChevronRight,
     ArrowUpRight,
     Loader2,
     AlertCircle,
     Clock,
-    ShoppingCart,
     CheckCircle2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -21,7 +17,7 @@ const SellerBikes = () => {
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [filter, setFilter] = useState('all'); // all, Sale, Rental, Exchange, Purchased
+    const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchBikes = async () => {

@@ -1,35 +1,35 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+﻿import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import SupportChat from './components/chat/SupportChat';
 import PrivateRoute from './components/PrivateRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import BikeList from './pages/admin/BikeList';
+import KycVerification from './pages/admin/KycVerification';
+import Payments from './pages/admin/Payments';
+import UserManagement from './pages/admin/UserManagement';
+import ValuationRules from './pages/admin/ValuationRules';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import UserDashboard from './pages/user/UserDashboard';
+import ResetPassword from './pages/auth/ResetPassword';
+import SellerBikes from './pages/seller/SellerBikes';
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerInventory from './pages/seller/SellerInventory';
-import BrowseBikes from './pages/user/BrowseBikes';
+import SellerKYC from './pages/seller/SellerKYC';
+import SellerMessages from './pages/seller/SellerMessages';
+import SellerPayments from './pages/seller/SellerPayments';
+import SellerPurchaseHub from './pages/seller/SellerPurchaseHub';
 import AboutUs from './pages/user/AboutUs';
+import BikeDetails from './pages/user/BikeDetails';
+import BrowseBikes from './pages/user/BrowseBikes';
 import Contact from './pages/user/Contact';
 import ListBike from './pages/user/ListBike';
-import SellerPurchaseHub from './pages/seller/SellerPurchaseHub';
-import SellerMessages from './pages/seller/SellerMessages';
-import UserSellingStatus from './pages/user/UserSellingStatus';
-import UserProfile from './pages/user/UserProfile';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
-import BikeDetails from './pages/user/BikeDetails';
-import SellerBikes from './pages/seller/SellerBikes';
-import SellerKYC from './pages/seller/SellerKYC';
-import SellerPayments from './pages/seller/SellerPayments';
+import UserDashboard from './pages/user/UserDashboard';
 import UserKYC from './pages/user/UserKYC';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import KycVerification from './pages/admin/KycVerification';
-import ValuationRules from './pages/admin/ValuationRules';
-import UserManagement from './pages/admin/UserManagement';
-import Payments from './pages/admin/Payments';
-import BikeList from './pages/admin/BikeList';
-import AdminLayout from './components/layout/AdminLayout';
-import SupportChat from './components/chat/SupportChat';
+import UserProfile from './pages/user/UserProfile';
+import UserSellingStatus from './pages/user/UserSellingStatus';
+import PaymentSuccess from './pages/user/PaymentSuccess';
+import PaymentFailure from './pages/user/PaymentFailure';
 
 const GlobalSupportChat = () => {
   const { user, loading } = useAuth();
@@ -111,6 +111,8 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-failure" element={<PaymentFailure />} />
             <Route
               path="/profile"
               element={
