@@ -34,6 +34,7 @@ app.use('/api/kyc', require('./routes/kycRoutes'));
 app.use('/api/valuation', require('./routes/valuationRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/emi', require('./routes/emiRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
