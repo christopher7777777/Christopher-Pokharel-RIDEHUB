@@ -25,6 +25,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { icon: Users, label: 'User Management', path: '/admin/users' },
         { icon: CreditCard, label: 'Payments', path: '/admin/payments' },
         { icon: Bike, label: 'Bike List', path: '/admin/bikes' },
+        { icon: FileText, label: 'EMI Leads', path: '/admin/emi' },
     ];
 
     return (

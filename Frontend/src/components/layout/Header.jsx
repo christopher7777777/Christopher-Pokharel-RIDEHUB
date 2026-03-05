@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, User } from 'lucide-react';
+import { AlertCircle, ArrowRight, User, Calculator } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -27,6 +27,7 @@ const Header = () => {
             ? []
             : [{ name: 'Sell Bike', path: '/sell' }]
         ),
+        { name: 'EMI', path: '/emi-calculator' },
         { name: 'About Us', path: '/about' },
         { name: 'Contact', path: '/contact' },
     ];
@@ -129,6 +130,9 @@ const Header = () => {
                                             <Link to="/my-selling" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
                                                 Listing Status
                                             </Link>
+                                            <Link to="/my-emi" className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                                EMI Applications
+                                            </Link>
                                         </>
                                     )}
                                     <div className="mt-2 pt-2 border-t border-gray-50">
@@ -163,50 +167,52 @@ const Header = () => {
             </div>
 
             {/* Mobile Menu */}
-            {isMobileMenuOpen && (
-                <div className="md:hidden bg-white border-t border-gray-100 animate-fadeIn">
-                    <div className="px-4 pt-2 pb-6 space-y-1">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                to={link.path}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block px-3 py-3 rounded-lg text-base font-medium ${isActive(link.path) ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
-                                    }`}
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
-                            <Link
-                                to="/profile"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2 text-gray-600"
-                            >
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden">
-                                    {user?.kycStatus === 'verified' && user?.kycId?.userPhoto ? (
-                                        <img
-                                            src={user.kycId.userPhoto}
-                                            alt={user.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-orange-600 font-bold">{user?.name?.charAt(0).toUpperCase()}</span>
-                                    )}
-                                </div>
-                                <span>Profile</span>
-                            </Link>
-                            <button
-                                onClick={logout}
-                                className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold"
-                            >
-                                Logout
-                            </button>
+            {
+                isMobileMenuOpen && (
+                    <div className="md:hidden bg-white border-t border-gray-100 animate-fadeIn">
+                        <div className="px-4 pt-2 pb-6 space-y-1">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    to={link.path}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`block px-3 py-3 rounded-lg text-base font-medium ${isActive(link.path) ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                            <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                                <Link
+                                    to="/profile"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center gap-3 px-3 py-2 text-gray-600"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden">
+                                        {user?.kycStatus === 'verified' && user?.kycId?.userPhoto ? (
+                                            <img
+                                                src={user.kycId.userPhoto}
+                                                alt={user.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-orange-600 font-bold">{user?.name?.charAt(0).toUpperCase()}</span>
+                                        )}
+                                    </div>
+                                    <span>Profile</span>
+                                </Link>
+                                <button
+                                    onClick={logout}
+                                    className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </header>
+                )
+            }
+        </header >
     );
 };
 

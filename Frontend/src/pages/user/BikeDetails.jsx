@@ -18,10 +18,14 @@ import {
     ChevronLeft,
     ChevronRight,
     ArrowLeft,
-    MessageSquare
+    MessageSquare,
+    Calculator
 } from 'lucide-react';
 import BookingModal from '../../components/models/BookingModal';
 import ExchangeModal from '../../components/models/ExchangeModal';
+import EMICalculator from '../../components/emi/EMICalculator';
+import FinanceModal from '../../components/emi/FinanceModal';
+import EMIModal from '../../components/emi/EMIModal';
 
 const BikeDetails = () => {
     const { id } = useParams();
@@ -35,6 +39,9 @@ const BikeDetails = () => {
     const [activeImage, setActiveImage] = useState(0);
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
+    const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false);
+    const [selectedLoanDetails, setSelectedLoanDetails] = useState(null);
+    const [isEMIModalOpen, setIsEMIModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchBike = async () => {
@@ -158,6 +165,11 @@ const BikeDetails = () => {
     const handleProceedAfterExchange = () => {
         setIsExchangeModalOpen(false);
         setIsBookingModalOpen(true);
+    };
+
+    const handleApplyFinance = (loanDetails) => {
+        setSelectedLoanDetails(loanDetails);
+        setIsFinanceModalOpen(true);
     };
 
     if (loading || authLoading) {
@@ -323,6 +335,29 @@ const BikeDetails = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Refined EMI Section - Now opens a Modal */}
+                            {isBuyBike && bike.status === 'Available' && (
+                                <div className="mt-6 animate-fadeIn">
+                                    <button
+                                        onClick={() => setIsEMIModalOpen(true)}
+                                        className="w-full flex items-center justify-between p-4 bg-orange-50/50 rounded-[25px] border border-orange-100 hover:border-orange-300 hover:bg-white transition-all group shadow-sm hover:shadow-md"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-orange-600 shadow-sm border border-orange-100 group-hover:bg-orange-600 group-hover:text-white transition-all">
+                                                <Calculator size={18} />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="text-[8px] font-black text-orange-400 uppercase tracking-[0.2em] mb-0.5">Financing Available</p>
+                                                <p className="text-[12px] font-black text-slate-800 group-hover:text-orange-600 transition-colors">Check Monthly EMI Plans</p>
+                                            </div>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-xl border border-orange-200 border-dashed flex items-center justify-center text-orange-400 group-hover:border-solid group-hover:border-orange-600 group-hover:text-orange-600 transition-all bg-white">
+                                            <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Specs grid */}
@@ -442,7 +477,26 @@ const BikeDetails = () => {
                 onProceed={handleProceedAfterExchange}
                 onConfirm={handleConfirmExchange}
             />
-        </div >
+
+            {isFinanceModalOpen && (
+                <FinanceModal
+                    isOpen={isFinanceModalOpen}
+                    onClose={() => setIsFinanceModalOpen(false)}
+                    bike={bike}
+                    loanDetails={selectedLoanDetails}
+                />
+            )}
+
+            <EMIModal
+                isOpen={isEMIModalOpen}
+                onClose={() => setIsEMIModalOpen(false)}
+                bike={bike}
+                onApply={(loanDetails) => {
+                    setIsEMIModalOpen(false);
+                    handleApplyFinance(loanDetails);
+                }}
+            />
+        </div>
     );
 };
 

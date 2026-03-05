@@ -30,6 +30,9 @@ import UserProfile from './pages/user/UserProfile';
 import UserSellingStatus from './pages/user/UserSellingStatus';
 import PaymentSuccess from './pages/user/PaymentSuccess';
 import PaymentFailure from './pages/user/PaymentFailure';
+import MyEMIApplications from './pages/user/MyEMIApplications';
+import AdminEMIApplications from './pages/admin/EMIApplications';
+import EMICalculatorPage from './pages/user/EMICalculatorPage';
 
 const GlobalSupportChat = () => {
   const { user, loading } = useAuth();
@@ -113,6 +116,7 @@ function App() {
             />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failure" element={<PaymentFailure />} />
+            <Route path="/emi-calculator" element={<EMICalculatorPage />} />
             <Route
               path="/profile"
               element={
@@ -126,6 +130,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <UserKYC />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-emi"
+              element={
+                <PrivateRoute>
+                  <MyEMIApplications />
                 </PrivateRoute>
               }
             />
@@ -225,6 +237,14 @@ function App() {
               element={
                 <PrivateRoute isAdmin={true}>
                   <BikeList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/emi"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <AdminEMIApplications />
                 </PrivateRoute>
               }
             />
