@@ -4,6 +4,8 @@ import { CheckCircle2, Loader2, XCircle, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import ReviewModal from '../../components/models/ReviewModal';
+import { Star } from 'lucide-react';
 
 const PaymentSuccess = () => {
     const [searchParams] = useSearchParams();
@@ -11,6 +13,8 @@ const PaymentSuccess = () => {
     const [verifying, setVerifying] = useState(true);
     const [status, setStatus] = useState('verifying'); // verifying, success, error
     const [message, setMessage] = useState('Verifying your payment with eSewa...');
+    const [bikeData, setBikeData] = useState(null);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     const paymentId = searchParams.get('paymentId');
     const data = searchParams.get('data');
@@ -34,6 +38,7 @@ const PaymentSuccess = () => {
                 if (response.data.success) {
                     setStatus('success');
                     setMessage('Your payment has been successfully verified! Your booking is now confirmed.');
+                    setBikeData(response.data.data);
                 } else {
                     setStatus('error');
                     setMessage(response.data.message || 'Verification failed. Please contact support.');
@@ -75,13 +80,24 @@ const PaymentSuccess = () => {
                                 <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] bg-green-50 py-1 px-4 rounded-full inline-block">Transaction Verified</p>
                             </div>
                             <p className="text-gray-500 font-medium leading-relaxed">{message}</p>
-                            <button
-                                onClick={() => navigate('/browse')}
-                                className="w-full bg-gray-900 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3 group"
-                            >
-                                Browse More Bikes
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
+
+                            <div className="pt-4 space-y-3">
+                                <button
+                                    onClick={() => setIsReviewModalOpen(true)}
+                                    className="w-full bg-orange-600 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-orange-700 transition-all flex items-center justify-center gap-3 group"
+                                >
+                                    Rate Our Service
+                                    <Star size={18} className="group-hover:rotate-12 transition-transform" />
+                                </button>
+
+                                <button
+                                    onClick={() => navigate('/browse')}
+                                    className="w-full bg-gray-900 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3 group"
+                                >
+                                    Browse More Bikes
+                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -112,6 +128,16 @@ const PaymentSuccess = () => {
                 </div>
             </main>
             <Footer />
+
+            {bikeData && (
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    bikeId={bikeData.bikeId}
+                    bikeName={bikeData.bikeName}
+                    serviceType={bikeData.listingType === 'Rental' ? 'Rental' : 'Buy'}
+                />
+            )}
         </div>
     );
 };

@@ -8,6 +8,7 @@ import KycVerification from './pages/admin/KycVerification';
 import Payments from './pages/admin/Payments';
 import UserManagement from './pages/admin/UserManagement';
 import ValuationRules from './pages/admin/ValuationRules';
+import ReviewManagement from './pages/admin/ReviewManagement';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -245,6 +246,14 @@ function App() {
               element={
                 <PrivateRoute isAdmin={true}>
                   <AdminEMIApplications />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/reviews"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <ReviewManagement />
                 </PrivateRoute>
               }
             />

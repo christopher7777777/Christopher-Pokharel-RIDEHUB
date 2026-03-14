@@ -9,7 +9,9 @@ import {
     Bike,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    FileText,
+    Star
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -26,6 +28,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { icon: CreditCard, label: 'Payments', path: '/admin/payments' },
         { icon: Bike, label: 'Bike List', path: '/admin/bikes' },
         { icon: FileText, label: 'EMI Leads', path: '/admin/emi' },
+        { icon: Star, label: 'Service Reviews', path: '/admin/reviews' },
     ];
 
     return (

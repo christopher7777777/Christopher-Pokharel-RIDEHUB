@@ -19,7 +19,8 @@ import {
     ChevronRight,
     ArrowLeft,
     MessageSquare,
-    Calculator
+    Calculator,
+    Star
 } from 'lucide-react';
 import BookingModal from '../../components/models/BookingModal';
 import ExchangeModal from '../../components/models/ExchangeModal';
@@ -42,6 +43,8 @@ const BikeDetails = () => {
     const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false);
     const [selectedLoanDetails, setSelectedLoanDetails] = useState(null);
     const [isEMIModalOpen, setIsEMIModalOpen] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
 
     useEffect(() => {
         const fetchBike = async () => {
@@ -58,7 +61,20 @@ const BikeDetails = () => {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                setReviewsLoading(true);
+                const response = await api.get(`/api/reviews/bike/${id}`);
+                setReviews(response.data.data);
+            } catch (err) {
+                console.error('Failed to fetch reviews', err);
+            } finally {
+                setReviewsLoading(false);
+            }
+        };
+
         fetchBike();
+        fetchReviews();
     }, [id]);
 
     const handleAction = () => {
@@ -458,6 +474,70 @@ const BikeDetails = () => {
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-20 border-t border-gray-100 pt-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                        <div>
+                            <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em] mb-3">User Feedback</p>
+                            <h2 className="text-4xl font-black text-gray-900 leading-none">Reviews & Ratings</h2>
+                        </div>
+                        <div className="flex items-center gap-4 py-3 px-6 bg-gray-50 rounded-3xl border border-gray-100">
+                            <div className="flex text-orange-500">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <Star key={i} size={16} className={i <= Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length || 0) ? 'fill-orange-500' : 'text-gray-200'} />
+                                ))}
+                            </div>
+                            <span className="text-sm font-black text-gray-900">{reviews.length} total reviews</span>
+                        </div>
+                    </div>
+
+                    {reviewsLoading ? (
+                        <div className="flex items-center justify-center py-20">
+                            <Loader2 size={32} className="text-orange-600 animate-spin" />
+                        </div>
+                    ) : reviews.length > 0 ? (
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {reviews.map((review) => (
+                                <div key={review._id} className="bg-white p-8 rounded-[40px] border border-gray-100/80 shadow-sm hover:shadow-xl transition-all duration-500 group">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 font-black text-lg">
+                                                {review.reviewer?.name?.charAt(0) || 'U'}
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-gray-900 text-sm uppercase tracking-tight">{review.reviewer?.name || 'Anonymous User'}</p>
+                                                <p className="text-[10px] text-gray-400 font-bold italic">{new Date(review.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1 text-orange-500 bg-orange-50/50 p-2 rounded-xl border border-orange-100">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <Star key={s} size={12} className={s <= review.rating ? 'fill-orange-500' : 'text-orange-200'} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute -top-4 -left-2 text-6xl text-orange-100 font-serif opacity-50">"</span>
+                                        <p className="text-gray-600 text-sm leading-relaxed relative z-10 italic">
+                                            {review.comment}
+                                        </p>
+                                    </div>
+                                    <div className="mt-6 flex items-center gap-2">
+                                        <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-100">
+                                            Verified {review.serviceType}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 bg-gray-50/50 rounded-[50px] border border-dashed border-gray-200">
+                            <MessageSquare size={48} className="text-gray-200 mx-auto mb-6" />
+                            <h3 className="text-xl font-black text-gray-400 uppercase tracking-widest">No Reviews Yet</h3>
+                            <p className="text-gray-400 text-xs italic mt-2">Be the first to share your experience after booking!</p>
+                        </div>
+                    )}
                 </div>
             </main>
 
