@@ -444,7 +444,7 @@ exports.confirmSale = async (req, res) => {
             notifyUserUpdate(
                 bike,
                 `Purchase Confirmation: ${bike.name}`,
-                `Dear ${req.user.name},\n\nYou have successfully confirmed the purchase details for ${bike.name}.\n\nTotal Price: NPR ${updateData.negotiatedPrice}\nBooking Date: ${new Date(bookingDate).toDateString()}\nPayment Method: ${paymentMethod}\n\nOur team will review the details and contact you soon.`,
+                `Dear ${req.user.name},\n\nYou have successfully confirmed the purchase details for ${bike.name}.\n\nTotal Price: NPR ${updateData.negotiatedPrice}\nBooking Date: ${new Date(bookingDate).toDateString()}\nPayment Method: ${paymentMethod}\n\nOur team will review the details and contact you soon.\n\nRate our service: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
                 req.user.email
             );
         }
@@ -502,7 +502,7 @@ exports.completePayment = async (req, res) => {
             notifyUserUpdate(
                 bike,
                 'Payment Received - Item Purchased!',
-                `Dear ${bike.purchasedBy.name},\n\nGood news! Your payment for "${bike.name}" has been received and confirmed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Your order is now being processed for delivery.'}`,
+                `Dear ${bike.purchasedBy.name},\n\nGood news! Your payment for "${bike.name}" has been received and confirmed.\n\nStatus: Purchased\nMessage: ${paymentMessage || 'Your order is now being processed for delivery.'}\n\nPlease share your feedback: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
                 bike.purchasedBy.email
             );
         }
@@ -561,7 +561,7 @@ exports.rentBike = async (req, res) => {
         notifyUserUpdate(
             bike,
             'Bike Rental Successful - Order Confirmed',
-            `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: NPR ${deliveryCharge > 0 ? (bike.price + deliveryCharge) : bike.price}\n\nThank you for choosing RIDEHUB! Your order is successful.`,
+            `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: NPR ${deliveryCharge > 0 ? (bike.price + deliveryCharge) : bike.price}\n\nThank you for choosing RIDEHUB! Your order is successful.\n\nRate your rental experience: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
             req.user.email
         );
 

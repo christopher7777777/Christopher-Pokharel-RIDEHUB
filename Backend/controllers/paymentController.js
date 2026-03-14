@@ -155,10 +155,16 @@ const verifyPayment = async (req, res) => {
         }
 
         if (payment.paymentStatus === 'COMPLETED') {
+            const bike = await Bike.findById(payment.bike);
             console.log('Payment already COMPLETED for ID:', payment._id);
             return res.status(200).json({
                 success: true,
-                message: "Payment was already verified and processed."
+                message: "Payment was already verified and processed.",
+                data: bike ? {
+                    bikeId: bike._id,
+                    bikeName: bike.name,
+                    listingType: bike.listingType
+                } : null
             });
         }
 
@@ -259,7 +265,12 @@ const verifyPayment = async (req, res) => {
 
             res.status(200).json({
                 success: true,
-                message: "Payment verified and processed successfully"
+                message: "Payment verified and processed successfully",
+                data: {
+                    bikeId: bike._id,
+                    bikeName: bike.name,
+                    listingType: bike.listingType
+                }
             });
 
         } catch (fetchError) {
