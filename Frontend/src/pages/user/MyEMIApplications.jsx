@@ -14,7 +14,7 @@ const MyEMIApplications = () => {
             try {
                 setLoading(true);
                 const response = await api.get('/api/emi/my-applications');
-                setApplications(response.data.data);
+                setApplications(response.data.data || []);
             } catch (err) {
                 setError('Failed to fetch EMI applications');
                 console.error(err);
@@ -69,8 +69,8 @@ const MyEMIApplications = () => {
                                     {/* Bike Preview */}
                                     <div className="w-full md:w-64 h-48 md:h-auto relative overflow-hidden">
                                         <img
-                                            src={app.bike.images[0]}
-                                            alt={app.bike.name}
+                                            src={app.bike?.images?.[0] || '/placeholder-bike.png'}
+                                            alt={app.bike?.name || 'Bike'}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
                                         <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(app.status)} backdrop-blur-md`}>
@@ -82,7 +82,7 @@ const MyEMIApplications = () => {
                                     <div className="flex-1 p-8">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                             <div>
-                                                <h3 className="text-2xl font-black text-gray-900 mb-1">{app.bike.name}</h3>
+                                                <h3 className="text-2xl font-black text-gray-900 mb-1">{app.bike?.name || 'Unknown Bike'}</h3>
                                                 <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                     <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(app.createdAt).toLocaleDateString()}</span>
                                                     <span className="flex items-center gap-1.5"><Clock size={12} /> Applied {new Date(app.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -90,26 +90,26 @@ const MyEMIApplications = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Monthly Cost</p>
-                                                <p className="text-2xl font-black text-orange-600">Rs {app.loanDetails.monthlyEMI.toLocaleString()}</p>
+                                                <p className="text-2xl font-black text-orange-600">Rs {app.loanDetails?.monthlyEMI?.toLocaleString() || '0'}</p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-y border-gray-50">
                                             <div>
                                                 <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Bike Price</p>
-                                                <p className="text-sm font-black text-gray-900 italic">Rs {app.loanDetails.totalPrice.toLocaleString()}</p>
+                                                <p className="text-sm font-black text-gray-900 italic">Rs {app.loanDetails?.totalPrice?.toLocaleString() || '0'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Down Payment</p>
-                                                <p className="text-sm font-black text-gray-900 italic">Rs {app.loanDetails.downPayment.toLocaleString()}</p>
+                                                <p className="text-sm font-black text-gray-900 italic">Rs {app.loanDetails?.downPayment?.toLocaleString() || '0'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Tenure</p>
-                                                <p className="text-sm font-black text-gray-900 italic">{app.loanDetails.tenure} Months</p>
+                                                <p className="text-sm font-black text-gray-900 italic">{app.loanDetails?.tenure || '0'} Months</p>
                                             </div>
                                             <div>
                                                 <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Interest Rate</p>
-                                                <p className="text-sm font-black text-gray-900 italic">{app.loanDetails.interestRate}% P.A.</p>
+                                                <p className="text-sm font-black text-gray-900 italic">{app.loanDetails?.interestRate || '0'}% P.A.</p>
                                             </div>
                                         </div>
 

@@ -11,8 +11,12 @@ import {
     CheckCircle2,
     XCircle,
     ExternalLink,
-    CalendarDays
+    CalendarDays,
+    Info,
+    Smartphone
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 const SellerPayments = () => {
     const formatDate = (dateStr) => {
@@ -26,6 +30,9 @@ const SellerPayments = () => {
         const date = new Date(dateStr);
         return isNaN(date.getTime()) ? 'Pending' : date.toLocaleString();
     };
+    const { user, loadUser } = useAuth();
+    const [esewaId, setEsewaId] = useState(user?.esewaId || '');
+    const [updatingEsewa, setUpdatingEsewa] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('All');
@@ -37,21 +44,63 @@ const SellerPayments = () => {
         grandTotalIncome: 0
     });
 
+    const handleEsewaUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            setUpdatingEsewa(true);
+            await api.put('/api/auth/update-esewa', { esewaId });
+            await loadUser();
+            toast.success('eSewa ID updated successfully!');
+        } catch (err) {
+            console.error('Failed to update eSewa ID:', err);
+            toast.error(err.response?.data?.message || 'Failed to update eSewa ID');
+        } finally {
+            setUpdatingEsewa(false);
+        }
+    };
+
     const fetchPayments = async () => {
         try {
             setLoading(true);
-            const [myListingsRes, saleRequestsRes] = await Promise.all([
+            const [myListingsRes, saleRequestsRes, payoutsRes] = await Promise.all([
                 api.get('/api/bikes/my-listings'),
-                api.get('/api/bikes/sale-requests')
+                api.get('/api/bikes/sale-requests'),
+                api.get('/api/payment/seller-payouts')
             ]);
 
             const listings = myListingsRes.data.data || [];
             const requests = saleRequestsRes.data.data || [];
+            const payouts = payoutsRes.data.data || [];
 
             const processedData = [];
 
-            // Process Rental and Sale Income
+            // 1. Process Actual Payments (Escrow System)
+            payouts.forEach(p => {
+                processedData.push({
+                    id: p._id,
+                    bikeId: p.bike?._id,
+                    bikeName: p.productName || p.bike?.name,
+                    user: p.user?.name || 'Customer',
+                    amount: p.amount,
+                    bookPrice: p.bike?.price || p.amount,
+                    paidPrice: p.amount,
+                    commission: p.commission,
+                    finalAmount: p.finalAmount,
+                    type: p.escrowStatus === 'released' ? 'Released Fund' : 'Escrow (Pending)',
+                    method: p.method,
+                    status: p.escrowStatus === 'released' ? 'Completed' : 'Pending',
+                    date: p.releasedAt || p.createdAt,
+                    isIncoming: true,
+                    isEscrow: true,
+                    escrowStatus: p.escrowStatus
+                });
+            });
+
+            // 2. Process Rental and Sale Income (Legacy/Fallback for non-escrow)
             listings.forEach(bike => {
+                // Avoid duplicating if we already have it from payouts
+                if (processedData.some(d => d.bikeId === bike._id)) return;
+
                 if (bike.status === 'Rented' || bike.status === 'Purchased' || bike.status === 'Approved') {
                     processedData.push({
                         id: bike._id,
@@ -66,13 +115,11 @@ const SellerPayments = () => {
                         date: bike.updatedAt || bike.createdAt,
                         proof: bike.paymentScreenshot,
                         isIncoming: true,
-                        isExchange: bike.isExchange,
-                        exchangeValuation: bike.exchangeValuation
+                        isEscrow: false
                     });
                 }
             });
 
-            // Process Payouts (Dealer buying bikes)
             requests.forEach(req => {
                 if (req.status === 'Purchased' || (req.status === 'Approved' && req.userConfirmed)) {
                     processedData.push({
@@ -88,6 +135,7 @@ const SellerPayments = () => {
                         date: req.updatedAt || req.createdAt,
                         proof: req.paymentScreenshot,
                         isIncoming: false,
+                        isEscrow: false,
                         isExchange: req.isExchange,
                         exchangeValuation: req.exchangeValuation
                     });
@@ -98,8 +146,8 @@ const SellerPayments = () => {
             setTransactions(processedData);
 
             // Calculate card stats
-            const rentalIncome = processedData.filter(t => t.isIncoming && t.status === 'Completed' && t.type === 'Rental Income').reduce((acc, t) => acc + (t.amount || 0), 0);
-            const income = processedData.filter(t => t.isIncoming && t.status === 'Completed').reduce((acc, t) => acc + (t.amount || 0), 0);
+            const rentalIncome = processedData.filter(t => t.isIncoming && t.status === 'Completed' && (t.type === 'Rental Income' || t.type === 'Released Fund')).reduce((acc, t) => acc + (t.finalAmount || t.amount || 0), 0);
+            const income = processedData.filter(t => t.isIncoming && t.status === 'Completed').reduce((acc, t) => acc + (t.finalAmount || t.amount || 0), 0);
             const payout = processedData.filter(t => !t.isIncoming && t.status === 'Completed').reduce((acc, t) => acc + (t.amount || 0), 0);
             const pendingIncome = processedData.filter(t => t.isIncoming && t.status === 'Pending').reduce((acc, t) => acc + (t.amount || 0), 0);
 
@@ -132,10 +180,91 @@ const SellerPayments = () => {
     return (
         <SellerLayout>
             <div className="space-y-6">
-                <div>
+                <div className="mb-8">
                     <h1 className="text-3xl font-black text-slate-800 uppercase">Payments & Financials</h1>
                     <p className="text-slate-500 italic">Manage your earnings and inventory spending.</p>
                 </div>
+
+                {/* eSewa ID Setting Section (Moved below title) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center">
+                                <Smartphone size={24} />
+                            </div>
+                            <div>
+                                <h4 className="text-xl font-black text-slate-800 uppercase leading-none">eSewa Setup</h4>
+                                <p className="text-xs text-slate-400 font-bold uppercase mt-1">Required for payouts</p>
+                            </div>
+                        </div>
+                        <form onSubmit={handleEsewaUpdate} className="space-y-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Enter your eSewa ID (Mobile/Email)"
+                                    className="w-full bg-slate-50 border-none rounded-3xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-orange-500/20 outline-none placeholder:text-slate-300"
+                                    value={esewaId}
+                                    onChange={(e) => setEsewaId(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={updatingEsewa}
+                                className="w-full bg-orange-600 text-white py-4 rounded-3xl text-xs font-black uppercase tracking-widest hover:bg-orange-700 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-orange-600/20"
+                            >
+                                {updatingEsewa ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : (
+                                    <>SAVE ACCOUNT <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" /></>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Quick Payout Info */}
+                    <div className="bg-slate-900 p-8 rounded-[40px] text-white overflow-hidden relative">
+                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                            <CreditCard size={120} />
+                        </div>
+                        <div className="relative z-10">
+                            <h4 className="text-lg font-black uppercase mb-4 text-orange-400">Payout Policy</h4>
+                            <div className="space-y-4">
+                                <div className="flex gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 size={12} className="text-green-400" />
+                                    </div>
+                                    <p className="text-xs text-slate-300">Rental payments are held in escrow by RideHub for safety.</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 size={12} className="text-green-400" />
+                                    </div>
+                                    <p className="text-xs text-slate-300">10% Platform fee is deducted automatically on release.</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 size={12} className="text-green-400" />
+                                    </div>
+                                    <p className="text-xs text-slate-300">Funds are released to your verified eSewa ID.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Important Note */}
+                {!user?.esewaId && (
+                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl mb-8 flex items-start gap-4 animate-pulse">
+                        <div className="bg-blue-100 p-2 rounded-xl text-blue-600">
+                            <Info size={18} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-black text-blue-800 uppercase tracking-tight">Payout Account Missing</p>
+                            <p className="text-[11px] text-blue-600 font-medium">Please provide your eSewa ID above to ensure you can receive payments released by the admin.</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -218,8 +347,8 @@ const SellerPayments = () => {
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">ID</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset / User</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Book Price</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Exchange</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Paid Price</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Paid</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payout</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Date</th>
                                     </tr>
@@ -248,6 +377,20 @@ const SellerPayments = () => {
                                                 {item.isExchange ? `Rs ${item.exchangeValuation?.toLocaleString()}` : '-'}
                                             </td>
                                             <td className="px-6 py-4 font-black text-slate-800">Rs {item.paidPrice?.toLocaleString()}</td>
+                                            <td className="px-6 py-4">
+                                                {item.isEscrow ? (
+                                                    item.escrowStatus === 'released' ? (
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[11px] font-black text-green-600">Rs {item.finalAmount?.toLocaleString()}</span>
+                                                            <span className="text-[9px] text-slate-400">Net after fee</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Pending Release</span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-[11px] font-black text-slate-400">-</span>
+                                                )}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div className={`flex items-center gap-1 text-[10px] font-black uppercase ${item.isIncoming ? 'text-green-600' : 'text-orange-600'}`}>
                                                     {item.isIncoming ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
@@ -296,9 +439,22 @@ const SellerPayments = () => {
                                     </div>
                                 )}
                                 <div className="p-4 bg-green-50 rounded-2xl border border-green-100 col-span-2">
-                                    <p className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-1">Final Paid Price</p>
+                                    <p className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-1">User Paid (Total)</p>
                                     <p className="text-2xl font-black text-green-800">Rs {selectedTransaction.paidPrice?.toLocaleString()}</p>
                                 </div>
+
+                                {selectedTransaction.isEscrow && selectedTransaction.escrowStatus === 'released' && (
+                                    <>
+                                        <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex flex-col">
+                                            <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">Platform Fee</p>
+                                            <p className="text-lg font-black text-red-600">- Rs {selectedTransaction.commission?.toLocaleString()}</p>
+                                        </div>
+                                        <div className="p-4 bg-green-600 rounded-2xl border border-green-700 flex flex-col text-white">
+                                            <p className="text-[10px] font-black text-green-200 uppercase tracking-widest mb-1">Your Payout</p>
+                                            <p className="text-lg font-black">Rs {selectedTransaction.finalAmount?.toLocaleString()}</p>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="space-y-4">

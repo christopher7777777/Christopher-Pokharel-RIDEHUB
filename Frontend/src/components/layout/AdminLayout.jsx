@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import AdminSidebar from '../navigation/AdminSidebar';
+import AdminHeader from '../navigation/AdminHeader';
 
 const AdminLayout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     return (
         <div className="flex min-h-screen bg-slate-50">
             <AdminSidebar
                 isOpen={isSidebarOpen}
-                toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                toggleSidebar={toggleSidebar}
             />
-            <main className="flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto p-8">
+            <main 
+                className={`flex-1 flex flex-col transition-all duration-300 min-h-screen overflow-hidden ${
+                    isSidebarOpen ? 'md:ml-[260px]' : 'md:ml-[80px]'
+                }`}
+            >
+                <AdminHeader 
+                    toggleSidebar={toggleSidebar}
+                />
+                
+                <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full">
                     {children}
                 </div>
             </main>

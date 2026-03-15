@@ -1,4 +1,4 @@
-﻿import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import SupportChat from './components/chat/SupportChat';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -9,6 +9,7 @@ import Payments from './pages/admin/Payments';
 import UserManagement from './pages/admin/UserManagement';
 import ValuationRules from './pages/admin/ValuationRules';
 import ReviewManagement from './pages/admin/ReviewManagement';
+import EscrowPayments from './pages/admin/EscrowPayments';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -34,6 +35,7 @@ import PaymentFailure from './pages/user/PaymentFailure';
 import MyEMIApplications from './pages/user/MyEMIApplications';
 import AdminEMIApplications from './pages/admin/EMIApplications';
 import EMICalculatorPage from './pages/user/EMICalculatorPage';
+import Notifications from './pages/Notifications';
 
 const GlobalSupportChat = () => {
   const { user, loading } = useAuth();
@@ -194,6 +196,22 @@ function App() {
 
             {/* Admin specific routes */}
             <Route
+              path="/notifications"
+              element={
+                <PrivateRoute>
+                  <Notifications />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/notifications"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <Notifications />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <PrivateRoute isAdmin={true}>
@@ -230,6 +248,14 @@ function App() {
               element={
                 <PrivateRoute isAdmin={true}>
                   <Payments />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/escrow"
+              element={
+                <PrivateRoute isAdmin={true}>
+                  <EscrowPayments />
                 </PrivateRoute>
               }
             />

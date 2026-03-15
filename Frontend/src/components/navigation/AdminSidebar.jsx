@@ -11,7 +11,8 @@ import {
     ChevronLeft,
     ChevronRight,
     FileText,
-    Star
+    Star,
+    Wallet
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -26,6 +27,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { icon: Settings, label: 'Valuation Rules', path: '/admin/valuation' },
         { icon: Users, label: 'User Management', path: '/admin/users' },
         { icon: CreditCard, label: 'Payments', path: '/admin/payments' },
+        { icon: Wallet, label: 'Escrow Payouts', path: '/admin/escrow' },
         { icon: Bike, label: 'Bike List', path: '/admin/bikes' },
         { icon: FileText, label: 'EMI Leads', path: '/admin/emi' },
         { icon: Star, label: 'Service Reviews', path: '/admin/reviews' },
