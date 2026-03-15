@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Star, X, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Send, Star, X } from 'lucide-react';
+import { useState } from 'react';
 import api from '../../utils/api';
 
-const ReviewModal = ({ isOpen, onClose, bikeId, bikeName, sellerId, serviceType = 'Buy' }) => {
+const ReviewModal = ({ isOpen, onClose, bikeId, bikeName, serviceType = 'Buy' }) => {
     const [rating, setRating] = useState(0);
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState('');
@@ -127,7 +127,7 @@ const ReviewModal = ({ isOpen, onClose, bikeId, bikeName, sellerId, serviceType 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-orange-900/10 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                className="w-full bg-orange-500 hover:bg-orange-700 text-white py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-orange-900/10 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                             >
                                 {loading ? (
                                     <Loader2 size={20} className="animate-spin" />
