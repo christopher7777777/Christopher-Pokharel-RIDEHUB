@@ -10,7 +10,8 @@ const {
     resetPassword,
     getAllUsers,
     deleteUser,
-    getSellers
+    getSellers,
+    updateEsewaId
 } = require('../controllers/authController');
 const { protect, isAdmin } = require('../middleware/auth');
 
@@ -21,6 +22,7 @@ router.put('/updatepassword', protect, updatePassword);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);
 router.get('/sellers', protect, getSellers);
+router.put('/update-esewa', protect, updateEsewaId);
 
 // Admin routes
 router.get('/users', protect, isAdmin, getAllUsers);

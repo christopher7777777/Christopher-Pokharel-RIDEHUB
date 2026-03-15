@@ -42,6 +42,26 @@ const paymentSchema = new mongoose.Schema({
     productName: {
         type: String,
         required: true
+    },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    escrowStatus: {
+        type: String,
+        enum: ['none', 'pending', 'released'],
+        default: 'none'
+    },
+    commission: {
+        type: Number,
+        default: 0
+    },
+    finalAmount: {
+        type: Number,
+        default: 0
+    },
+    releasedAt: {
+        type: Date
     }
 }, { timestamps: true });
 

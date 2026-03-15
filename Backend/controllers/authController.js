@@ -327,6 +327,48 @@ const getSellers = async (req, res) => {
     }
 };
 
+// @desc    Update eSewa ID (Seller)
+// @route   PUT /api/auth/update-esewa
+// @access  Private
+const updateEsewaId = async (req, res) => {
+    try {
+        const { esewaId } = req.body;
+
+        if (!esewaId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide an eSewa ID'
+            });
+        }
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        user.esewaId = esewaId;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'eSewa ID updated successfully',
+            data: {
+                esewaId: user.esewaId
+            }
+        });
+    } catch (error) {
+        console.error('Update eSewa ID error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -336,5 +378,6 @@ module.exports = {
     resetPassword,
     getAllUsers,
     deleteUser,
-    getSellers
+    getSellers,
+    updateEsewaId
 };

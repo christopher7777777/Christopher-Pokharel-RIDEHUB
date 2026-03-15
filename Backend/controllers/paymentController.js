@@ -35,18 +35,28 @@ const initiatePayment = async (req, res) => {
             });
         }
 
+        const bike = await Bike.findById(bikeId);
+        if (!bike) {
+            return res.status(404).json({
+                success: false,
+                message: "Bike not found"
+            });
+        }
+
         const tempUuid = `HUB-${Date.now()}`;
 
         // Create a pending payment record
         const payment = await Payment.create({
             user: req.user._id,
             bike: bikeId,
+            seller: bike.seller,
             amount: amount,
             productName: productName,
             method: 'esewa',
             transactionId: tempUuid,
             esewaTransactionUuid: tempUuid,
-            paymentStatus: 'PENDING'
+            paymentStatus: 'PENDING',
+            escrowStatus: 'none'
         });
 
         const transactionUuid = `HUB-${payment._id}-${Date.now()}`;
@@ -234,6 +244,7 @@ const verifyPayment = async (req, res) => {
                 {
                     $set: {
                         paymentStatus: 'COMPLETED',
+                        escrowStatus: 'pending',
                         esewaRefId: decoded.ref_id || null
                     }
                 },
@@ -247,9 +258,34 @@ const verifyPayment = async (req, res) => {
                 });
             }
 
-            console.log('Payment record updated to COMPLETED');
-
             const bike = await Bike.findById(payment.bike);
+
+            // Create Notifications
+            const Notification = require('../models/Notification');
+            try {
+                // Notification for User
+                await Notification.create({
+                    user: payment.user,
+                    title: 'Payment Successful',
+                    message: `Rs ${payment.amount} for ${payment.productName} has been received and is held in escrow. Verified by eSewa.`,
+                    type: 'PAYMENT_RECEIVED',
+                    relatedId: payment._id
+                });
+
+                // Notification for Seller
+                if (bike && bike.seller) {
+                    await Notification.create({
+                        user: bike.seller,
+                        title: 'New Rental/Purchase!',
+                        message: `Someone has ${bike.listingType === 'Rental' ? 'rented' : 'purchased'} your ${bike.name}. Rs ${payment.amount} is held in escrow by admin and will be released after verification.`,
+                        type: 'GENERAL',
+                        relatedId: payment._id
+                    });
+                }
+            } catch (notifErr) {
+                console.error('Failed to create notification after payment:', notifErr);
+            }
+
             if (bike) {
                 console.log('Updating bike status for bike:', bike._id);
                 if (bike.listingType === 'Sale' || bike.listingType === 'Purchase') {
@@ -293,7 +329,29 @@ const verifyPayment = async (req, res) => {
     }
 };
 
+// @desc    Get payments for seller
+// @route   GET /api/payment/seller-payouts
+// @access  Private (Seller only)
+const getSellerPayments = async (req, res) => {
+    try {
+        const payments = await Payment.find({ seller: req.user.id, paymentStatus: 'COMPLETED' })
+            .populate('user', 'name email mobile')
+            .populate('bike', 'name model brand price')
+            .sort('-createdAt');
+
+        res.json({
+            success: true,
+            count: payments.length,
+            data: payments
+        });
+    } catch (error) {
+        console.error('Get seller payments error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     initiatePayment,
-    verifyPayment
+    verifyPayment,
+    getSellerPayments
 };
