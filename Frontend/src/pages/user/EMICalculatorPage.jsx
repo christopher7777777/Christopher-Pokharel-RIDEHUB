@@ -16,14 +16,13 @@ import {
 import { Link } from 'react-router-dom';
 
 const EMICalculatorPage = () => {
-    const [bikePrice, setBikePrice] = useState(250000);
-    const [downPayment, setDownPayment] = useState(50000);
-    const [tenure, setTenure] = useState(24);
-    const [interestRate, setInterestRate] = useState(12);
+    const [bikePrice, setBikePrice] = useState(500000);
+    const [tenure, setTenure] = useState(240); // 20 years
+    const [interestRate, setInterestRate] = useState(8);
     const [monthlyEMI, setMonthlyEMI] = useState(0);
 
     const calculateEMI = () => {
-        const principal = bikePrice - downPayment;
+        const principal = bikePrice; // Loan Amount is now treated as the full principal
         const monthlyRate = interestRate / 12 / 100;
         const numberOfPayments = tenure;
 
@@ -43,12 +42,12 @@ const EMICalculatorPage = () => {
 
     useEffect(() => {
         calculateEMI();
-    }, [bikePrice, downPayment, tenure, interestRate]);
+    }, [bikePrice, tenure, interestRate]);
 
     // Financial breakdown calculations
-    const loanAmount = Math.max(0, bikePrice - downPayment);
+    const loanAmountCalculated = bikePrice;
     const totalPayable = monthlyEMI * tenure;
-    const totalInterest = Math.max(0, totalPayable - loanAmount);
+    const totalInterest = Math.max(0, totalPayable - loanAmountCalculated);
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-800">
@@ -80,64 +79,99 @@ const EMICalculatorPage = () => {
                                 <Calculator className="text-orange-600" size={24} /> Adjust Parameters
                             </h3>
 
-                            <div className="space-y-12">
-                                {/* Bike Price Input */}
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-end">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Expected Bike Price (NPR)</label>
-                                        <span className="text-2xl font-black text-gray-900">Rs {bikePrice.toLocaleString()}</span>
-                                    </div>
-                                    <input
-                                        type="range" min="50000" max="2500000" step="5000"
-                                        value={bikePrice} onChange={(e) => setBikePrice(parseInt(e.target.value))}
-                                        className="w-full h-3 bg-gray-200 rounded-2xl appearance-none cursor-pointer accent-orange-600"
-                                    />
-                                </div>
-
-                                {/* Down Payment Input */}
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-end">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Down Payment (NPR)</label>
-                                        <div className="text-right">
-                                            <span className="text-2xl font-black text-orange-600">Rs {downPayment.toLocaleString()}</span>
-                                            <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">({Math.round(downPayment / bikePrice * 100)}% of Total)</p>
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="range" min="0" max={bikePrice} step="5000"
-                                        value={downPayment} onChange={(e) => setDownPayment(parseInt(e.target.value))}
-                                        className="w-full h-3 bg-gray-200 rounded-2xl appearance-none cursor-pointer accent-orange-600"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Loan Tenure</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {[12, 24, 36, 48].map(m => (
-                                                <button
-                                                    key={m} onClick={() => setTenure(m)}
-                                                    className={`px-6 py-3 rounded-xl font-black text-xs transition-all ${tenure === m ? 'bg-orange-600 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-500 hover:border-orange-200'}`}
-                                                >
-                                                    {m} MO
-                                                </button>
-                                            ))}
+                            <div className="space-y-8">
+                                <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {/* Loan Amount */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-900">Loan Amount</label>
+                                        <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                            <div className="bg-gray-100 px-4 flex items-center justify-center border-r border-gray-300 min-w-[50px]">
+                                                <span className="text-gray-600 font-medium text-xs">NPR</span>
+                                            </div>
+                                            <input 
+                                                type="number" 
+                                                value={bikePrice} 
+                                                onChange={(e) => setBikePrice(Number(e.target.value))}
+                                                className="w-full p-3 font-medium outline-none text-gray-700 bg-white"
+                                                placeholder="500000"
+                                            />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Interest Rate (%)</label>
-                                        <select
-                                            value={interestRate} onChange={(e) => setInterestRate(parseFloat(e.target.value))}
-                                            className="w-full bg-white border border-gray-100 rounded-xl p-3 font-black text-xs outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                                        >
-                                            <option value={10}>10% Annual</option>
-                                            <option value={12}>12% Annual</option>
-                                            <option value={13}>13% Annual</option>
-                                            <option value={14}>14% Annual</option>
-                                        </select>
+                                    {/* Annual Interest Rate */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-900">Annual Interest Rate</label>
+                                        <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                            <input 
+                                                type="number" 
+                                                value={interestRate} 
+                                                onChange={(e) => setInterestRate(Number(e.target.value))}
+                                                className="w-full p-3 font-medium outline-none text-gray-700 bg-white"
+                                                placeholder="8"
+                                            />
+                                            <div className="bg-gray-100 px-4 flex items-center justify-center border-l border-gray-300 min-w-[50px]">
+                                                <span className="text-gray-600 font-medium">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Loan Tenure (Years) */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-900">Loan Tenure (Years)</label>
+                                        <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                            <input 
+                                                type="number" 
+                                                value={Math.floor(tenure / 12)} 
+                                                onChange={(e) => {
+                                                    const years = Number(e.target.value);
+                                                    const months = tenure % 12;
+                                                    setTenure((years * 12) + months);
+                                                }}
+                                                className="w-full p-3 font-medium outline-none text-gray-700 bg-white"
+                                                placeholder="20"
+                                            />
+                                            <div className="bg-gray-100 px-4 flex items-center justify-center border-l border-gray-300 min-w-[80px]">
+                                                <span className="text-gray-600 font-medium text-sm">Years</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Additional Months */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-900">Additional Months</label>
+                                        <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                            <input 
+                                                type="number" 
+                                                value={tenure % 12} 
+                                                onChange={(e) => {
+                                                    const months = Number(e.target.value);
+                                                    const years = Math.floor(tenure / 12);
+                                                    setTenure((years * 12) + months);
+                                                }}
+                                                className="w-full p-3 font-medium outline-none text-gray-700 bg-white"
+                                                placeholder="0"
+                                            />
+                                            <div className="bg-gray-100 px-4 flex items-center justify-center border-l border-gray-300 min-w-[80px]">
+                                                <span className="text-gray-600 font-medium text-sm">Months</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div className="flex flex-wrap gap-4 pt-6 justify-center">
+                                    <button 
+                                        onClick={() => {
+                                            setBikePrice(500000);
+                                            setInterestRate(8);
+                                            setTenure(240); // 20 years
+                                        }}
+                                        className="bg-gray-100 border border-gray-300 text-gray-900 px-12 py-3 rounded-lg font-bold hover:bg-gray-200 transition-all shadow-sm active:scale-95"
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+
+
                             </div>
                         </div>
 
@@ -161,31 +195,31 @@ const EMICalculatorPage = () => {
                     {/* Right: Results & Summary */}
                     <div className="lg:col-span-5 space-y-8">
                         {/* Result Card */}
-                        <div className="bg-slate-900 rounded-[45px] p-10 text-white shadow-2xl sticky top-40 overflow-hidden">
+                        <div className="bg-slate-900 rounded-[45px] p-10 text-white shadow-2xl overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
 
                             <div className="relative">
-                                <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-4">Estimated Monthly EMI</p>
+                                <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-4">ESTIMATED MONTHLY EMI</p>
                                 <div className="flex items-baseline gap-2 mb-10">
                                     <span className="text-5xl lg:text-6xl font-black tracking-tighter">NPR {monthlyEMI.toLocaleString()}</span>
-                                    <span className="text-sm text-slate-400 font-bold uppercase italic">/ month</span>
+                                    <span className="text-sm text-slate-400 font-bold uppercase italic">/ MONTH</span>
                                 </div>
 
                                 <div className="space-y-6 pt-10 border-t border-white/10">
                                     <div className="flex justify-between items-center group">
-                                        <span className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                                            <ShieldCheck size={14} className="text-green-500" /> Loan Amount
+                                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                            <ShieldCheck size={14} className="text-green-500" /> LOAN AMOUNT
                                         </span>
-                                        <span className="text-sm font-black group-hover:text-orange-500 transition-colors">Rs {loanAmount.toLocaleString()}</span>
+                                        <span className="text-sm font-black group-hover:text-orange-500 transition-colors">Rs {loanAmountCalculated.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center group">
-                                        <span className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                                            <TrendingUp size={14} className="text-blue-500" /> Total Interest
+                                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                            <TrendingUp size={14} className="text-blue-500" /> TOTAL INTEREST
                                         </span>
                                         <span className="text-sm font-black group-hover:text-orange-500 transition-colors">Rs {totalInterest.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center group">
-                                        <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Grand Total</span>
+                                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">GRAND TOTAL</span>
                                         <span className="text-sm font-black text-orange-500">Rs {totalPayable.toLocaleString()}</span>
                                     </div>
                                 </div>
