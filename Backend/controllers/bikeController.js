@@ -1,78 +1,7 @@
 const Bike = require('../models/Bike');
-const sendEmail = require('../utils/sendEmail');
 const ValuationRule = require('../models/ValuationRule');
+const notifyUserUpdate = require('../utils/notifyUserUpdate');
 
-// Email helper handling updates
-const notifyUserUpdate = async (bike, subject, message, targetEmail = null) => {
-    const emailToUse = targetEmail || (bike && bike.seller && bike.seller.email);
-
-    if (bike && emailToUse) {
-        try {
-            let attachments = [];
-            let imageHtml = '';
-
-            if (bike.images && bike.images.length > 0) {
-                const imagePath = bike.images[0];
-                const isUrl = imagePath.startsWith('http');
-
-                if (!isUrl) {
-                    attachments.push({
-                        filename: 'bike.jpg',
-                        path: imagePath,
-                        cid: 'bikeimage'
-                    });
-                    imageHtml = `<img src="cid:bikeimage" alt="Bike Image" style="width: 100%; max-width: 600px; border-radius: 10px; margin-bottom: 20px;" />`;
-                } else {
-                    imageHtml = `<img src="${imagePath}" alt="Bike Image" style="width: 100%; max-width: 600px; border-radius: 10px; margin-bottom: 20px;" />`;
-                }
-            }
-
-            const htmlMessage = `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 10px;">
-                        <h2 style="color: #ea580c; text-align: center;">RIDEHUB Update</h2>
-                        <div style="background-color: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                            ${imageHtml}
-                            <h3 style="margin-top: 0;">${subject}</h3>
-                            <p style="white-space: pre-wrap; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</p>
-                            
-                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                                <h4 style="margin: 0 0 10px 0;">Bike Details:</h4>
-                                <table style="width: 100%; font-size: 14px;">
-                                    <tr>
-                                        <td style="padding: 5px 0; color: #666;">Model:</td>
-                                        <td style="padding: 5px 0; font-weight: bold;">${bike.model} (${bike.modelYear})</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 5px 0; color: #666;">Brand:</td>
-                                        <td style="padding: 5px 0; font-weight: bold;">${bike.brand}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 5px 0; color: #666;">Ref ID:</td>
-                                        <td style="padding: 5px 0; font-family: monospace;">${bike._id.toString().slice(-8).toUpperCase()}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 20px;">
-                            © ${new Date().getFullYear()} RIDEHUB. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            await sendEmail({
-                email: emailToUse,
-                subject: subject,
-                message: message,
-                html: htmlMessage,
-                attachments: attachments
-            });
-        } catch (err) {
-            console.error('Email notification error:', err);
-        }
-    }
-};
 
 // @desc    Create new bike listing
 // @route   POST /api/bikes
@@ -432,21 +361,23 @@ exports.confirmSale = async (req, res) => {
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
-        // Notify Seller (Dealer or User who listed) - Non-blocking
-        notifyUserUpdate(
-            bike,
-            `Sale Confirmed: ${bike.name}`,
-            `A sale confirmation has been received for "${bike.name}".\n\nStatus: ${bike.status}\nBooking Date: ${new Date(bookingDate).toDateString()}\n\nPlease check the portal for further actions.`
-        );
-
-        // Notify Buyer (the person who just clicked confirm)
-        if (req.user && req.user.email && req.user.email !== bike.seller.email) {
+        // Notify Seller (Dealer or User who listed) - Only if not Online payment
+        if (paymentMethod !== 'Online') {
             notifyUserUpdate(
                 bike,
-                `Purchase Confirmation: ${bike.name}`,
-                `Dear ${req.user.name},\n\nYou have successfully confirmed the purchase details for ${bike.name}.\n\nTotal Price: NPR ${updateData.negotiatedPrice}\nBooking Date: ${new Date(bookingDate).toDateString()}\nPayment Method: ${paymentMethod}\n\nOur team will review the details and contact you soon.\n\nRate our service: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
-                req.user.email
+                `Sale Confirmed: ${bike.name}`,
+                `A sale confirmation has been received for "${bike.name}".\n\nStatus: ${bike.status}\nBooking Date: ${new Date(bookingDate).toDateString()}\n\nPlease check the portal for further actions.`
             );
+
+            // Notify Buyer (the person who just clicked confirm)
+            if (req.user && req.user.email && req.user.email !== bike.seller.email) {
+                notifyUserUpdate(
+                    bike,
+                    `Purchase Confirmation: ${bike.name}`,
+                    `Dear ${req.user.name},\n\nYou have successfully confirmed the purchase details for ${bike.name}.\n\nTotal Price: NPR ${updateData.negotiatedPrice}\nBooking Date: ${new Date(bookingDate).toDateString()}\nPayment Method: ${paymentMethod}\n\nOur team will review the details and contact you soon.\n\nRate our service: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
+                    req.user.email
+                );
+            }
         }
 
         res.status(200).json({
@@ -557,20 +488,23 @@ exports.rentBike = async (req, res) => {
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
-        // Email the Renter (User) - Non-blocking
-        notifyUserUpdate(
-            bike,
-            'Bike Rental Successful - Order Confirmed',
-            `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: NPR ${deliveryCharge > 0 ? (bike.price + deliveryCharge) : bike.price}\n\nThank you for choosing RIDEHUB! Your order is successful.\n\nRate your rental experience: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
-            req.user.email
-        );
+        // Notify if not Online payment
+        if (paymentMethod !== 'Online') {
+            // Email the Renter (User) - Non-blocking
+            notifyUserUpdate(
+                bike,
+                'Bike Rental Successful - Order Confirmed',
+                `Dear ${req.user.name},\n\nYour rental for "${bike.name}" has been successfully confirmed!\n\nDuration: ${duration} ${rentalPlan === 'Weekly' ? 'Weeks' : 'Days'}\nStart Date: ${new Date(bookingDate).toDateString()}\nExpiry Date: ${expiryDate.toDateString()}\nDelivery Method: ${deliveryMethod}\nTotal Payment: NPR ${deliveryCharge > 0 ? (bike.price + deliveryCharge) : bike.price}\n\nThank you for choosing RIDEHUB! Your order is successful.\n\nRate your rental experience: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
+                req.user.email
+            );
 
-        // Notify the Seller (Dealer)
-        notifyUserUpdate(
-            bike,
-            `New Rental Booking: ${bike.name}`,
-            `Good news! Your bike "${bike.name}" has been rented by ${req.user.name}.\n\nRental Period: ${new Date(bookingDate).toDateString()} to ${expiryDate.toDateString()}\nCustomer Contact: ${req.user.email}\n\nPlease prepare the bike for delivery/pickup.`
-        );
+            // Notify the Seller (Dealer)
+            notifyUserUpdate(
+                bike,
+                `New Rental Booking: ${bike.name}`,
+                `Good news! Your bike "${bike.name}" has been rented by ${req.user.name}.\n\nRental Period: ${new Date(bookingDate).toDateString()} to ${expiryDate.toDateString()}\nCustomer Contact: ${req.user.email}\n\nPlease prepare the bike for delivery/pickup.`
+            );
+        }
 
         res.status(200).json({
             success: true,

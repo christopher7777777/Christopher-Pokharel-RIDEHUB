@@ -1,7 +1,9 @@
 const Payment = require('../models/Payment');
 const Bike = require('../models/Bike');
+const User = require('../models/User');
 const { v4: uuidv4 } = require('uuid');
 const { generateEsewaSignature } = require('../utils/esewa');
+const notifyUserUpdate = require('../utils/notifyUserUpdate');
 
 const validateEnvironmentVariables = () => {
     const requiredEnvVars = [
@@ -258,7 +260,9 @@ const verifyPayment = async (req, res) => {
                 });
             }
 
-            const bike = await Bike.findById(payment.bike);
+            const bike = await Bike.findById(payment.bike).populate('seller', 'name email');
+            const buyer = await User.findById(payment.user);
+
 
             // Create Notifications
             const Notification = require('../models/Notification');
@@ -297,6 +301,43 @@ const verifyPayment = async (req, res) => {
                 }
                 await bike.save();
                 console.log('Bike status updated successfully');
+
+                const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
+                // Send success notification email for Online Payment
+                if (bike && buyer) {
+                    if (bike.listingType === 'Rental') {
+                        // Notify Renter
+                        notifyUserUpdate(
+                            bike,
+                            'Bike Rental Successful - Payment Verified',
+                            `Dear ${buyer.name},\n\nYour online payment for "${bike.name}" has been successfully verified!\n\nBooking Date: ${new Date(bike.bookingDate || Date.now()).toDateString()}\nExpiry Date: ${new Date(bike.rentalExpiry || Date.now()).toDateString()}\nTotal Payment: NPR ${payment.amount}\nReference ID: ${payment.esewaRefId || payment._id}\n\nThank you for choosing RIDEHUB!\n\nRate your experience: ${clientUrl}/browse`,
+                            buyer.email
+                        );
+
+                        // Notify Seller
+                        notifyUserUpdate(
+                            bike,
+                            `New Rental Paid: ${bike.name}`,
+                            `Good news! Your bike "${bike.name}" has been rented and paid for online by ${buyer.name}.\n\nRental Period: ${new Date(bike.bookingDate || Date.now()).toDateString()} to ${new Date(bike.rentalExpiry || Date.now()).toDateString()}\nAmount Paid: NPR ${payment.amount}\n\nPlease prepare the bike for delivery/pickup.`
+                        );
+                    } else {
+                        // Notify Buyer
+                        notifyUserUpdate(
+                            bike,
+                            `Purchase Successful - Payment Verified: ${bike.name}`,
+                            `Dear ${buyer.name},\n\nYour online payment for the purchase of "${bike.name}" has been successfully verified!\n\nAmount Paid: NPR ${payment.amount}\nBooking Date: ${new Date(bike.bookingDate || Date.now()).toDateString()}\nReference ID: ${payment.esewaRefId || payment._id}\n\nOur team will review the details and contact you soon.\n\nRate our service: ${clientUrl}/browse`,
+                            buyer.email
+                        );
+
+                        // Notify Seller
+                        notifyUserUpdate(
+                            bike,
+                            `Bike Sold & Paid: ${bike.name}`,
+                            `A sale and online payment has been confirmed for "${bike.name}".\n\nBuyer: ${buyer.name}\nAmount Paid: NPR ${payment.amount}\nBooking Date: ${new Date(bike.bookingDate || Date.now()).toDateString()}\n\nPlease check the portal for further actions.`
+                        );
+                    }
+                }
             }
 
             res.status(200).json({
