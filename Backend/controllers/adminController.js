@@ -16,7 +16,90 @@ const getAdminStats = async (req, res) => {
         const totalReviews = await ServiceReview.countDocuments();
         const pendingPayments = await Payment.countDocuments({ escrowStatus: 'pending' });
 
-        const revenue = 0;
+        // Calculate platform revenue (sum of commissions)
+        const revenueResult = await Payment.aggregate([
+            { $match: { escrowStatus: 'released' } },
+            { $group: { _id: null, total: { $sum: "$commission" } } }
+        ]);
+
+        const revenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+
+        // --- CHART DATA CALCULATION ---
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            last7Days.push(d.toISOString().split('T')[0]);
+        }
+
+        // Aggregate daily revenue (commission)
+        const revenueAgg = await Payment.aggregate([
+            {
+                $match: {
+                    escrowStatus: 'released',
+                    createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    revenue: { $sum: "$commission" }
+                }
+            }
+        ]);
+
+        // Aggregate daily new users
+        const usersAgg = await User.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    users: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // --- RECENT ACTIVITY ---
+        // Fetch last 5 of each type and merge
+        const recentKYCs = await KYC.find({}).sort('-updatedAt').limit(5).populate('user', 'name');
+        const recentPayments = await Payment.find({}).sort('-createdAt').limit(5).populate('user', 'name');
+        const recentBikes = await Bike.find({}).sort('-createdAt').limit(5);
+
+        const recentActivities = [
+            ...recentKYCs.map(k => ({ 
+                text: `KYC for '${k.user?.name || 'User'}' ${k.status}`, 
+                time: k.updatedAt, 
+                type: 'kyc' 
+            })),
+            ...recentPayments.map(p => ({ 
+                text: `Payment of Rs ${p.amount} received`, 
+                time: p.createdAt, 
+                type: 'payment' 
+            })),
+            ...recentBikes.map(b => ({ 
+                text: `New bike listed: '${b.name}'`, 
+                time: b.createdAt, 
+                type: 'bike' 
+            }))
+        ].sort((a, b) => b.time - a.time).slice(0, 8);
+
+        // Merge aggregation results with all 7 days (including zeros)
+        const chartData = last7Days.map(date => {
+            const revItem = revenueAgg.find(item => item._id === date);
+            const userItem = usersAgg.find(item => item._id === date);
+            const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+            
+            return {
+                name: dayName,
+                fullDate: date,
+                revenue: revItem ? revItem.revenue : 0,
+                users: userItem ? userItem.users : 0
+            };
+        });
 
         res.json({
             success: true,
@@ -26,7 +109,11 @@ const getAdminStats = async (req, res) => {
                 pendingKYC,
                 totalReviews,
                 pendingPayments,
-                revenue
+                revenue,
+                chartData,
+                recentActivities,
+                targetRevenue: revenue * 1.5, // Just as an example goal
+                activeInquiries: totalReviews // Or some other metric like chat count
             }
         });
     } catch (error) {

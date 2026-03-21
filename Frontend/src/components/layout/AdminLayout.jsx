@@ -14,9 +14,7 @@ const AdminLayout = ({ children }) => {
                 toggleSidebar={toggleSidebar}
             />
             <main 
-                className={`flex-1 flex flex-col transition-all duration-300 min-h-screen overflow-hidden ${
-                    isSidebarOpen ? 'md:ml-[260px]' : 'md:ml-[80px]'
-                }`}
+                className="flex-1 flex flex-col transition-all duration-300 min-h-screen overflow-hidden"
             >
                 <AdminHeader 
                     toggleSidebar={toggleSidebar}
