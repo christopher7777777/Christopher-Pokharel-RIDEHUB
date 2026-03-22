@@ -33,7 +33,7 @@ const emiApplicationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Reviewing', 'Verified', 'Forwarded', 'Approved', 'Rejected'],
+        enum: ['Pending', 'Reviewing', 'Verified', 'Forwarded', 'Approved', 'Rejected', 'Completed'],
         default: 'Pending'
     },
     remarks: {

@@ -127,3 +127,43 @@ exports.updateApplicationStatus = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+// @desc    Complete EMI 
+// @route   PUT /api/emi/:id/complete
+// @access  Private
+exports.completeEMI = async (req, res) => {
+    try {
+        const application = await EMIApplication.findById(req.params.id);
+
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+
+        // Verify user owns this application
+        if (application.user.toString() !== req.user.id) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Only Approved EMIs can be marked as Completed
+        if (application.status !== 'Approved') {
+            return res.status(400).json({ success: false, message: 'Only Approved EMIs can be marked as completed' });
+        }
+
+        application.status = 'Completed';
+        await application.save();
+
+        // Update bike status to Purchased
+        const bike = await Bike.findById(application.bike);
+        if (bike) {
+            bike.status = 'Purchased';
+            bike.purchasedBy = req.user.id;
+            await bike.save();
+        }
+
+        res.status(200).json({
+            success: true,
+            data: application
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};

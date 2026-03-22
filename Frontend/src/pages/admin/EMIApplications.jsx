@@ -84,6 +84,7 @@ const AdminEMIApplications = () => {
         if (!status) return 'text-gray-600 bg-gray-50 border-gray-100';
         const s = status.toUpperCase();
         switch (s) {
+            case 'COMPLETED':
             case 'APPROVED': case 'VERIFIED': return 'text-green-600 bg-green-50 border-green-100';
             case 'REJECTED': return 'text-red-600 bg-red-50 border-red-100';
             case 'REVIEWING': return 'text-blue-600 bg-blue-50 border-blue-100';

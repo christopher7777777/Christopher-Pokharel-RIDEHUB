@@ -420,9 +420,24 @@ const BikeDetails = () => {
                                     >
                                         {actionLoading ? (
                                             <Loader2 size={18} className="animate-spin" />
-                                        ) : (
-                                            bike.status !== 'Available' ? bike.status.toUpperCase() : (isBuyBike ? 'Buy This Bike' : 'Rent This Bike')
-                                        )}
+                                        ) : (() => {
+                                            if (bike.status === 'Available') {
+                                                return isBuyBike ? 'Buy This Bike' : 'Rent This Bike';
+                                            }
+                                            
+                                            // Handle special EMI/Finance states
+                                            const statusMap = {
+                                                'FinancePending': 'Financing In Progress',
+                                                'Purchased': 'Purchased Already',
+                                                'Rented': 'Rented Already',
+                                                'Approved': 'Ready For Purchase',
+                                                'Negotiating': 'Under Negotiation',
+                                                'Countered': 'Counter Offer Sent'
+                                            };
+                                            
+                                            return statusMap[bike.status] || bike.status.toUpperCase();
+                                        })()}
+
                                         {bike.status === 'Available' && !actionLoading && <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                                     </button>
 

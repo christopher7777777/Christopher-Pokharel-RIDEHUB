@@ -4,7 +4,8 @@ const {
     applyEMI,
     getMyApplications,
     getAllApplications,
-    updateApplicationStatus
+    updateApplicationStatus,
+    completeEMI
 } = require('../controllers/emiController');
 const { protect, isAdmin } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
@@ -20,5 +21,7 @@ router.get('/my-applications', protect, getMyApplications);
 router.get('/all', protect, isAdmin, getAllApplications);
 
 router.put('/:id/status', protect, isAdmin, updateApplicationStatus);
+router.put('/:id/complete', protect, completeEMI);
+
 
 module.exports = router;

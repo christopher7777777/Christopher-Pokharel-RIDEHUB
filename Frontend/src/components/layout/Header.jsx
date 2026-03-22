@@ -230,9 +230,7 @@ const Header = () => {
                                                     </div>
                                                     {[
                                                         { label: 'Profile Settings', icon: User, path: '/profile' },
-                                                        { label: 'My Favorites', icon: Heart, path: '/favorites' },
-                                                        { label: 'Loan Status', icon: Calculator, path: '/my-emi' },
-                                                        { label: 'Preferences', icon: Settings, path: '/settings' }
+                                                        { label: 'My EMI Plans', icon: Calculator, path: '/my-emi' }
                                                     ].map((item) => (
                                                         <Link
                                                             key={item.label}
