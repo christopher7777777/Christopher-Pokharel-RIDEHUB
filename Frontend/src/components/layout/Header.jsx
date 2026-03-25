@@ -32,9 +32,10 @@ const Header = () => {
         if (!user) return;
         try {
             const res = await api.get('/api/notifications');
-            setNotifications(res.data.data);
+            setNotifications(res.data.data || []);
         } catch (err) {
             console.error('Failed to fetch notifications:', err);
+            setNotifications([]);
         }
     };
 
@@ -59,7 +60,7 @@ const Header = () => {
     useEffect(() => {
         if (user) {
             fetchNotifications();
-            const interval = setInterval(fetchNotifications, 30000);
+            const interval = setInterval(fetchNotifications, 15000); // 15s polling
             return () => clearInterval(interval);
         }
     }, [user]);
@@ -157,7 +158,7 @@ const Header = () => {
                                     >
                                         <Bell size={20} />
                                         {notifications.some(n => !n.isRead) && (
-                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border-2 border-orange-500"></span>
+                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                                         )}
                                     </button>
 

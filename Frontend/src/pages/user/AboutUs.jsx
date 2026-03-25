@@ -26,11 +26,7 @@ const AboutUs = () => {
                                 <p className="text-gray-500 text-base font-medium max-w-lg leading-relaxed">
                                     RIDEHUB is a premier motorcycle ecosystem designed for the modern rider. We combine engineering excellence with digital innovation to create the ultimate marketplace.
                                 </p>
-                                <div className="flex gap-4">
-                                    <button className="px-8 py-4 bg-slate-900 text-white rounded-[2rem] font-bold text-xs uppercase tracking-[0.2em] hover:bg-orange-600 transition-all shadow-xl shadow-slate-200">
-                                        View Collection
-                                    </button>
-                                </div>
+
                             </div>
                             <div className="relative group">
                                 <div className="absolute -inset-4 bg-orange-500/10 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
