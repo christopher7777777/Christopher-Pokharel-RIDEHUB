@@ -1,127 +1,120 @@
-// About Us page
+import React from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import { Target, Users, Zap, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 const AboutUs = () => {
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-800">
+        <div className="min-h-screen bg-white font-sans text-slate-900">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-6 pt-32 pb-12 lg:pb-20">
-                <h1 className="text-4xl font-black text-slate-900 mb-16 uppercase tracking-tight">About Us</h1>
-
-                {/* About details */}
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-24">
-                    <div className="order-2 lg:order-1">
-                        <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Description</h3>
-                            <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                                RIDEHUB is your premier destination for premium motorcycles. We combine cutting-edge technology with a passion for riding.
-                                Our platform ensures a seamless experience for buying, selling, and renting motorcycles, connecting riders with the best machines on the market.
-                                We verify every listing to ensure quality and trust in our community.
-                            </p>
-
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600">Verified Listings</span>
+            <main>
+                {/* Modern Hero Section */}
+                <section className="relative pt-32 pb-12 lg:pt-40 lg:pb-20 bg-slate-50 overflow-hidden">
+                    <div className="absolute top-0 right-0 w-2/5 h-full bg-orange-500/5 -skew-x-12 translate-x-1/4 -z-0"></div>
+                    <div className="max-w-7xl mx-auto px-6 relative z-10">
+                        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                            <div className="space-y-6">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100/80 rounded-full border border-orange-200">
+                                    <Zap className="text-orange-600" size={12} fill="currentColor" />
+                                    <span className="text-orange-600 text-[10px] font-bold uppercase tracking-widest">Our Legacy</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600">Secure Payments</span>
+                                <h1 className="text-5xl lg:text-7xl font-bold text-slate-900 uppercase tracking-tighter leading-[0.9] mb-4">
+                                    Ride To <br />
+                                    <span className="text-orange-500 italic">Inspire.</span>
+                                </h1>
+                                <p className="text-gray-500 text-base font-medium max-w-lg leading-relaxed">
+                                    RIDEHUB is a premier motorcycle ecosystem designed for the modern rider. We combine engineering excellence with digital innovation to create the ultimate marketplace.
+                                </p>
+                                <div className="flex gap-4">
+                                    <button className="px-8 py-4 bg-slate-900 text-white rounded-[2rem] font-bold text-xs uppercase tracking-[0.2em] hover:bg-orange-600 transition-all shadow-xl shadow-slate-200">
+                                        View Collection
+                                    </button>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600">24/7 Support</span>
-                                </div>
+                            </div>
+                            <div className="relative group">
+                                <div className="absolute -inset-4 bg-orange-500/10 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <img
+                                    src="/image 7.png"
+                                    alt="RIDEHUB Excellence"
+                                    className="w-full h-auto object-contain transform group-hover:scale-105 transition-transform duration-700 drop-shadow-xl"
+                                />
                             </div>
                         </div>
                     </div>
-                    <div className="order-1 lg:order-2">
-                        <img
-                            src="/image2.png"
-                            alt="About RideHub"
-                            className="w-full mix-blend-multiply object-contain hover:scale-105 transition-transform duration-500"
-                        />
-                    </div>
-                </div>
+                </section>
 
-                {/* Our mission */}
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-24">
-                    <div className="order-1">
-                        <img
-                            src="/image4.png"
-                            alt="Our Mission"
-                            className="w-full mix-blend-multiply object-contain hover:scale-105 transition-transform duration-500"
-                        />
-                    </div>
-                    <div className="order-2">
-                        <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Our Mission</h3>
-                            <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                                To revolutionize the motorcycle marketplace by providing a transparent, efficient, and user-friendly platform.
-                                We empower riders to find their dream bikes without the hassle of traditional dealerships.
-                                Whether you are a casual rider or a track enthusiast, RIDEHUB has something for everyone.
-                            </p>
+                {/* Values Section */}
+                <section className="py-16 lg:py-24 px-6 bg-white">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16 space-y-3">
+                            <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 uppercase tracking-tighter">Why Choose <span className="text-orange-500">RideHub?</span></h2>
+                            <p className="text-gray-400 text-base font-medium max-w-2xl mx-auto">We aren&apos;t just selling bikes; we&apos;re building the future of riding culture.</p>
+                        </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {[
+                                { 
+                                    icon: <Target className="text-orange-500" size={28} />, 
+                                    title: "Perfect Accuracy", 
+                                    desc: "Our verification process ensures that every detail of the motorcycle is accurately represented.",
+                                    img: "/image4.png"
+                                },
+                                { 
+                                    icon: <Users className="text-orange-500" size={28} />, 
+                                    title: "Biker Community", 
+                                    desc: "Join a network of thousands of enthusiasts sharing tips, routes, and experiences.",
+                                    img: "/image3.png"
+                                },
+                                { 
+                                    icon: <CheckCircle2 className="text-orange-500" size={28} />, 
+                                    title: "Verified Sellers", 
+                                    desc: "Every seller on our platform undergoes a rigorous background check for your safety.",
+                                    img: "/image2.png"
+                                }
+                            ].map((item, idx) => (
+                                <div key={idx} className="group bg-slate-50 p-8 rounded-[2.5rem] border border-transparent hover:border-orange-100 hover:bg-white hover:shadow-xl transition-all h-full">
+                                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:bg-orange-50 transition-colors">
+                                        {item.icon}
                                     </div>
-                                    <span className="text-xs font-bold text-gray-600">Community Driven</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                    <h3 className="text-lg font-bold text-slate-900 mb-3 uppercase tracking-tight">{item.title}</h3>
+                                    <p className="text-gray-400 text-xs font-medium leading-relaxed mb-6">{item.desc}</p>
+                                    <div className="relative h-32 overflow-hidden rounded-2xl">
+                                        <img src={item.img} alt={item.title} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" />
                                     </div>
-                                    <span className="text-xs font-bold text-gray-600">Expert Reviews</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600">Global Reach</span>
-                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Mission Statement */}
+                <section className="py-16 lg:py-24 bg-slate-50 px-6 overflow-hidden relative border-t border-slate-100">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-orange-500/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                            <div className="relative order-2 lg:order-1">
+                                <img src="/image1.png" alt="Mission" className="w-full max-w-sm mx-auto transform hover:-rotate-3 transition-transform duration-700 drop-shadow-xl" />
+                            </div>
+                            <div className="space-y-6 order-1 lg:order-2">
+                                <h3 className="text-3xl lg:text-5xl font-bold text-slate-900 uppercase tracking-tighter leading-none">
+                                    Our <span className="text-orange-500">Mission.</span>
+                                </h3>
+                                <p className="text-gray-500 text-base lg:text-lg font-medium leading-relaxed">
+                                    To revolutionize the motorcycle marketplace by providing a transparent, efficient, and user-friendly platform. We empower riders to find their dream machines without the hassle.
+                                </p>
+                                <ul className="space-y-3">
+                                    {["Premium Quality Control", "Secure Global Payments", "24/7 Expert Support"].map((text, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-slate-800 font-bold text-[10px] uppercase tracking-[0.2em]">
+                                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                                            {text}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Community section */}
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-                    <div className="order-2 lg:order-1">
-                        <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Join The Ride</h3>
-                            <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                                Start your journey with us today. RIDEHUB is more than just a marketplace; it&apos;s a community of passionate riders.
-                                Share your experiences, find riding buddies, and discover new routes.
-                            </p>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-600">Events & Meetups</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="order-1 lg:order-2">
-                        <img
-                            src="/image3.png"
-                            alt="Community"
-                            className="w-full mix-blend-multiply object-contain hover:scale-105 transition-transform duration-500"
-                        />
-                    </div>
-                </div>
-
+                </section>
             </main>
 
             <Footer />

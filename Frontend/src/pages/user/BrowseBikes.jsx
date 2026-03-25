@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
@@ -7,6 +7,7 @@ import { Search, Filter, Bike, Loader2, AlertCircle } from 'lucide-react';
 
 const BrowseBikes = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,7 +15,7 @@ const BrowseBikes = () => {
 
     // Filter state
     const [filters, setFilters] = useState({
-        type: 'all', // Listing type filter
+        type: searchParams.get('type') || 'all', // Listing type filter
         minPrice: '',
         maxPrice: '',
         brand: 'all'
@@ -37,6 +38,13 @@ const BrowseBikes = () => {
     useEffect(() => {
         fetchBikes();
     }, []);
+
+    useEffect(() => {
+        const type = searchParams.get('type');
+        if (type) {
+            setFilters(prev => ({ ...prev, type }));
+        }
+    }, [searchParams]);
 
     const [sortOption, setSortOption] = useState('recent');
 
@@ -76,12 +84,12 @@ const BrowseBikes = () => {
         <div className="min-h-screen flex flex-col bg-gray-50 font-sans text-slate-800">
             <Header />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 md:pt-32 flex-grow w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-20 md:pt-24 flex-grow w-full">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Filters */}
                     <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
                         <div>
-                            <h3 className="font-black text-xl text-gray-900 mb-4">Filters</h3>
+                            <h3 className="font-bold text-xl text-gray-900 mb-4">Filters</h3>
                             <button
                                 onClick={() => setFilters({ type: 'all', minPrice: '', maxPrice: '', brand: 'all' })}
                                 className="text-sm text-red-500 font-bold hover:underline mb-6"
@@ -174,7 +182,7 @@ const BrowseBikes = () => {
 
                         {/* Results */}
                         <div className="mb-6">
-                            <h2 className="text-2xl font-black text-gray-900">Bikes For You</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">Bikes For You</h2>
                             <p className="text-gray-500 text-sm">Found {filteredBikes.length} Bikes</p>
                         </div>
 
@@ -221,7 +229,7 @@ const BrowseBikes = () => {
                                         </div>
                                         <div className="p-5 flex flex-col flex-1">
                                             <div className="mb-4">
-                                                <h3 className="text-lg font-black text-gray-900 line-clamp-1">{bike.name}</h3>
+                                                <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{bike.name}</h3>
                                                 <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mt-1">
                                                     {bike.modelYear} • {bike.category} • {bike.engineCapacity}cc
                                                 </p>
@@ -230,7 +238,7 @@ const BrowseBikes = () => {
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs text-gray-400 font-bold uppercase">Price</span>
-                                                    <span className="text-xl font-black text-orange-600">
+                                                    <span className="text-xl font-bold text-orange-600">
                                                         Rs {bike.price.toLocaleString()}
                                                         <span className="text-xs text-gray-400 font-normal ml-1">
                                                             {bike.listingType === 'Rental' ? '/ Day' : ''}
@@ -242,13 +250,13 @@ const BrowseBikes = () => {
                                             <div className="grid grid-cols-2 gap-3 mt-auto">
                                                 <button
                                                     onClick={() => navigate(`/bike/${bike._id}`)}
-                                                    className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
+                                                    className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
                                                 >
                                                     Check This Bike
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/bike/${bike._id}`)}
-                                                    className="py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200"
+                                                    className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200"
                                                 >
                                                     {bike.listingType === 'Rental' ? 'Rent Now' : 'Buy Now'}
                                                 </button>

@@ -1,8 +1,7 @@
-import { Bike, Loader2 } from 'lucide-react';
+import { Bike, Loader2, Key, ShoppingCart, HandCoins, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import Header from '../../components/layout/Header';
 import api from '../../utils/api';
@@ -12,6 +11,15 @@ const UserDashboard = () => {
     useAuth();
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentImage, setCurrentImage] = useState(0);
+    const heroImages = ['/image1.png', '/image2.png', '/image3.png'];
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentImage((prev) => (prev + 1) % heroImages.length);
+        }, 4000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const fetchBikes = async () => {
@@ -32,15 +40,15 @@ const UserDashboard = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
 
-            <main className="pt-32">
+            <main className="pt-24 lg:pt-32">
 
                 {/* Hero section */}
-                <section className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
+                <section className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8 animate-slideInLeft">
                             <h1 className="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-gray-900">
-                                Your Ultimate Marketplace <br />
-                                <span className="text-orange-500">Motorcycle</span>
+                                Your Ultimate <br />
+                                <span className="text-orange-500">Motorcycle</span> Marketplace
                             </h1>
                             <p className="text-gray-500 text-lg leading-relaxed max-w-md">
                                 Ride Your Way. Discover outstanding bikes, find the perfect ride for your next adventure.
@@ -57,27 +65,103 @@ const UserDashboard = () => {
 
                         <div className="relative animate-slideInRight lg:translate-x-10">
                             {/* Background shape */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-orange-100/50 to-blue-50/50 rounded-full blur-3xl -z-10"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-orange-100/50 to-blue-50/50 rounded-full blur-3xl -z-10 animate-pulse"></div>
 
-                            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white">
-                                <img
-                                    src="/image1.png"
-                                    alt="Motorcycle"
-                                    className="w-full h-auto object-cover transform hover:scale-105 transition-duration-700"
-                                />
+                            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] bg-gray-100">
+                                {heroImages.map((img, idx) => (
+                                    <img
+                                        key={idx}
+                                        src={img}
+                                        alt={`Motorcycle ${idx + 1}`}
+                                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out ${idx === currentImage ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+                                            }`}
+                                    />
+                                ))}
                                 {/* Overlay gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"></div>
+
+                                {/* Indicators */}
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                                    {heroImages.map((_, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`h-1.5 rounded-full transition-all duration-500 ${idx === currentImage ? 'w-8 bg-orange-500' : 'w-2 bg-white/50'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
+                {/* Services Section */}
+                <section className="py-12 lg:py-16 bg-white relative overflow-hidden">
+                    {/* Background decorations */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50/50 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2"></div>
+
+                    <div className="max-w-7xl mx-auto px-6">
+                        <div className="text-center mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6 tracking-tight text-center">Our <span className="text-orange-500">Featured</span> Services</h2>
+                            <p className="text-gray-500 text-lg max-w-2xl mx-auto">Discover the perfect way to get moving with our comprehensive motorcycle solutions tailored for your every need.</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-10">
+                            {[
+                                {
+                                    title: "Rent a Bike",
+                                    desc: "Explore the open road with our premium rental fleet. Perfect for weekend getaways and short trips.",
+                                    icon: <Key className="text-orange-600" size={36} />,
+                                    link: "/browse?type=Rental",
+                                    bg: "bg-orange-100/50",
+                                    accent: "border-orange-100"
+                                },
+                                {
+                                    title: "Purchase Bike",
+                                    desc: "Invest in your dream ride from our verified collection of pre-owned and new motorcycles.",
+                                    icon: <ShoppingCart className="text-blue-600" size={36} />,
+                                    link: "/browse?type=Sale",
+                                    bg: "bg-blue-100/50",
+                                    accent: "border-blue-100"
+                                },
+                                {
+                                    title: "List & Sell",
+                                    desc: "Connect with thousands of buyers. List your bike today and get the best value for your machine.",
+                                    icon: <HandCoins className="text-emerald-600" size={36} />,
+                                    link: "/sell",
+                                    bg: "bg-emerald-100/50",
+                                    accent: "border-emerald-100"
+                                }
+                            ].map((service, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => navigate(service.link)}
+                                    className={`group cursor-pointer p-10 rounded-[40px] border-2 ${service.accent} bg-white hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col items-center text-center h-full relative overflow-hidden`}
+                                >
+                                    <div className={`absolute top-0 right-0 w-32 h-32 ${service.bg} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+                                    <div className={`${service.bg} w-24 h-24 rounded-[32px] flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 relative z-10`}>
+                                        {service.icon}
+                                    </div>
+                                    <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight relative z-10">{service.title}</h3>
+                                    <p className="text-gray-500 leading-relaxed mb-10 flex-grow relative z-10 font-medium">
+                                        {service.desc}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-orange-600 font-extrabold group-hover:gap-5 transition-all relative z-10 uppercase text-xs tracking-widest">
+                                        Experience Now <ArrowRight size={20} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 {/* Featured motorcycles */}
-                <section className="bg-slate-50 py-24">
+                <section className="bg-slate-50 py-14 lg:py-18 border-y border-slate-50">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center max-w-2xl mx-auto mb-16">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Motorcycles</h2>
-                            <p className="text-gray-500">Find the best deals on standard and premium bikes.</p>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">Top Inventory</h2>
+                            <p className="text-gray-500 text-lg">Find the best deals on standard and premium bikes.</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
@@ -135,28 +219,36 @@ const UserDashboard = () => {
                 </section>
 
                 {/* How it works */}
-                <section className="py-24 bg-white">
+                <section className="py-18 lg:py-22 bg-white relative overflow-hidden">
+                    {/* Artistic gradient background */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-slate-50 to-white -z-10"></div>
+
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-20">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
-                            <p className="text-gray-500">Get started in three simple steps</p>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Proper Ride Flow</h2>
+                            <p className="text-gray-500 text-lg">Getting started is effortless. We've streamlined the process down to three elite stages.</p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-12 relative">
-                            {/* Desktop connecting line */}
-                            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-orange-100 via-orange-200 to-orange-100 -z-10"></div>
+                        <div className="grid md:grid-cols-3 gap-16 lg:gap-20 relative">
+                            {/* Desktop connecting path - decorative */}
+                            <div className="hidden md:block absolute top-16 left-[15%] right-[15%] h-px border-t-2 border-dashed border-orange-200 -z-0"></div>
 
                             {[
-                                { step: "1", title: "Browse Bikes", desc: "Search through verified listings and select your perfect ride." },
-                                { step: "2", title: "Connect & Buy", desc: "Chat with sellers directly and set up a meeting." },
-                                { step: "3", title: "Complete Ride", desc: "Finalize the deal safely and start your journey." }
+                                { step: "01", title: "Browse Bikes", desc: "Search through our elite, verified listings and select your perfect companion for the road." },
+                                { step: "02", title: "Connect & Buy", desc: "Engage with owners directly through our secure platform and finalize your interest." },
+                                { step: "03", title: "Complete Ride", desc: "Seal the deal with confidence and embark on your next great journey with RIDEHUB." }
                             ].map((item, idx) => (
-                                <div key={idx} className="relative text-center group">
-                                    <div className="w-24 h-24 mx-auto bg-orange-50 rounded-full flex items-center justify-center mb-8 border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-300">
-                                        <span className="text-3xl font-black text-orange-500">{item.step}</span>
+                                <div key={idx} className="relative text-center group z-10">
+                                    <div className="w-32 h-32 mx-auto bg-white rounded-3xl flex items-center justify-center mb-10 border-2 border-slate-50 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] group-hover:shadow-[0_30px_60px_-15px_rgba(249,115,22,0.2)] group-hover:-translate-y-2 transition-all duration-500 relative">
+                                        <div className="absolute -top-4 -right-4 w-12 h-12 bg-orange-500 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
+                                            {item.step}
+                                        </div>
+                                        {idx === 0 && <Bike className="text-orange-500" size={48} />}
+                                        {idx === 1 && <ShoppingCart className="text-orange-500" size={48} />}
+                                        {idx === 2 && <Key className="text-orange-500" size={48} />}
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                                    <p className="text-gray-500 max-w-xs mx-auto leading-relaxed text-sm">
+                                    <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight uppercase tracking-tighter">{item.title}</h3>
+                                    <p className="text-gray-500 max-w-xs mx-auto leading-relaxed font-medium">
                                         {item.desc}
                                     </p>
                                 </div>

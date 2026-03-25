@@ -92,22 +92,22 @@ const Header = () => {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled || (user && user.kycStatus !== 'verified')
-                    ? 'bg-white shadow-[0_4px_25px_rgba(0,0,0,0.06)] py-3'
-                    : 'bg-white/80 backdrop-blur-md border-b border-gray-100 py-4'
+                    ? 'bg-orange-500 shadow-[0_4px_30px_rgba(249,115,22,0.1)] py-3'
+                    : 'bg-orange-400 py-4 border-b border-orange-300/30'
                 }`}
         >
             {/* KYC Notification Banner */}
             {!authLoading && user && user.role !== 'admin' && user.kycStatus !== 'verified' && (
-                <div className="absolute top-0 left-0 right-0 bg-orange-600 text-white overflow-hidden py-1.5 px-4 h-8 flex items-center">
+                <div className="absolute top-0 left-0 right-0 bg-orange-700 text-white overflow-hidden py-1.5 px-4 h-8 flex items-center">
                     <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
                             <Shield size={12} />
-                            <p className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+                            <p className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap text-white/90">
                                 {user.kycStatus === 'pending' ? "Verification in Progress" : "Identity Verification Required"}
                             </p>
                         </div>
                         {user.kycStatus !== 'pending' && (
-                            <Link to="/kyc-verification" className="text-[9px] font-black uppercase tracking-widest bg-white text-orange-600 px-3 py-1 rounded-full hover:bg-orange-50 transition-colors">
+                            <Link to="/kyc-verification" className="text-[9px] font-bold uppercase tracking-widest bg-white text-orange-700 px-3 py-1 rounded-full hover:bg-orange-50 transition-colors">
                                 Verify Now
                             </Link>
                         )}
@@ -122,24 +122,24 @@ const Header = () => {
                         <img
                             src="/image5.png"
                             alt="RIDEHUB Logo"
-                            className={`transition-all duration-500 ${isScrolled ? 'h-9' : 'h-11'} w-auto object-contain`}
+                            className={`transition-all duration-500 ${isScrolled ? 'h-10' : 'h-14'} w-auto object-contain`}
                         />
                     </Link>
                 </div>
 
                 {/* Navigation - Locked Middle */}
-                <nav className="hidden lg:flex items-center justify-center gap-1">
+                <nav className="hidden lg:flex items-center justify-center gap-2">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`px-4 py-2 text-[13px] font-bold tracking-tight transition-all duration-300 relative group overflow-hidden ${isActive(link.path)
-                                    ? 'text-orange-500'
-                                    : 'text-slate-600 hover:text-orange-500'
+                            className={`px-5 py-2 text-base font-bold tracking-tight transition-all duration-300 relative group overflow-hidden ${isActive(link.path)
+                                    ? 'text-white'
+                                    : 'text-orange-50 hover:text-white'
                                 }`}
                         >
                             <span>{link.name}</span>
-                            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 transform transition-transform duration-300 scale-x-0 group-hover:scale-x-100 ${isActive(link.path) ? 'scale-x-100' : ''}`}></span>
+                            <span className={`absolute bottom-0 left-0 w-full h-1 bg-white transform transition-transform duration-300 scale-x-0 group-hover:scale-x-100 ${isActive(link.path) ? 'scale-x-100' : ''}`}></span>
                         </Link>
                     ))}
                 </nav>
@@ -153,11 +153,11 @@ const Header = () => {
                                 <div className="relative">
                                     <button
                                         onClick={() => setIsNotifOpen(!isNotifOpen)}
-                                        className="p-2 text-slate-500 hover:text-orange-600 transition-colors relative"
+                                        className="p-2 text-white hover:text-orange-100 transition-colors relative"
                                     >
                                         <Bell size={20} />
                                         {notifications.some(n => !n.isRead) && (
-                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-600 rounded-full border-2 border-white"></span>
+                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border-2 border-orange-500"></span>
                                         )}
                                     </button>
 
@@ -167,8 +167,8 @@ const Header = () => {
                                             <div className="absolute right-0 top-full mt-4 w-80 z-50 animate-fadeInScale group">
                                                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                                                     <div className="px-5 py-4 border-b border-gray-50 flex justify-between items-center bg-slate-50/50">
-                                                        <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Notifications</h4>
-                                                        <button onClick={markAllRead} className="text-[10px] font-black text-orange-600 uppercase hover:underline">Mark all read</button>
+                                                        <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Notifications</h4>
+                                                        <button onClick={markAllRead} className="text-[10px] font-bold text-orange-600 uppercase hover:underline">Mark all read</button>
                                                     </div>
                                                     <div className="max-h-[350px] overflow-y-auto">
                                                         {notifications.length === 0 ? (
@@ -189,7 +189,7 @@ const Header = () => {
                                                             ))
                                                         )}
                                                     </div>
-                                                    <Link to="/notifications" className="block text-center p-3 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-slate-800 border-t" onClick={() => setIsNotifOpen(false)}>
+                                                    <Link to="/notifications" className="block text-center p-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-slate-800 border-t" onClick={() => setIsNotifOpen(false)}>
                                                         View All
                                                     </Link>
                                                 </div>
@@ -202,9 +202,9 @@ const Header = () => {
                                 <div className="relative">
                                     <button
                                         onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                        className="flex items-center gap-3 group px-2 py-1.5 rounded-full hover:bg-gray-50 transition-all"
+                                        className="flex items-center gap-3 group px-2 py-1.5 rounded-full hover:bg-white/10 transition-all"
                                     >
-                                        <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200 overflow-hidden shadow-sm">
+                                        <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-white/50 overflow-hidden shadow-md">
                                             {user.kycStatus === 'verified' && user.kycId?.userPhoto ? (
                                                 <img src={user.kycId.userPhoto} alt="" className="w-full h-full object-cover" />
                                             ) : (
@@ -212,12 +212,12 @@ const Header = () => {
                                             )}
                                         </div>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-sm font-bold text-slate-800 group-hover:text-orange-600 transition-colors leading-none">
+                                            <span className="text-sm font-bold text-white group-hover:text-orange-50 transition-colors leading-none">
                                                 {user.name.split(' ')[0]}
                                             </span>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Account</span>
+                                            <span className="text-[10px] font-bold text-white/70 uppercase tracking-tighter mt-1">Account</span>
                                         </div>
-                                        <ChevronDown size={14} className={`text-slate-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                        <ChevronDown size={14} className={`text-white transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     {isProfileOpen && (
