@@ -279,7 +279,7 @@ const verifyPayment = async (req, res) => {
                 // Notification for Seller
                 if (bike && bike.seller) {
                     await Notification.create({
-                        user: bike.seller,
+                        user: bike.seller._id,
                         title: 'New Rental/Purchase!',
                         message: `Someone has ${bike.listingType === 'Rental' ? 'rented' : 'purchased'} your ${bike.name}. Rs ${payment.amount} is held in escrow by admin and will be released after verification.`,
                         type: 'GENERAL',

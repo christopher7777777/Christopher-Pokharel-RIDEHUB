@@ -1,5 +1,6 @@
 const Message = require('../models/Message');
 const sendEmail = require('../utils/sendEmail');
+const notifyAdmins = require('../utils/adminNotification');
 
 // @desc    Submit a contact form
 // @route   POST /api/messages
@@ -25,6 +26,14 @@ exports.submitMessage = async (req, res) => {
         } catch (err) {
             console.error('Email error:', err);
         }
+
+        // Notify Admins of new inquiry
+        await notifyAdmins(
+            'New Inquiry',
+            `${name} has sent a new message regarding ${message.slice(0, 30)}...`,
+            'GENERAL',
+            newMessage._id
+        );
 
         res.status(201).json({
             success: true,

@@ -95,61 +95,88 @@ const UserDashboard = () => {
                     </div>
                 </section>
 
-                {/* Services Section */}
-                <section className="py-12 lg:py-16 bg-white relative overflow-hidden">
-                    {/* Background decorations */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50/50 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2"></div>
-
+                {/* Featured Categories Section */}
+                <section className="py-20 bg-white relative">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-20">
                             <h2 className="text-4xl font-bold text-gray-900 mb-6 tracking-tight text-center">Our <span className="text-orange-500">Featured</span> Services</h2>
                             <p className="text-gray-500 text-lg max-w-2xl mx-auto">Discover the perfect way to get moving with our comprehensive motorcycle solutions tailored for your every need.</p>
                         </div>
-
-                        <div className="grid md:grid-cols-3 gap-10">
+                        <div className="grid md:grid-cols-3 gap-8">
                             {[
                                 {
-                                    title: "Rent a Bike",
-                                    desc: "Explore the open road with our premium rental fleet. Perfect for weekend getaways and short trips.",
-                                    icon: <Key className="text-orange-600" size={36} />,
+                                    tag: "FLEXIBLE",
+                                    title: "RENT A BIKE",
+                                    image: "/image 8.png",
                                     link: "/browse?type=Rental",
-                                    bg: "bg-orange-100/50",
-                                    accent: "border-orange-100"
+                                    icon: <Key className="text-orange-500" size={20} />
                                 },
                                 {
-                                    title: "Purchase Bike",
-                                    desc: "Invest in your dream ride from our verified collection of pre-owned and new motorcycles.",
-                                    icon: <ShoppingCart className="text-blue-600" size={36} />,
-                                    link: "/browse?type=Sale",
-                                    bg: "bg-blue-100/50",
-                                    accent: "border-blue-100"
-                                },
-                                {
-                                    title: "List & Sell",
-                                    desc: "Connect with thousands of buyers. List your bike today and get the best value for your machine.",
-                                    icon: <HandCoins className="text-emerald-600" size={36} />,
+                                    tag: "PROFITABLE",
+                                    title: "SELL YOUR BIKE",
+                                    image: "/image 9.png",
                                     link: "/sell",
-                                    bg: "bg-emerald-100/50",
-                                    accent: "border-emerald-100"
+                                    icon: <HandCoins className="text-emerald-500" size={20} />
+                                },
+                                {
+                                    tag: "PREMIUM",
+                                    title: "PURCHASE BIKE",
+                                    image: "/image 10.png",
+                                    link: "/browse?type=Sale",
+                                    icon: <ShoppingCart className="text-blue-500" size={20} />
                                 }
-                            ].map((service, idx) => (
-                                <div
+                            ].map((item, idx) => (
+                                <div 
                                     key={idx}
-                                    onClick={() => navigate(service.link)}
-                                    className={`group cursor-pointer p-10 rounded-[40px] border-2 ${service.accent} bg-white hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col items-center text-center h-full relative overflow-hidden`}
+                                    className="group relative bg-white rounded-[2.5rem] border-2 border-slate-50 hover:border-orange-200 hover:shadow-[0_20px_50px_-20px_rgba(249,115,22,0.15)] transition-all duration-500 overflow-hidden cursor-pointer flex flex-col"
+                                    onClick={() => navigate(item.link)}
                                 >
-                                    <div className={`absolute top-0 right-0 w-32 h-32 ${service.bg} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-                                    <div className={`${service.bg} w-24 h-24 rounded-[32px] flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 relative z-10`}>
-                                        {service.icon}
+                                    {/* Image Container - Fully display the bike */}
+                                    <div className="relative aspect-[16/10] bg-slate-50 p-6 overflow-hidden">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_100%)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <img 
+                                            src={item.image} 
+                                            alt={item.title}
+                                            className="w-full h-full object-contain relative z-10 transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                        {/* Tag Overlay */}
+                                        <div className="absolute top-6 left-6 z-20">
+                                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                                <span className="text-[9px] font-black tracking-widest text-slate-800 uppercase">
+                                                    {item.tag}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight relative z-10">{service.title}</h3>
-                                    <p className="text-gray-500 leading-relaxed mb-10 flex-grow relative z-10 font-medium">
-                                        {service.desc}
-                                    </p>
-                                    <div className="flex items-center gap-3 text-orange-600 font-extrabold group-hover:gap-5 transition-all relative z-10 uppercase text-xs tracking-widest">
-                                        Experience Now <ArrowRight size={20} />
+
+                                    {/* Content Section */}
+                                    <div className="p-8 flex flex-col flex-grow">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-2.5 bg-slate-50 rounded-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                                {item.icon}
+                                            </div>
+                                            <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none group-hover:text-orange-500 transition-colors">
+                                                {item.title}
+                                            </h3>
+                                        </div>
+                                        
+                                        <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
+                                            Experience the best-in-class service for your motorcycling journey with our dedicated platform.
+                                        </p>
+
+                                        <div className="mt-auto flex items-center justify-between">
+                                            <button className="px-6 py-2.5 bg-slate-900 hover:bg-orange-500 text-white rounded-xl text-[10px] font-black tracking-[0.2em] transition-all duration-300 uppercase shadow-lg shadow-slate-200 hover:shadow-orange-200 active:scale-95">
+                                                Explore Now
+                                            </button>
+                                            <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-orange-500 group-hover:border-orange-200 transition-all">
+                                                <ArrowRight size={18} />
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    {/* Hover Decorative Line */}
+                                    <div className="absolute bottom-0 left-0 h-1.5 bg-orange-500 transition-all duration-500 w-0 group-hover:w-full"></div>
                                 </div>
                             ))}
                         </div>

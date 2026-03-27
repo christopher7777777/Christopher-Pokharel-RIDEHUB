@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -31,7 +32,9 @@ const Login = () => {
             await login(formData);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'Login failed');
+            const errorMsg = err.message || 'Login failed';
+            setError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }

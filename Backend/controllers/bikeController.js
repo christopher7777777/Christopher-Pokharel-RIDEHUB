@@ -1,5 +1,7 @@
 const Bike = require('../models/Bike');
 const ValuationRule = require('../models/ValuationRule');
+const Notification = require('../models/Notification');
+const notifyAdmins = require('../utils/adminNotification');
 const notifyUserUpdate = require('../utils/notifyUserUpdate');
 
 
@@ -35,6 +37,14 @@ exports.createBike = async (req, res) => {
         }
 
         const bike = await Bike.create(req.body);
+
+        // Notify Admin of new listing
+        await notifyAdmins(
+            'New Bike Listed',
+            `${bike.name} has been listed for ${bike.listingType}.`,
+            'GENERAL',
+            bike._id
+        );
 
         res.status(201).json({
             success: true,
@@ -265,6 +275,15 @@ exports.updateSaleStatus = async (req, res) => {
             `Update on your Bike Listing: ${bike.name}`,
             `Your bike listing status has been updated to: ${status}.\n\nNegotiated Price: NPR ${negotiatedPrice || 'N/A'}\nDealer Note: ${dealerNote || 'None'}\n\nPlease check your dashboard for more details.`
         );
+
+        // Notify user about status update
+        await Notification.create({
+            user: bike.seller._id,
+            title: `Listing Updated: ${bike.name}`,
+            message: `Your bike listing status has been updated to: ${status}.`,
+            type: 'ACCOUNT_UPDATE',
+            relatedId: bike._id
+        });
 
         res.status(200).json({
             success: true,
@@ -616,6 +635,14 @@ exports.requestExchange = async (req, res) => {
             bike,
             `New Exchange Request: ${bike.name}`,
             `A new exchange request has been submitted by ${req.user.name} for the bike "${bike.name}".\n\nUser Bike: ${exchangeBikeDetails.brand} ${exchangeBikeDetails.model} (${exchangeBikeDetails.modelYear})\nAuto-Valuation: NPR ${valuation}\n\nPlease check the admin panel to review the uploaded documents and confirm valuation.`
+        );
+
+        // Notify Admin of new exchange request
+        await notifyAdmins(
+            'New Exchange Request',
+            `User has requested an exchange for ${bike.name}.`,
+            'GENERAL',
+            bike._id
         );
 
         res.status(200).json({

@@ -1,5 +1,7 @@
 const EMIApplication = require('../models/EMIApplication');
 const Bike = require('../models/Bike');
+const Notification = require('../models/Notification');
+const notifyAdmins = require('../utils/adminNotification');
 
 // @desc    Apply for EMI
 // @route   POST /api/emi/apply
@@ -44,6 +46,14 @@ exports.applyEMI = async (req, res) => {
         // Update bike status to FinancePending
         bike.status = 'FinancePending';
         await bike.save();
+
+        // Notify Admin of new EMI application
+        await notifyAdmins(
+            'New EMI Application',
+            `User has applied for EMI for ${bike.name}.`,
+            'GENERAL',
+            application._id
+        );
 
         res.status(201).json({
             success: true,
@@ -118,6 +128,17 @@ exports.updateApplicationStatus = async (req, res) => {
                 await bike.save();
             }
         }
+
+        // Notify user of status update
+        await Notification.create({
+            user: application.user,
+            title: `EMI Application ${status}`,
+            message: status === 'Approved'
+                ? `Congratulations! Your EMI application for the bike has been approved. Please visit us to finalize the documents.`
+                : `Sorry, your EMI application was rejected. Remarks: ${remarks || 'No remarks provided'}.`,
+            type: 'ACCOUNT_UPDATE',
+            relatedId: application._id
+        });
 
         res.status(200).json({
             success: true,

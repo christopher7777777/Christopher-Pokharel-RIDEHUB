@@ -70,28 +70,36 @@ const login = async (req, res) => {
         // Check user with password
         const user = await User.findOne({ email }).select('+password');
 
-        if (user && (await user.comparePassword(password))) {
-            const token = generateToken(user._id);
-
-            res.json({
-                success: true,
-                data: {
-                    _id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    isAdmin: user.isAdmin,
-                    kycStatus: user.kycStatus,
-                    token: token,
-                },
-                message: 'Login successful'
-            });
-        } else {
-            res.status(401).json({
+        if (!user) {
+            return res.status(401).json({
                 success: false,
-                message: 'Invalid email or password'
+                message: 'Email is not registered'
             });
         }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Password is incorrect'
+            });
+        }
+
+        const token = generateToken(user._id);
+
+        res.json({
+            success: true,
+            data: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isAdmin: user.isAdmin,
+                kycStatus: user.kycStatus,
+                token: token,
+            },
+            message: 'Login successful'
+        });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({

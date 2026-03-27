@@ -14,6 +14,17 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from '../../context/AuthContext';
 import SellerLayout from '../../components/layout/SellerLayout';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getDocumentUrl = (path) => {
+    if (!path) return '';
+    // If it's already an absolute URL (like Cloudinary), return it
+    if (path.startsWith('http')) return path;
+    // Otherwise, prefix with API_BASE_URL and normalize slashes
+    const normalizedPath = path.replace(/\\/g, '/');
+    return `${API_BASE_URL}/${normalizedPath}`.replace(/([^:])(\/\/+)/g, '$1/');
+};
+
 // Leaflet fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -51,15 +62,18 @@ const KYCPreview = ({ kycStatus, isVerified, onEdit, onNavigate }) => {
         <div className="py-8 px-6 animate-fadeIn">
             <div className="max-w-5xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="text-center space-y-4">
-                    <div className={`inline-flex items-center gap-2 px-4 py-2 bg-${themeColor}-100 text-${themeColor}-700 rounded-full font-bold text-xs uppercase tracking-widest ${!isVerified && 'animate-pulse'}`}>
-                        <StatusIcon size={14} />
+                <div className="text-center space-y-6">
+                    <div className={`inline-flex items-center gap-3 px-6 py-2.5 bg-${themeColor}-50 text-${themeColor}-600 rounded-full font-bold text-[10px] uppercase tracking-[0.2em] shadow-sm border border-${themeColor}-100 ${!isVerified && 'animate-pulse'}`}>
+                        <StatusIcon size={14} className="stroke-[3]" />
                         {statusText}
                     </div>
-                    <h1 className="text-5xl font-black text-slate-900 tracking-tight">
-                        Your <span className={`text-${themeColor}-600`}>Seller KYC {isVerified ? 'Details' : 'Submission'}</span>
+                    <h1 className="text-6xl font-black text-slate-900 tracking-tight leading-none group">
+                        Seller <span className={`text-${themeColor}-600 relative inline-block`}>
+                            KYC {isVerified ? 'Details' : 'Submission'}
+                            <span className={`absolute -bottom-2 left-0 w-full h-1.5 bg-${themeColor}-600/10 rounded-full`}></span>
+                        </span>
                     </h1>
-                    <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">
+                    <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium leading-relaxed">
                         {isVerified
                             ? 'Your business identity has been verified. Review your submitted information below.'
                             : 'Your documents are being reviewed. You can edit your submission while it\'s pending.'}
@@ -69,49 +83,55 @@ const KYCPreview = ({ kycStatus, isVerified, onEdit, onNavigate }) => {
                 {/* KYC Details */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8">
+                        <div className="bg-white/80 backdrop-blur-md p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white/80 space-y-12 transition-all hover:shadow-orange-600/5 group/card">
                             {/* Personal Information */}
-                            <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                <UserIcon className={`text-${themeColor}-600`} />
-                                Personal Information
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {[
-                                    { label: 'Full Name', value: kycStatus.name },
-                                    { label: 'Email', value: kycStatus.email },
-                                    { label: 'Phone Number', value: kycStatus.phoneNumber },
-                                    { label: 'Date of Birth', value: new Date(kycStatus.dob).toLocaleDateString() },
-                                ].map((field, idx) => (
-                                    <div key={idx} className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{field.label}</label>
-                                        <p className="text-slate-900 font-bold text-lg">{field.value}</p>
+                            <div className="space-y-8">
+                                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4">
+                                    <div className="p-3 bg-green-100 text-green-600 rounded-2xl shadow-sm shadow-green-200/50">
+                                        <UserIcon size={24} className="stroke-[2.5]" />
                                     </div>
-                                ))}
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Permanent Address</label>
-                                    <p className="text-slate-900 font-bold text-lg">{kycStatus.permanentAddress}</p>
+                                    Personal Information
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7 ml-1">
+                                    {[
+                                        { label: 'Full Name', value: kycStatus.name },
+                                        { label: 'Email', value: kycStatus.email },
+                                        { label: 'Phone Number', value: kycStatus.phoneNumber },
+                                        { label: 'Date of Birth', value: new Date(kycStatus.dob).toLocaleDateString() },
+                                    ].map((field, idx) => (
+                                        <div key={idx} className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                                            <p className="text-slate-900 font-extrabold text-lg tracking-tight">{field.value}</p>
+                                        </div>
+                                    ))}
+                                    <div className="space-y-1.5 md:col-span-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Address</label>
+                                        <p className="text-slate-900 font-extrabold text-lg tracking-tight">{kycStatus.permanentAddress}</p>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Business Details */}
-                            <div className="pt-6 border-t border-slate-100 space-y-6">
-                                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                    <Building2 className={`text-${themeColor}-600`} />
+                            <div className="pt-10 border-t border-slate-100 space-y-8">
+                                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4">
+                                    <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl shadow-sm shadow-blue-200/50">
+                                        <Building2 size={24} className="stroke-[2.5]" />
+                                    </div>
                                     Business Details
                                 </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Business Name</label>
-                                        <p className="text-slate-900 font-bold text-lg">{kycStatus.businessName}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7 ml-1">
+                                    <div className="space-y-1.5 md:col-span-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Name</label>
+                                        <p className="text-slate-900 font-extrabold text-lg tracking-tight">{kycStatus.businessName}</p>
                                     </div>
                                     {[
                                         { label: 'PAN Number', value: kycStatus.panNumber },
                                         { label: 'Registration Number', value: kycStatus.businessRegistrationNumber },
                                         { label: 'Business Contact', value: kycStatus.businessContactNumber },
                                     ].map((field, idx) => (
-                                        <div key={idx} className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{field.label}</label>
-                                            <p className="text-slate-900 font-bold text-lg">{field.value}</p>
+                                        <div key={idx} className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                                            <p className="text-slate-900 font-extrabold text-lg tracking-tight">{field.value}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -119,23 +139,27 @@ const KYCPreview = ({ kycStatus, isVerified, onEdit, onNavigate }) => {
 
                             {/* Location */}
                             {kycStatus.location && (
-                                <div className="pt-6 border-t border-slate-100 space-y-4">
-                                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                        <MapPin className={`text-${themeColor}-600`} />
+                                <div className="pt-10 border-t border-slate-100 space-y-8">
+                                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4">
+                                        <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl shadow-sm shadow-orange-200/50">
+                                            <MapPin size={24} className="stroke-[2.5]" />
+                                        </div>
                                         Shop Location
                                     </h3>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Address</label>
-                                        <p className="text-slate-900 font-bold text-lg">{kycStatus.location.address}</p>
-                                    </div>
-                                    {kycStatus.location.coordinates?.length === 2 && (
-                                        <div className="h-[300px] w-full rounded-3xl overflow-hidden border-4 border-white shadow-lg ring-1 ring-slate-200">
-                                            <MapContainer center={[kycStatus.location.coordinates[1], kycStatus.location.coordinates[0]]} zoom={13} style={{ height: '100%', width: '100%' }}>
-                                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                                <Marker position={[kycStatus.location.coordinates[1], kycStatus.location.coordinates[0]]}></Marker>
-                                            </MapContainer>
+                                    <div className="space-y-6 ml-1">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Address</label>
+                                            <p className="text-slate-900 font-extrabold text-lg tracking-tight">{kycStatus.location.address}</p>
                                         </div>
-                                    )}
+                                        {kycStatus.location.coordinates?.length === 2 && (
+                                            <div className="h-[350px] w-full rounded-[2.5rem] overflow-hidden border-8 border-white shadow-xl ring-1 ring-slate-200 group-hover/card:ring-orange-500/20 transition-all">
+                                                <MapContainer center={[kycStatus.location.coordinates[1], kycStatus.location.coordinates[0]]} zoom={13} style={{ height: '100%', width: '100%' }}>
+                                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                                    <Marker position={[kycStatus.location.coordinates[1], kycStatus.location.coordinates[0]]}></Marker>
+                                                </MapContainer>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -143,27 +167,38 @@ const KYCPreview = ({ kycStatus, isVerified, onEdit, onNavigate }) => {
 
                     {/* Documents */}
                     <div className="space-y-6">
-                        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8">
+                        <div className="bg-white/70 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/40 border border-white/60 space-y-8 sticky top-32">
                             <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                <Camera className={`text-${themeColor}-600`} />
+                                <div className={`p-2.5 bg-${themeColor}-100 rounded-xl text-${themeColor}-600`}>
+                                    <Camera size={20} className="stroke-[2.5]" />
+                                </div>
                                 Documents
                             </h3>
-                            <div className="space-y-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 {[
                                     { label: 'Passport Size Photo', path: kycStatus.userPhoto },
                                     { label: 'Citizenship (Front)', path: kycStatus.nagriktaFront },
                                     { label: 'Citizenship (Back)', path: kycStatus.nagriktaBack },
                                     { label: 'PAN Document', path: kycStatus.panPhoto },
                                 ].map((doc, idx) => (
-                                    <div key={idx} className="space-y-2">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{doc.label}</label>
-                                        <div className={`aspect-video rounded-2xl overflow-hidden border-2 border-${themeColor}-100 bg-${themeColor}-50`}>
+                                    <div key={idx} className="group/doc">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">{doc.label}</label>
+                                        <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden border-2 border-${themeColor}-100 bg-slate-50 group-hover/doc:ring-4 group-hover/doc:ring-${themeColor}-500/10 transition-all cursor-pointer shadow-sm shadow-${themeColor}-200/20`}>
                                             <img
-                                                src={`http://localhost:5000/${doc.path}`}
+                                                src={getDocumentUrl(doc.path)}
                                                 alt={doc.label}
-                                                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                                                onClick={() => window.open(`http://localhost:5000/${doc.path}`, '_blank')}
+                                                className="w-full h-full object-cover transition-all duration-700 group-hover/doc:scale-110 group-hover/doc:rotate-1"
+                                                onClick={() => window.open(getDocumentUrl(doc.path), '_blank')}
                                             />
+                                            <div 
+                                                className="absolute inset-0 bg-slate-900/0 group-hover/doc:bg-slate-900/20 transition-all flex items-center justify-center opacity-0 group-hover/doc:opacity-100"
+                                                onClick={() => window.open(getDocumentUrl(doc.path), '_blank')}
+                                            >
+                                                <div className="bg-white/90 backdrop-blur-md text-slate-900 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transform translate-y-4 group-hover/doc:translate-y-0 transition-all shadow-xl">
+                                                    <FileText size={14} className="text-orange-600" />
+                                                    VIEW DOCUMENT
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -608,15 +643,17 @@ const SellerKYC = () => {
                                         <div key={doc.id} className="space-y-2">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{doc.label}</label>
                                             <label className="block group cursor-pointer">
-                                                <div className={`relative aspect-video rounded-2xl overflow-hidden border-2 border-dashed transition-all flex flex-col items-center justify-center p-4 ${previews[doc.id] || (kycStatus && kycStatus[doc.id]) ? 'border-orange-500 bg-orange-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'}`}>
+                                                <div className={`relative aspect-square rounded-3xl overflow-hidden border-2 border-dashed transition-all flex flex-col items-center justify-center p-4 ${previews[doc.id] || (kycStatus && kycStatus[doc.id]) ? 'border-orange-500 bg-orange-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'}`}>
                                                     {previews[doc.id] ? (
                                                         <img src={previews[doc.id]} className="absolute inset-0 w-full h-full object-cover" alt="Preview" />
                                                     ) : kycStatus && kycStatus[doc.id] ? (
-                                                        <img src={`http://localhost:5000/${kycStatus[doc.id]}`} className="absolute inset-0 w-full h-full object-cover" alt="Existing" />
+                                                        <img src={getDocumentUrl(kycStatus[doc.id])} className="absolute inset-0 w-full h-full object-cover" alt="Existing" />
                                                     ) : (
-                                                        <div className="text-center">
-                                                            <Upload className="mx-auto text-slate-400 group-hover:text-orange-600 mb-2" size={24} />
-                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter group-hover:text-slate-600">Upload Image</p>
+                                                        <div className="text-center group-hover:scale-110 transition-transform">
+                                                            <div className="w-12 h-12 bg-slate-200 group-hover:bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors">
+                                                                <Upload className="text-slate-400 group-hover:text-orange-600" size={24} />
+                                                            </div>
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600">Choose Image</p>
                                                         </div>
                                                     )}
                                                     <input

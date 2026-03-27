@@ -49,7 +49,7 @@ const AdminHeader = ({ toggleSidebar }) => {
     return (
         <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 sticky top-0 z-40 shadow-sm">
             <div className="flex items-center gap-4">
-                <button 
+                <button
                     onClick={toggleSidebar}
                     className="p-2 hover:bg-slate-50 rounded-xl text-slate-500 transition-colors"
                 >
@@ -63,7 +63,7 @@ const AdminHeader = ({ toggleSidebar }) => {
             <div className="flex items-center gap-6">
                 {/* Notifications */}
                 <div className="relative">
-                    <button 
+                    <button
                         onClick={() => setIsNotifOpen(!isNotifOpen)}
                         className="p-2.5 text-slate-400 hover:text-orange-600 transition-all relative bg-slate-50 rounded-xl"
                     >
@@ -78,7 +78,7 @@ const AdminHeader = ({ toggleSidebar }) => {
                             <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
                                 <div className="px-6 py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">Admin Notifications</h4>
-                                    <button 
+                                    <button
                                         onClick={markAllRead}
                                         className="text-[10px] font-black text-orange-600 uppercase tracking-widest hover:underline"
                                     >
@@ -93,7 +93,7 @@ const AdminHeader = ({ toggleSidebar }) => {
                                         </div>
                                     ) : (
                                         notifications.map((n) => (
-                                            <div 
+                                            <div
                                                 key={n._id}
                                                 onClick={() => markAsRead(n._id)}
                                                 className={`px-6 py-5 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer relative group ${!n.isRead ? 'bg-orange-50/20' : ''}`}
@@ -117,8 +117,8 @@ const AdminHeader = ({ toggleSidebar }) => {
                                     )}
                                 </div>
                                 <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
-                                    <Link 
-                                        to="/admin/notifications" 
+                                    <Link
+                                        to="/admin/notifications"
                                         className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-slate-800"
                                         onClick={() => setIsNotifOpen(false)}
                                     >
@@ -132,7 +132,7 @@ const AdminHeader = ({ toggleSidebar }) => {
 
                 {/* Profile */}
                 <div className="relative">
-                    <button 
+                    <button
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                         className="flex items-center gap-3 p-1 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
                     >
@@ -148,7 +148,7 @@ const AdminHeader = ({ toggleSidebar }) => {
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin User</p>
                                     <p className="text-xs font-bold text-slate-800 truncate">{user?.email}</p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={logout}
                                     className="w-full text-left px-5 py-3 text-xs font-black text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3 uppercase tracking-widest"
                                 >

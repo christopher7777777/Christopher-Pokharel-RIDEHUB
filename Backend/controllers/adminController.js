@@ -70,20 +70,20 @@ const getAdminStats = async (req, res) => {
         const recentBikes = await Bike.find({}).sort('-createdAt').limit(5);
 
         const recentActivities = [
-            ...recentKYCs.map(k => ({ 
-                text: `KYC for '${k.user?.name || 'User'}' ${k.status}`, 
-                time: k.updatedAt, 
-                type: 'kyc' 
+            ...recentKYCs.map(k => ({
+                text: `KYC for '${k.user?.name || 'User'}' ${k.status}`,
+                time: k.updatedAt,
+                type: 'kyc'
             })),
-            ...recentPayments.map(p => ({ 
-                text: `Payment of Rs ${p.amount} received`, 
-                time: p.createdAt, 
-                type: 'payment' 
+            ...recentPayments.map(p => ({
+                text: `Payment of Rs ${p.amount} received`,
+                time: p.createdAt,
+                type: 'payment'
             })),
-            ...recentBikes.map(b => ({ 
-                text: `New bike listed: '${b.name}'`, 
-                time: b.createdAt, 
-                type: 'bike' 
+            ...recentBikes.map(b => ({
+                text: `New bike listed: '${b.name}'`,
+                time: b.createdAt,
+                type: 'bike'
             }))
         ].sort((a, b) => b.time - a.time).slice(0, 8);
 
@@ -92,7 +92,7 @@ const getAdminStats = async (req, res) => {
             const revItem = revenueAgg.find(item => item._id === date);
             const userItem = usersAgg.find(item => item._id === date);
             const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-            
+
             return {
                 name: dayName,
                 fullDate: date,
@@ -170,8 +170,8 @@ const releaseEscrowPayment = async (req, res) => {
             });
         }
 
-        // Calculate commission (10% platform fee)
-        const commissionRate = 0.10;
+        // Calculate commission (5% platform fee)
+        const commissionRate = 0.05;
         const commission = payment.amount * commissionRate;
         const finalAmount = payment.amount - commission;
 
@@ -261,10 +261,87 @@ const deleteReview = async (req, res) => {
     }
 };
 
+// @desc    Get all financial transaction stats
+// @route   GET /api/admin/financials
+// @access  Private/Admin
+const getFinancials = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        let query = {};
+
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) query.createdAt.$gte = new Date(startDate);
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                query.createdAt.$lte = end;
+            }
+        }
+
+        const payments = await Payment.find(query)
+            .populate('user', 'name')
+            .populate('seller', 'name')
+            .sort('-createdAt');
+
+        // Stats calculation (based on filtered or all?) 
+        // Usually stats on the page reflect the current filter
+        const stats = await Payment.aggregate([
+            { $match: { ...query, paymentStatus: 'COMPLETED' } },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$amount' },
+                    pendingPayouts: {
+                        $sum: {
+                            $cond: [{ $eq: ['$escrowStatus', 'pending'] }, '$amount', 0]
+                        }
+                    },
+                    commissionEarned: {
+                        $sum: {
+                            $cond: [{ $eq: ['$escrowStatus', 'released'] }, '$commission', 0]
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const financialStats = stats.length > 0 ? stats[0] : {
+            totalRevenue: 0,
+            pendingPayouts: 0,
+            commissionEarned: 0
+        };
+
+        res.json({
+            success: true,
+            data: {
+                stats: financialStats,
+                transactions: payments.map(p => ({
+                    id: p.transactionId || p._id,
+                    user: p.user?.name || 'Unknown',
+                    amount: p.amount,
+                    displayAmount: `Rs ${p.amount.toLocaleString()}`,
+                    commission: p.commission || 0,
+                    type: p.escrowStatus === 'released' ? 'Payout' : 'Payment',
+                    status: p.paymentStatus === 'COMPLETED'
+                        ? (p.escrowStatus === 'released' ? 'Completed' : 'Processing')
+                        : 'Pending',
+                    date: new Date(p.createdAt).toLocaleDateString(),
+                    fullDate: p.createdAt
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('Get financials error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     getAdminStats,
     getAllReviews,
     deleteReview,
     getPendingEscrowPayments,
-    releaseEscrowPayment
+    releaseEscrowPayment,
+    getFinancials
 };

@@ -1,5 +1,7 @@
 const KYC = require('../models/KYC');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+const notifyAdmins = require('../utils/adminNotification');
 
 // @desc    Submit KYC details
 // @route   POST /api/kyc
@@ -94,6 +96,14 @@ exports.submitKYC = async (req, res) => {
             kycId: kyc._id
         });
 
+        // Notify Admin of new/updated KYC
+        await notifyAdmins(
+            'New KYC Submission',
+            `${name || req.user.name} has submitted a KYC verification request.`,
+            'GENERAL',
+            kyc._id
+        );
+
         res.status(201).json({
             success: true,
             data: kyc
@@ -170,6 +180,17 @@ exports.updateKYCStatus = async (req, res) => {
         // Update user status
         await User.findByIdAndUpdate(kyc.user, {
             kycStatus: status
+        });
+
+        // Notify user of status update
+        await Notification.create({
+            user: kyc.user,
+            title: `KYC ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+            message: status === 'verified'
+                ? 'Congratulations! Your identity has been verified. You can now list bikes for sale or rent.'
+                : `Sorry, your KYC was rejected. Reason: ${adminNote || 'No reason provided'}. Please update and resubmit.`,
+            type: 'ACCOUNT_UPDATE',
+            relatedId: kyc._id
         });
 
         res.status(200).json({
