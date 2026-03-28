@@ -101,14 +101,12 @@ const MyEMIApplications = () => {
                             <div key={app._id} className="bg-white rounded-[45px] border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group">
                                 <div className="flex flex-col lg:row-span-1 lg:flex-row">
                                     {/* Bike Preview */}
-                                    <div className="w-full lg:w-[450px] min-h-[300px] lg:min-h-full relative overflow-hidden">
-
+                                    <div className="w-full lg:w-[450px] min-h-[300px] lg:min-h-full relative overflow-hidden bg-gray-50">
                                         <img
                                             src={app.bike?.images?.[0] || '/placeholder-bike.png'}
                                             alt={app.bike?.name || 'Bike'}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                                            className="w-full h-full object-contain transition-all duration-1000 p-2"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                                         <div className={`absolute top-6 left-6 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(app.status)} backdrop-blur-xl shadow-lg`}>
                                             {app.status}
                                         </div>

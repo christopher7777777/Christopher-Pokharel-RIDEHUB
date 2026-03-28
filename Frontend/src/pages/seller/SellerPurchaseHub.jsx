@@ -150,7 +150,7 @@ const SellerPurchaseHub = () => {
                                     <div className="flex flex-col sm:flex-row border-b border-gray-50">
                                         <div className="sm:w-48 h-48 relative overflow-hidden">
                                             <img
-                                                src={request.images[0] || 'https://via.placeholder.com/400'}
+                                                src={request.images[0] || 'https://placehold.co/400'}
                                                 alt={request.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />

@@ -76,6 +76,15 @@ const UserKYC = () => {
         userPhoto: null
     });
 
+    const getFullImageUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('blob:')) return path;
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const normalizedPath = path.replace(/\\/g, '/');
+        const cleanPath = normalizedPath.startsWith('/') ? normalizedPath.slice(1) : normalizedPath;
+        return `${baseUrl}/${cleanPath}`;
+    };
+
     useEffect(() => {
         fetchKYCStatus();
     }, []);
@@ -273,10 +282,10 @@ const UserKYC = () => {
                                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{doc.label}</label>
                                                         <div className="aspect-video rounded-2xl overflow-hidden border-2 border-green-100 bg-green-50">
                                                             <img
-                                                                src={`http://localhost:5000/${doc.path}`}
+                                                                src={getFullImageUrl(doc.path)}
                                                                 alt={doc.label}
                                                                 className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                                                                onClick={() => window.open(`http://localhost:5000/${doc.path}`, '_blank')}
+                                                                onClick={() => window.open(getFullImageUrl(doc.path), '_blank')}
                                                             />
                                                         </div>
                                                     </div>
@@ -382,10 +391,10 @@ const UserKYC = () => {
                                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{doc.label}</label>
                                                         <div className="aspect-video rounded-2xl overflow-hidden border-2 border-orange-100 bg-orange-50">
                                                             <img
-                                                                src={`http://localhost:5000/${doc.path}`}
+                                                                src={getFullImageUrl(doc.path)}
                                                                 alt={doc.label}
                                                                 className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                                                                onClick={() => window.open(`http://localhost:5000/${doc.path}`, '_blank')}
+                                                                onClick={() => window.open(getFullImageUrl(doc.path), '_blank')}
                                                             />
                                                         </div>
                                                     </div>
@@ -602,7 +611,7 @@ const UserKYC = () => {
                                                                 {previews[doc.id] ? (
                                                                     <img src={previews[doc.id]} className="absolute inset-0 w-full h-full object-cover" alt="Preview" />
                                                                 ) : kycStatus && kycStatus[doc.id] ? (
-                                                                    <img src={`http://localhost:5000/${kycStatus[doc.id]}`} className="absolute inset-0 w-full h-full object-cover" alt="Current" />
+                                                                    <img src={getFullImageUrl(kycStatus[doc.id])} className="absolute inset-0 w-full h-full object-cover" alt="Current" />
                                                                 ) : (
                                                                     <div className="text-center">
                                                                         <Upload className="mx-auto text-slate-400 group-hover:text-orange-600 mb-2" size={24} />

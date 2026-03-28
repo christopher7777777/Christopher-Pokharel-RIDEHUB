@@ -184,27 +184,27 @@ const AdminEMIApplications = () => {
                                             <td className="px-8 py-5 text-center font-black">
                                                 <div className="flex items-center justify-center gap-2">
                                                     {app.documents?.citizenship && (
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.citizenship, `${app.personalDetails?.fullName || 'Applicant'}_Citizenship`); }} 
-                                                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm" 
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.citizenship, `${app.personalDetails?.fullName || 'Applicant'}_Citizenship`); }}
+                                                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                                                             title="Download Citizenship"
                                                         >
                                                             <Download size={14} />
                                                         </button>
                                                     )}
                                                     {app.documents?.salarySlip && (
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.salarySlip, `${app.personalDetails?.fullName || 'Applicant'}_SalarySlip`); }} 
-                                                            className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm" 
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.salarySlip, `${app.personalDetails?.fullName || 'Applicant'}_SalarySlip`); }}
+                                                            className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm"
                                                             title="Download Salary Slip"
                                                         >
                                                             <Download size={14} />
                                                         </button>
                                                     )}
                                                     {app.documents?.lalpurja && (
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.lalpurja, `${app.personalDetails?.fullName || 'Applicant'}_Lalpurja`); }} 
-                                                            className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-600 hover:text-white transition-all shadow-sm" 
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDownload(app.documents.lalpurja, `${app.personalDetails?.fullName || 'Applicant'}_Lalpurja`); }}
+                                                            className="p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-600 hover:text-white transition-all shadow-sm"
                                                             title="Download Lalpurja"
                                                         >
                                                             <Download size={14} />
@@ -311,13 +311,13 @@ const AdminEMIApplications = () => {
                                                                 href={url} target="_blank" rel="noopener noreferrer"
                                                                 className="bg-orange-600 hover:bg-orange-700 text-white p-2.5 rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-md flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
                                                             >
-                                                                 <ExternalLink size={16} /> View
+                                                                <ExternalLink size={16} /> View
                                                             </a>
                                                             <button
                                                                 onClick={() => handleDownload(url, `${selectedApp.personalDetails?.fullName || 'Applicant'}_${key}`)}
                                                                 className="bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75 shadow-md flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
                                                             >
-                                                                 <Download size={16} /> Save
+                                                                <Download size={16} /> Save
                                                             </button>
                                                         </div>
                                                     </div>

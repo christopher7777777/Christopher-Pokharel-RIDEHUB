@@ -8,8 +8,10 @@ import {
     Trash2,
     Bike as BikeIcon,
     AlertCircle,
-    Loader2
+    Loader2,
+    Truck
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import BikeFormModal from '../../components/models/BikeFormModal';
 
 const SellerInventory = () => {
@@ -24,11 +26,10 @@ const SellerInventory = () => {
         try {
             setLoading(true);
             const response = await api.get('/api/bikes/my-listings');
-            // Filter  available bikes
-            const availableBikes = response.data.data.filter(bike =>
-                bike.status === 'Available'
+            const allBikes = response.data.data.filter(bike =>
+                ['Available', 'Pending Review'].includes(bike.status)
             );
-            setBikes(availableBikes);
+            setBikes(allBikes);
             setError(null);
         } catch (err) {
             setError('Failed to fetch bike listings');
@@ -51,6 +52,18 @@ const SellerInventory = () => {
                 alert('Failed to delete listing');
                 console.error(err);
             }
+        }
+    };
+
+    const handleReleaseForDelivery = async (id) => {
+        try {
+            const response = await api.put(`/api/bikes/release-delivery/${id}`);
+            if (response.data.success) {
+                toast.success('Bike marked as shipped!');
+                fetchBikes();
+            }
+        } catch (err) {
+            toast.error('Failed to update shipment status');
         }
     };
 
@@ -181,7 +194,7 @@ const SellerInventory = () => {
                                             <p className="text-[10px] text-gray-500 font-bold uppercase italic">{bike.listingType === 'Rental' ? '/ day' : 'total'}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-50">
+                                    <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-50 flex-wrap">
                                         <div className="flex items-center gap-1.5 text-gray-700">
                                             <span className="text-xs font-bold">{bike.engineCapacity} CC</span>
                                         </div>
@@ -192,6 +205,13 @@ const SellerInventory = () => {
                                         <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
                                         <div className="flex items-center gap-1.5 text-gray-700">
                                             <span className="text-xs font-bold">{bike.condition}</span>
+                                        </div>
+                                        <div className="ml-auto">
+                                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
+                                                bike.status === 'Available' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-orange-50 text-orange-600 border border-orange-100'
+                                            }`}>
+                                                {bike.status}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

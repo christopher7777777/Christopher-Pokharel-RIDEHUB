@@ -151,7 +151,7 @@ const UserSellingStatus = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="flex items-center gap-6">
                                 <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-orange-100 shadow-sm">
-                                    <img src={listing.images[0] || 'https://via.placeholder.com/400'} alt={listing.name} className="w-full h-full object-cover" />
+                                    <img src={listing.images[0] || 'https://placehold.co/400'} alt={listing.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-3 mb-1">

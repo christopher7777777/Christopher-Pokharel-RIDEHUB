@@ -21,6 +21,7 @@ import SellerKYC from './pages/seller/SellerKYC';
 import SellerMessages from './pages/seller/SellerMessages';
 import SellerPayments from './pages/seller/SellerPayments';
 import SellerPurchaseHub from './pages/seller/SellerPurchaseHub';
+import SellerSales from './pages/seller/SellerSales';
 import AboutUs from './pages/user/AboutUs';
 import BikeDetails from './pages/user/BikeDetails';
 import BrowseBikes from './pages/user/BrowseBikes';
@@ -33,6 +34,7 @@ import UserSellingStatus from './pages/user/UserSellingStatus';
 import PaymentSuccess from './pages/user/PaymentSuccess';
 import PaymentFailure from './pages/user/PaymentFailure';
 import MyEMIApplications from './pages/user/MyEMIApplications';
+import MyPurchases from './pages/user/MyPurchases';
 import AdminEMIApplications from './pages/admin/EMIApplications';
 import EMICalculatorPage from './pages/user/EMICalculatorPage';
 import Notifications from './pages/Notifications';
@@ -144,6 +146,14 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/my-purchases"
+              element={
+                <PrivateRoute>
+                  <MyPurchases />
+                </PrivateRoute>
+              }
+            />
             {/* Seller specific routes */}
             <Route
               path="/seller/inventory"
@@ -166,6 +176,14 @@ function App() {
               element={
                 <PrivateRoute role="seller">
                   <SellerPurchaseHub />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller/sales"
+              element={
+                <PrivateRoute role="seller">
+                  <SellerSales />
                 </PrivateRoute>
               }
             />

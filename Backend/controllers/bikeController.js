@@ -1,6 +1,7 @@
 const Bike = require('../models/Bike');
 const ValuationRule = require('../models/ValuationRule');
 const Notification = require('../models/Notification');
+const KYC = require('../models/KYC');
 const notifyAdmins = require('../utils/adminNotification');
 const notifyUserUpdate = require('../utils/notifyUserUpdate');
 
@@ -64,6 +65,31 @@ exports.createBike = async (req, res) => {
 exports.getMyBikes = async (req, res) => {
     try {
         const bikes = await Bike.find({ seller: req.user.id }).sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            count: bikes.length,
+            data: bikes
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Get bikes purchased or rented by current user
+// @route   GET /api/bikes/my-purchases
+// @access  Private
+exports.getMyPurchases = async (req, res) => {
+    try {
+        const bikes = await Bike.find({
+            $or: [
+                { purchasedBy: req.user.id },
+                { rentedBy: req.user.id }
+            ]
+        }).populate('seller', 'name email').sort('-updatedAt');
 
         res.status(200).json({
             success: true,
@@ -360,8 +386,8 @@ exports.confirmSale = async (req, res) => {
             deliveryCharge,
             bookingDate,
             serviceDay,
-            status: bike.status === 'Purchased' ? 'Purchased' : 'Approved',
-            purchasedBy: req.user.id
+            status: paymentMethod === 'Online' ? bike.status : (bike.status === 'Purchased' ? 'Purchased' : 'Approved'),
+            purchasedBy: paymentMethod === 'Online' ? bike.purchasedBy : req.user.id
         };
 
         // Calculate final transaction price
@@ -494,7 +520,7 @@ exports.rentBike = async (req, res) => {
         }
 
         const updateData = {
-            status: 'Rented',
+            status: paymentMethod === 'Online' ? bike.status : 'Rented',
             paymentMethod: paymentMethod || 'Cash',
             deliveryMethod,
             deliveryCharge,
@@ -502,7 +528,7 @@ exports.rentBike = async (req, res) => {
             serviceDay,
             rentalPlan: rentalPlan || 'Daily',
             rentalExpiry: expiryDate,
-            rentedBy: req.user.id
+            rentedBy: paymentMethod === 'Online' ? bike.rentedBy : req.user.id
         };
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
@@ -644,6 +670,120 @@ exports.requestExchange = async (req, res) => {
             'GENERAL',
             bike._id
         );
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// @desc    Seller releases bike for delivery
+// @route   PUT /api/bikes/release-delivery/:id
+// @access  Private/Seller
+exports.releaseBikeForDelivery = async (req, res) => {
+    try {
+        const bike = await Bike.findById(req.params.id).populate('seller');
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        // Check if seller is the owner
+        const sellerId = bike.seller._id || bike.seller;
+        if (sellerId.toString() !== req.user.id.toString()) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Legacy support: if deliveryStatus is already Shipped/Delivered, don't re-release
+        if (bike.deliveryStatus === 'Shipped' || bike.deliveryStatus === 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Bike already released for delivery' });
+        }
+
+        // Use findByIdAndUpdate to bypass validation of other fields for legacy records
+        await Bike.findByIdAndUpdate(req.params.id, { deliveryStatus: 'Shipped' });
+
+        // 1. Create System Notification for Buyer
+        const buyerId = bike.purchasedBy || bike.rentedBy;
+        if (buyerId) {
+            await Notification.create({
+                user: buyerId,
+                title: 'Bike Out for Delivery!',
+                message: `Your ${bike.listingType.toLowerCase()} bike "${bike.name}" has been shipped by the seller.`,
+                type: 'GENERAL'
+            });
+
+            // 2. Send Email with KYC Location
+            const User = require('../models/User');
+            const buyer = await User.findById(buyerId);
+            const kyc = await KYC.findOne({ user: buyerId, status: 'verified' });
+
+            const deliveryLocation = kyc ? (kyc.location?.address || kyc.permanentAddress) : 'the address provided in your profile';
+
+            if (buyer && buyer.email) {
+                notifyUserUpdate(
+                    bike,
+                    'Bike Shipped - You will get it soon!',
+                    `Great news! Your bike "${bike.name}" has been released for delivery by the seller and is on its way to your verified location: ${deliveryLocation}. You will get it soon. Expect a call from the delivery partner.`,
+                    buyer.email
+                );
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    User confirms bike receipt
+// @route   PUT /api/bikes/receive-bike/:id
+// @access  Private
+exports.receiveBike = async (req, res) => {
+    try {
+        const bike = await Bike.findById(req.params.id).populate('seller');
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        // Check if user is the buyer/renter
+        const isBuyer = bike.purchasedBy && bike.purchasedBy.toString() === req.user.id;
+        const isRenter = bike.rentedBy && bike.rentedBy.toString() === req.user.id;
+
+        if (!isBuyer && !isRenter) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        if (bike.deliveryStatus !== 'Shipped') {
+            return res.status(400).json({ success: false, message: 'Bike is not in transit' });
+        }
+
+        bike.deliveryStatus = 'Delivered';
+        await bike.save();
+
+        // Notify Seller
+        await Notification.create({
+            user: bike.seller._id,
+            title: 'Bike Received!',
+            message: `The buyer has confirmed receipt of "${bike.name}". Transaction completed.`,
+            type: 'GENERAL'
+        });
+
+        // Email Seller
+        if (bike.seller && bike.seller.email) {
+            notifyUserUpdate(
+                bike,
+                'Order Received - Item Delivered!',
+                `Hello ${bike.seller.name}, your bike "${bike.name}" has been received by the user. Transaction successful!`,
+                bike.seller.email
+            );
+        }
 
         res.status(200).json({
             success: true,
@@ -689,6 +829,7 @@ exports.valuateExchange = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
 // @desc    Get dashboard stats for seller
 // @route   GET /api/bikes/seller/stats
 // @access  Private/Seller
@@ -777,5 +918,8 @@ module.exports = {
     requestExchange: exports.requestExchange,
     valuateExchange: exports.valuateExchange,
     getAdminBikes: exports.getAdminBikes,
-    getSellerStats: exports.getSellerStats
+    getSellerStats: exports.getSellerStats,
+    releaseBikeForDelivery: exports.releaseBikeForDelivery,
+    receiveBike: exports.receiveBike,
+    getMyPurchases: exports.getMyPurchases
 };

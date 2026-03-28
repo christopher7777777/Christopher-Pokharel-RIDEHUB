@@ -19,7 +19,11 @@ const KycVerification = () => {
         if (!path) return '';
         if (path.startsWith('http')) return path;
         const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        return `${baseUrl}/${path}`;
+        // Normalize backslashes (Windows) to forward slashes for URLs
+        const normalizedPath = path.replace(/\\/g, '/');
+        // Ensure path doesn't start with / if baseUrl ends with /
+        const cleanPath = normalizedPath.startsWith('/') ? normalizedPath.slice(1) : normalizedPath;
+        return `${baseUrl}/${cleanPath}`;
     };
 
     const fetchKycs = async () => {
@@ -258,7 +262,7 @@ const KycVerification = () => {
                                         { label: 'Citizenship (Back)', src: selectedKyc.nagriktaBack },
                                         { label: 'PAN Document', src: selectedKyc.panPhoto },
                                     ].map((doc, i) => doc.src && (
-                                        <div key={i} className="space-y-3 group cursor-pointer" onClick={() => window.open(doc.src, '_blank')}>
+                                        <div key={i} className="space-y-3 group cursor-pointer" onClick={() => window.open(getFullImageUrl(doc.src), '_blank')}>
                                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{doc.label}</p>
                                             <div className="aspect-video bg-slate-50 rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-sm relative group">
                                                 <img src={getFullImageUrl(doc.src)} alt={doc.label} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
