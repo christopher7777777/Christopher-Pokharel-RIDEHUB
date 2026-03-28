@@ -225,8 +225,11 @@ const BookingModal = ({ isOpen, onClose, bike, onConfirm }) => {
                         <div className="flex flex-wrap gap-4">
                             <button
                                 type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'Cash' }))}
-                                className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${formData.paymentMethod === 'Cash' ? 'bg-orange-500 text-white shadow-orange-200 scale-105' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                                onClick={() => setFormData(prev => ({ 
+                                    ...prev, 
+                                    paymentMethod: prev.deliveryMethod === 'Home Delivery' ? 'Cash on Delivery' : 'Cash' 
+                                }))}
+                                className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-sm ${formData.paymentMethod === 'Cash' || formData.paymentMethod === 'Cash on Delivery' ? 'bg-orange-500 text-white shadow-orange-200 scale-105' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
                             >
                                 {formData.deliveryMethod === 'Home Delivery' ? 'Cash On Delivery' : 'Cash At Pickup'}
                             </button>

@@ -424,7 +424,7 @@ const BikeDetails = () => {
                                             if (bike.status === 'Available') {
                                                 return isBuyBike ? 'Buy This Bike' : 'Rent This Bike';
                                             }
-                                            
+
                                             // Handle special EMI/Finance states
                                             const statusMap = {
                                                 'FinancePending': 'Financing In Progress',
@@ -434,7 +434,7 @@ const BikeDetails = () => {
                                                 'Negotiating': 'Under Negotiation',
                                                 'Countered': 'Counter Offer Sent'
                                             };
-                                            
+
                                             return statusMap[bike.status] || bike.status.toUpperCase();
                                         })()}
 

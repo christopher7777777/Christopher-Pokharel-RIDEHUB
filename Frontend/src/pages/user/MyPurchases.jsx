@@ -39,7 +39,7 @@ const MyPurchases = () => {
 
     const handleConfirmReceipt = async (bikeId) => {
         if (!window.confirm('Have you received the bike in the stated condition?')) return;
-        
+
         try {
             const response = await api.put(`/api/bikes/receive-bike/${bikeId}`);
             if (response.data.success) {
@@ -60,7 +60,7 @@ const MyPurchases = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col pt-24">
             <Header />
-            
+
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-10">
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-4">
@@ -94,15 +94,14 @@ const MyPurchases = () => {
                                 <div className="flex flex-col lg:flex-row">
                                     {/* Image Section */}
                                     <div className="lg:w-1/3 relative h-64 lg:h-auto overflow-hidden bg-gray-50">
-                                        <img 
-                                            src={bike.images?.[0] || 'https://placehold.co/600x400'} 
+                                        <img
+                                            src={bike.images?.[0] || 'https://placehold.co/600x400'}
                                             alt={bike.name}
-                                            className="w-full h-full object-contain transition-all duration-700 p-2" 
+                                            className="w-full h-full object-contain transition-all duration-700 p-2"
                                         />
                                         <div className="absolute top-6 left-6">
-                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg backdrop-blur-md border border-white/20 ${
-                                                bike.listingType === 'Rental' ? 'bg-blue-600/90 text-white' : 'bg-emerald-600/90 text-white'
-                                            }`}>
+                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg backdrop-blur-md border border-white/20 ${bike.listingType === 'Rental' ? 'bg-blue-600/90 text-white' : 'bg-emerald-600/90 text-white'
+                                                }`}>
                                                 {bike.listingType}
                                             </span>
                                         </div>
@@ -138,25 +137,23 @@ const MyPurchases = () => {
                                         <div className="bg-gray-50 rounded-3xl p-8 mb-8 border border-gray-100">
                                             <div className="flex items-center justify-between relative mb-12">
                                                 <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2"></div>
-                                                <div 
+                                                <div
                                                     className="absolute top-1/2 left-0 h-1 bg-orange-600 -translate-y-1/2 transition-all duration-1000"
                                                     style={{ width: `${(getStatusStep(bike.status, bike.deliveryStatus) - 1) * 50}%` }}
                                                 ></div>
-                                                
+
                                                 {[
                                                     { step: 1, label: 'Processing', icon: Package, active: true },
                                                     { step: 2, label: 'In Transit', icon: Truck, active: getStatusStep(bike.status, bike.deliveryStatus) >= 2 },
                                                     { step: 3, label: 'Delivered', icon: CheckCircle2, active: getStatusStep(bike.status, bike.deliveryStatus) >= 3 }
                                                 ].map((s) => (
                                                     <div key={s.step} className="relative z-10 flex flex-col items-center group">
-                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-4 border-white ${
-                                                            s.active ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20' : 'bg-white text-gray-300 border-gray-100'
-                                                        }`}>
+                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-4 border-white ${s.active ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20' : 'bg-white text-gray-300 border-gray-100'
+                                                            }`}>
                                                             <s.icon size={20} />
                                                         </div>
-                                                        <span className={`absolute -bottom-8 whitespace-nowrap text-[9px] font-black uppercase tracking-widest transition-colors ${
-                                                            s.active ? 'text-orange-600' : 'text-gray-300'
-                                                        }`}>
+                                                        <span className={`absolute -bottom-8 whitespace-nowrap text-[9px] font-black uppercase tracking-widest transition-colors ${s.active ? 'text-orange-600' : 'text-gray-300'
+                                                            }`}>
                                                             {s.label}
                                                         </span>
                                                     </div>
@@ -186,7 +183,7 @@ const MyPurchases = () => {
 
                                         {/* Action Button */}
                                         {bike.deliveryStatus === 'Shipped' && (
-                                            <button 
+                                            <button
                                                 onClick={() => handleConfirmReceipt(bike._id)}
                                                 className="w-full bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] group"
                                             >

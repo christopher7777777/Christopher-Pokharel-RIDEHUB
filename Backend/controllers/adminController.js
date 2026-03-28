@@ -170,8 +170,8 @@ const releaseEscrowPayment = async (req, res) => {
             });
         }
 
-        // Calculate commission (5% platform fee)
-        const commissionRate = 0.05;
+        // Calculate commission (10% platform fee)
+        const commissionRate = 0.10;
         const commission = payment.amount * commissionRate;
         const finalAmount = payment.amount - commission;
 
@@ -287,11 +287,13 @@ const getFinancials = async (req, res) => {
         // Stats calculation (based on filtered or all?) 
         // Usually stats on the page reflect the current filter
         const stats = await Payment.aggregate([
-            { $match: { ...query, paymentStatus: 'COMPLETED' } },
+            { $match: query },
             {
                 $group: {
                     _id: null,
-                    totalRevenue: { $sum: '$amount' },
+                    totalRevenue: { 
+                        $sum: { $cond: [{ $eq: ['$paymentStatus', 'COMPLETED'] }, '$amount', 0] } 
+                    },
                     pendingPayouts: {
                         $sum: {
                             $cond: [{ $eq: ['$escrowStatus', 'pending'] }, '$amount', 0]
