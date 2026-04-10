@@ -58,6 +58,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const verifyOTP = async (email, otp) => {
+        try {
+            const res = await api.post('/api/auth/verify-otp', { email, otp });
+            return res.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Verification failed' };
+        }
+    };
+
+    const resendOTP = async (email) => {
+        try {
+            const res = await api.post('/api/auth/resend-otp', { email });
+            return res.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Resending OTP failed' };
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem('token');
         setUser(null);
@@ -68,6 +86,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         register,
         login,
+        verifyOTP,
+        resendOTP,
         logout,
         loadUser
     };

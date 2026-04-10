@@ -8,6 +8,8 @@ const {
     updatePassword,
     forgotPassword,
     resetPassword,
+    verifyOTP,
+    resendOTP,
     getAllUsers,
     deleteUser,
     getSellers,
@@ -16,6 +18,8 @@ const {
 const { protect, isAdmin } = require('../middleware/auth');
 
 router.post('/register', register);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
 router.post('/login', login);
 router.get('/me', protect, getMe);
 router.put('/updatepassword', protect, updatePassword);

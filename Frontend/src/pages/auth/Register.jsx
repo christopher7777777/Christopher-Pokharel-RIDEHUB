@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -29,21 +30,25 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
+            setLoading(false);
             return;
         }
 
         if (formData.password.length < 6) {
             setError('Password must be at least 6 characters');
+            setLoading(false);
             return;
         }
 
         try {
             const result = await register(formData);
             if (result.success) {
-                navigate('/login');
+                toast.success('Registration successful! Please verify your email.');
+                navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
             }
         } catch (err) {
             setError(err.message || 'Registration failed');
@@ -62,7 +67,7 @@ const Register = () => {
                 {/* Left Side - Branding */}
                 <div className="bg-slate-900 p-12 flex flex-col justify-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-600/20 to-transparent"></div>
-                    
+
                     <div className="relative z-10">
                         <h1 className="text-4xl font-extrabold text-white mb-4 uppercase tracking-tight">
                             Your Journey <br />

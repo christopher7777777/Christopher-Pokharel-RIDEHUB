@@ -60,7 +60,7 @@ const SellerLayout = ({ children }) => {
                     isSidebarOpen={isSidebarOpen}
                 />
 
-                <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
+                <main className="flex-1 p-6 md:p-8 w-full">
                     {children}
                 </main>
             </div>

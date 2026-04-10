@@ -14,6 +14,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ResetPassword from './pages/auth/ResetPassword';
+import VerifyOTP from './pages/auth/VerifyOTP';
 import SellerBikes from './pages/seller/SellerBikes';
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerInventory from './pages/seller/SellerInventory';
@@ -38,6 +39,7 @@ import MyPurchases from './pages/user/MyPurchases';
 import AdminEMIApplications from './pages/admin/EMIApplications';
 import EMICalculatorPage from './pages/user/EMICalculatorPage';
 import Notifications from './pages/Notifications';
+import { Toaster } from 'react-hot-toast';
 
 const GlobalSupportChat = () => {
   const { user, loading } = useAuth();
@@ -65,6 +67,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/resetpassword/:token" element={<ResetPassword />} />
             <Route
@@ -303,6 +306,7 @@ function App() {
             />
           </Routes>
           <GlobalSupportChat />
+          <Toaster position="top-center" reverseOrder={false} />
         </div>
       </Router>
     </AuthProvider>

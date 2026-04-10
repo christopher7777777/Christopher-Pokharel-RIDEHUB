@@ -1,16 +1,17 @@
 const nodemailer = require('nodemailer');
 
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: false,
+    auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+    },
+});
+
 const sendEmail = async (options) => {
     try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 587,
-            secure: false,
-            auth: {
-                user: process.env.SMTP_EMAIL,
-                pass: process.env.SMTP_PASSWORD,
-            },
-        });
 
         const fromName = process.env.FROM_NAME || 'RIDEHUB';
         const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_EMAIL;

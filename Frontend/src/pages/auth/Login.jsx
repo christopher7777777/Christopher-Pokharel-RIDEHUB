@@ -32,6 +32,14 @@ const Login = () => {
             await login(formData);
             navigate('/dashboard');
         } catch (err) {
+            console.error('Login error details:', err);
+            // Check if account requires verification
+            if (err.requiresVerification) {
+                toast.error('Please verify your email to continue');
+                navigate(`/verify-otp?email=${encodeURIComponent(err.email || formData.email)}`);
+                return;
+            }
+
             const errorMsg = err.message || 'Login failed';
             setError(errorMsg);
             toast.error(errorMsg);
@@ -50,7 +58,7 @@ const Login = () => {
                 {/* Left Side - Branding */}
                 <div className="bg-slate-900 p-12 flex flex-col justify-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-600/20 to-transparent"></div>
-                    
+
                     <div className="relative z-10">
                         <h1 className="text-4xl font-extrabold text-white mb-4 uppercase tracking-tight">
                             Your Journey <br />

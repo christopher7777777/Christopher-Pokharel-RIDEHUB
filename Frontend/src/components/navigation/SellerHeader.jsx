@@ -50,7 +50,7 @@ const SellerHeader = ({ onMenuToggle }) => {
     }, [user]);
 
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-gray-100 h-20 px-6 flex items-center justify-between shadow-sm">
+        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 h-20 px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
                 <button
                     onClick={onMenuToggle}

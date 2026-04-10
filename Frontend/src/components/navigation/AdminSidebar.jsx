@@ -35,23 +35,22 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
 
     return (
         <aside
-            className={`h-screen bg-slate-900 border-r border-slate-800 text-white transition-all duration-300 flex flex-col sticky top-0 ${isOpen ? 'w-[260px]' : 'w-[80px]'}`}
+            className={`h-screen bg-[#0f172a] border-r border-slate-800 text-slate-300 transition-all duration-300 flex flex-col sticky top-0 ${isOpen ? 'w-[260px]' : 'w-[80px]'}`}
         >
             {/* Branding */}
-            <div className="h-20 flex items-center justify-center border-b border-slate-800 shrink-0">
+            <div className="h-24 flex items-center justify-center border-b border-slate-800/50 shrink-0">
                 <Link to="/admin/dashboard" className="flex items-center justify-center">
                     <img
                         src="/image5.png"
                         alt="RIDEHUB Logo"
-                        className={`transition-all duration-300 ${isOpen ? 'h-14 px-4' : 'h-10 px-2'}`}
+                        className={`transition-all duration-300 ${isOpen ? 'h-16 px-4' : 'h-10 px-2'}`}
                     />
                 </Link>
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 py-8 px-4 space-y-2 overflow-y-auto custom-scrollbar">
                 {menuItems.map((item, idx) => {
-                    // Precise match or sub-path match for active state
                     const isActive = location.pathname === item.path;
                     const Icon = item.icon;
 
@@ -59,14 +58,14 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
-                                ? 'bg-orange-600 text-white font-bold'
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium'
+                            className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group ${isActive
+                                ? 'bg-slate-800/50 text-sky-400 shadow-sm'
+                                : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'
                                 }`}
                         >
-                            <Icon size={20} className={isActive ? 'text-white' : 'text-slate-400'} />
+                            <Icon size={22} className={isActive ? 'text-orange-500' : 'text-slate-500 group-hover:text-slate-300'} />
                             {isOpen && (
-                                <span className="text-sm tracking-wide">
+                                <span className="text-sm font-bold tracking-tight">
                                     {item.label}
                                 </span>
                             )}
@@ -76,19 +75,19 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
             </div>
 
             {/* Bottom Actions */}
-            <div className="p-4 border-t border-slate-800 space-y-2 shrink-0">
+            <div className="p-4 border-t border-slate-800/50 space-y-4 shrink-0">
                 <button
                     onClick={logout}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-400/10 transition-all font-bold ${!isOpen && 'justify-center'}`}
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-red-400 hover:bg-red-400/5 hover:text-red-300 transition-all font-bold ${!isOpen && 'justify-center'}`}
                 >
-                    <LogOut size={20} />
-                    {isOpen && <span className="text-sm tracking-wide">Logout</span>}
+                    <LogOut size={22} />
+                    {isOpen && <span className="text-sm font-bold tracking-tight">LOGOUT</span>}
                 </button>
 
                 {toggleSidebar && (
                     <button
                         onClick={toggleSidebar}
-                        className="w-full h-10 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 transition-all"
+                        className="w-full h-12 flex items-center justify-center bg-slate-800/30 text-slate-500 rounded-xl hover:bg-slate-800 hover:text-slate-300 transition-all"
                     >
                         {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
                     </button>

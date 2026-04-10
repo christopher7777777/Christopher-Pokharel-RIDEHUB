@@ -13,47 +13,86 @@ const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Check if user exists
-        const userExists = await User.findOne({ email });
-        if (userExists) {
+        // Validation: Check for required fields
+        if (!name || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'User already exists'
+                message: 'Please add all required fields (name, email, password)'
             });
         }
 
-        // Create user
+        // Check if a verified user with this email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            if (existingUser.isVerified) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User already exists with this email'
+                });
+            }
+            // If pending (unverified) re-registration, delete stale record
+            await existingUser.deleteOne();
+        }
+
+        // Generate 6-digit OTP and hash it
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+        // Create user in pending (unverified) state
         const user = await User.create({
             name,
             email,
             password,
-            role: role || 'user'
+            role: role || 'user',
+            isVerified: false,
+            otp: hashedOtp,
+            otpExpire: Date.now() + 10 * 60 * 1000 // 10 minutes
         });
 
-        const token = generateToken(user._id);
-
-        res.status(201).json({
-            success: true,
-            data: {
-                _id: user._id,
-                name: user.name,
+        // Send OTP email
+        try {
+            await sendEmail({
                 email: user.email,
-                role: user.role,
-                isAdmin: user.isAdmin,
-                kycStatus: user.kycStatus,
-                token: token,
-            },
-            message: 'Registration successful'
-        });
+                subject: 'RIDEHUB – Email Verification OTP',
+                message: `Your RIDEHUB verification OTP is: ${otp}\n\nThis OTP is valid for 10 minutes. Do not share it with anyone.`,
+                html: `
+                    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+                        <h2 style="color:#ea580c;margin-bottom:8px;">RIDEHUB Email Verification</h2>
+                        <p style="color:#334155;">Hello <strong>${user.name}</strong>,</p>
+                        <p style="color:#334155;">Use the OTP below to verify your email address:</p>
+                        <div style="background:#1e293b;color:#f97316;font-size:38px;font-weight:bold;letter-spacing:14px;text-align:center;padding:24px 16px;border-radius:14px;margin:28px 0;">
+                            ${otp}
+                        </div>
+                        <p style="color:#475569;">This OTP expires in <strong>10 minutes</strong>. Never share it with anyone.</p>
+                        <p style="color:#94a3b8;font-size:13px;">If you did not create a RIDEHUB account, you can safely ignore this email.</p>
+                    </div>
+                `
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Registration successful. Please check your email for the OTP verification code.',
+                email: user.email
+            });
+        } catch (emailError) {
+            console.error('OTP email send error:', emailError);
+            // Roll back — delete the user so they can try again
+            await user.deleteOne();
+            return res.status(500).json({
+                success: false,
+                message: 'Could not send verification email. Please try registering again.'
+            });
+        }
 
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: 'Server error'
+            message: error.message || 'Registration failed'
         });
     }
 };
+
 
 // Login
 const login = async (req, res) => {
@@ -74,6 +113,16 @@ const login = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: 'Email is not registered'
+            });
+        }
+
+        // Block login for unverified (pending) accounts (Except Admins)
+        if (user.isVerified === false && !user.isAdmin) {
+            return res.status(403).json({
+                success: false,
+                message: 'Please verify your email before logging in.',
+                email: user.email,
+                requiresVerification: true
             });
         }
 
@@ -108,6 +157,139 @@ const login = async (req, res) => {
         });
     }
 };
+
+// @desc    Verify OTP
+// @route   POST /api/auth/verify-otp
+// @access  Public
+const verifyOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email and OTP'
+            });
+        }
+
+        // Hash the incoming OTP and compare
+        const hashedOtp = crypto.createHash('sha256').update(otp.trim()).digest('hex');
+
+        const user = await User.findOne({
+            email,
+            otp: hashedOtp,
+            otpExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid or expired OTP. Please request a new one.'
+            });
+        }
+
+        // Activate account
+        user.isVerified = true;
+        user.otp = undefined;
+        user.otpExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        const token = generateToken(user._id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Email verified successfully! Welcome to RIDEHUB.',
+            data: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isAdmin: user.isAdmin,
+                kycStatus: user.kycStatus,
+                token
+            }
+        });
+
+    } catch (error) {
+        console.error('OTP verification error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+// @desc    Resend OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+const resendOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email'
+            });
+        }
+
+        const user = await User.findOne({ email, isVerified: false });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'No pending account found for this email.'
+            });
+        }
+
+        // Generate fresh OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+        user.otp = hashedOtp;
+        user.otpExpire = Date.now() + 10 * 60 * 1000;
+        await user.save({ validateBeforeSave: false });
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'RIDEHUB – Resend OTP Verification',
+                message: `Your new RIDEHUB verification OTP is: ${otp}\n\nThis OTP is valid for 10 minutes.`,
+                html: `
+                    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+                        <h2 style="color:#ea580c;margin-bottom:8px;">RIDEHUB – New Verification OTP</h2>
+                        <p style="color:#334155;">Hello <strong>${user.name}</strong>,</p>
+                        <p style="color:#334155;">Here is your new OTP to verify your email address:</p>
+                        <div style="background:#1e293b;color:#f97316;font-size:38px;font-weight:bold;letter-spacing:14px;text-align:center;padding:24px 16px;border-radius:14px;margin:28px 0;">
+                            ${otp}
+                        </div>
+                        <p style="color:#475569;">This OTP expires in <strong>10 minutes</strong>.</p>
+                        <p style="color:#94a3b8;font-size:13px;">If you did not request this, please ignore this email.</p>
+                    </div>
+                `
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'A new OTP has been sent to your email.'
+            });
+        } catch (emailError) {
+            console.error('Resend OTP email error:', emailError);
+            return res.status(500).json({
+                success: false,
+                message: 'Could not send OTP email. Please try again.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Resend OTP error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
 
 // Get user profile
 const getMe = async (req, res) => {
@@ -380,6 +562,8 @@ const updateEsewaId = async (req, res) => {
 module.exports = {
     register,
     login,
+    verifyOTP,
+    resendOTP,
     getMe,
     updatePassword,
     forgotPassword,
