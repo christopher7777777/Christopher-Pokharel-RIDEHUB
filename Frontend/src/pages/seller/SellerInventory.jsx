@@ -88,7 +88,7 @@ const SellerInventory = () => {
             <div className="animate-fadeIn">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Bike Inventory</h1>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Bike Listing</h1>
                         <p className="text-gray-500 text-sm italic">Manage your ride listings and availability.</p>
                     </div>
                     <button

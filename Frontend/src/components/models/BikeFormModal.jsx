@@ -1,4 +1,4 @@
-import { AlertCircle, Bike, Calendar, DollarSign, Gauge, Loader2, Package, Tag, Trash2, Upload, X, Zap } from 'lucide-react';
+import { AlertCircle, Bike, Calendar, Gauge, Loader2, Package, Tag, Trash2, Upload, X, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../../utils/api';
 
@@ -271,7 +271,7 @@ const BikeFormModal = ({ isOpen, onClose, bike, onSuccess }) => {
 
                         <div>
                             <label className="flex items-center gap-2 text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">
-                                <DollarSign size={12} /> {formData.listingType === 'Rental' ? 'Price/Day (RS)' : 'Sale Price (RS)'}
+                                <span className="text-[9px] bg-orange-100 text-orange-600 px-1 rounded-md border border-orange-200">RS</span> {formData.listingType === 'Rental' ? 'Price/Day (RS)' : 'Sale Price (RS)'}
                             </label>
                             <input
                                 required

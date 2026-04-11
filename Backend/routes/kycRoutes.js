@@ -15,7 +15,8 @@ router.route('/')
         { name: 'nagriktaFront', maxCount: 1 },
         { name: 'nagriktaBack', maxCount: 1 },
         { name: 'userPhoto', maxCount: 1 },
-        { name: 'panPhoto', maxCount: 1 }
+        { name: 'panPhoto', maxCount: 1 },
+        { name: 'photoWithCitizenship', maxCount: 1 }
     ]), submitKYC);
 
 router.route('/my-status')

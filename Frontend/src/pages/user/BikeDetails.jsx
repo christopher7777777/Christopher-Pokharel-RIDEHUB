@@ -98,7 +98,15 @@ const BikeDetails = () => {
                     const initResponse = await api.post('/api/payment/initiate', {
                         amount: bookingData.totalAmount,
                         productName: bike.name,
-                        bikeId: bike._id
+                        bikeId: bike._id,
+                        bookingDetails: {
+                            rentalPlan: bookingData.rentalPlan,
+                            rentalDuration: bookingData.rentalDuration,
+                            bookingDate: bookingData.bookingDate,
+                            deliveryMethod: bookingData.deliveryMethod,
+                            deliveryCharge: bookingData.deliveryCharge,
+                            serviceDay: bookingData.serviceDay
+                        }
                     });
 
                     if (initResponse.data.success) {

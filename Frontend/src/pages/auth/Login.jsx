@@ -123,7 +123,7 @@ const Login = () => {
                     </div>
 
                     {error && (
-                        <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-6 text-xs font-semibold uppercase tracking-widest text-center shadow-sm">
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl mb-6 text-sm font-bold uppercase tracking-wider text-center shadow-sm animate-pulse">
                             {error}
                         </div>
                     )}
@@ -139,7 +139,7 @@ const Login = () => {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-semibold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all text-sm"
+                                className={`w-full px-5 py-3.5 bg-slate-50 border ${error && error.toLowerCase().includes('email') ? 'border-red-500' : 'border-slate-100'} rounded-2xl text-slate-900 font-semibold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all text-sm`}
                                 placeholder="Enter your email"
                             />
                         </div>
@@ -155,7 +155,7 @@ const Login = () => {
                                     required
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-semibold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all text-sm"
+                                    className={`w-full px-5 py-3.5 bg-slate-50 border ${error && error.toLowerCase().includes('password') ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-100'} rounded-2xl text-slate-900 font-semibold placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all text-sm`}
                                     placeholder="Enter your password"
                                 />
                                 <button

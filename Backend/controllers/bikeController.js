@@ -92,10 +92,19 @@ exports.getMyPurchases = async (req, res) => {
             ]
         }).populate('seller', 'name email').sort('-updatedAt');
 
+        // Dynamically update status to Overdue if needed
+        const updatedBikes = await Promise.all(bikes.map(async (bike) => {
+            if (bike.status === 'Rented' && bike.rentalExpiry && new Date() > new Date(bike.rentalExpiry)) {
+                bike.status = 'Overdue';
+                await bike.save();
+            }
+            return bike;
+        }));
+
         res.status(200).json({
             success: true,
-            count: bikes.length,
-            data: bikes
+            count: updatedBikes.length,
+            data: updatedBikes
         });
     } catch (error) {
         res.status(400).json({
@@ -405,6 +414,15 @@ exports.confirmSale = async (req, res) => {
 
         if (userQrImage) updateData.userQrImage = userQrImage;
 
+        // --- NEW: Bypass DB update for Online Payment ---
+        if (paymentMethod === 'Online') {
+            return res.status(200).json({
+                success: true,
+                message: 'Validated for online payment',
+                data: bike
+            });
+        }
+
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
         // Notify Seller (Dealer or User who listed) - Only if not Online payment
@@ -544,8 +562,17 @@ exports.rentBike = async (req, res) => {
             expiryDate.setDate(expiryDate.getDate() + duration);
         }
 
+        // --- NEW: Bypass DB update for Online Payment ---
+        if (paymentMethod === 'Online') {
+            return res.status(200).json({
+                success: true,
+                message: 'Validated for online payment',
+                data: bike
+            });
+        }
+
         const updateData = {
-            status: paymentMethod === 'Online' ? bike.status : 'Rented',
+            status: 'Rented',
             paymentMethod: paymentMethod || 'Cash',
             deliveryMethod,
             deliveryCharge,
@@ -553,7 +580,7 @@ exports.rentBike = async (req, res) => {
             serviceDay,
             rentalPlan: rentalPlan || 'Daily',
             rentalExpiry: expiryDate,
-            rentedBy: paymentMethod === 'Online' ? bike.rentedBy : req.user.id
+            rentedBy: req.user.id
         };
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
@@ -892,7 +919,8 @@ exports.getSellerStats = async (req, res) => {
         const myBikes = await Bike.find({ seller: req.user.id });
 
         const activeListings = myBikes.filter(b => b.status === 'Available').length;
-        const newOrders = myBikes.filter(b => b.status === 'Rented').length;
+        const newOrders = myBikes.filter(b => ['Rented', 'Overdue'].includes(b.status)).length;
+        const pendingReturns = myBikes.filter(b => b.status === 'Pending Return').length;
 
         // Calculate earnings from bikes SOLD by the dealer
         const soldBikes = myBikes.filter(b => b.status === 'Purchased');
@@ -925,6 +953,7 @@ exports.getSellerStats = async (req, res) => {
                 totalEarnings,
                 activeListings,
                 newOrders,
+                pendingReturns,
                 recentActivity
             }
         });
@@ -956,6 +985,127 @@ exports.getAdminBikes = async (req, res) => {
     }
 };
 
+
+// @desc    Initiate bike return (User)
+// @route   PUT /api/bikes/return/initiate/:id
+// @access  Private
+exports.initiateReturn = async (req, res) => {
+    try {
+        const bike = await Bike.findById(req.params.id).populate('seller');
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        // Check if user is the renter
+        if (bike.rentedBy.toString() !== req.user.id.toString()) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        if (bike.status !== 'Rented' && bike.status !== 'Overdue') {
+            return res.status(400).json({ success: false, message: 'Bike is not currently rented' });
+        }
+
+        // Calculate Late Fee (NPR 500 per extra day)
+        let lateFee = 0;
+        let lateDays = 0;
+        const currentDate = new Date();
+        const expiryDate = new Date(bike.rentalExpiry);
+
+        if (currentDate > expiryDate) {
+            const diffTime = Math.abs(currentDate - expiryDate);
+            lateDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            lateFee = lateDays * 500;
+        }
+
+        bike.status = 'Pending Return';
+        await bike.save();
+
+        const lateFeeMsg = lateFee > 0 ? ` (Late Fee Accrued: NPR ${lateFee} for ${lateDays} days)` : '';
+
+        // Notify Seller
+        await Notification.create({
+            user: bike.seller._id,
+            title: 'Return Initiated' + (lateFee > 0 ? ' [LATE]' : ''),
+            message: `User ${req.user.name} has initiated a return for "${bike.name}".${lateFeeMsg} Please confirm receipt after inspection.`,
+            type: 'GENERAL',
+            relatedId: bike._id
+        });
+
+        // Email Seller
+        if (bike.seller && bike.seller.email) {
+            notifyUserUpdate(
+                bike,
+                'Bike Return Notification',
+                `Hello ${bike.seller.name}, your bike "${bike.name}" is being returned by the user. Please check your dashboard to confirm the return after inspecting the bike condition.`,
+                bike.seller.email
+            );
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Return initiated successfully',
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Confirm bike return (Seller)
+// @route   PUT /api/bikes/return/confirm/:id
+// @access  Private/Seller
+exports.confirmReturn = async (req, res) => {
+    try {
+        const bike = await Bike.findById(req.params.id).populate('rentedBy');
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        // Check if user is the seller
+        if (bike.seller.toString() !== req.user.id.toString()) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        const renter = bike.rentedBy;
+        const renterEmail = renter ? renter.email : null;
+        const { isMaintenance } = req.body;
+
+        bike.status = isMaintenance ? 'Maintenance' : 'Available';
+        bike.rentedBy = null;
+        bike.rentalExpiry = null;
+        bike.deliveryStatus = 'Pending'; // Reset for next rent
+        await bike.save();
+
+        // Notify Renter
+        if (renter) {
+            await Notification.create({
+                user: renter._id,
+                title: 'Return Confirmed',
+                message: `The seller has confirmed the return of "${bike.name}". Thank you for using RIDEHUB!`,
+                type: 'ACCOUNT_UPDATE',
+                relatedId: bike._id
+            });
+
+            if (renterEmail) {
+                notifyUserUpdate(
+                    bike,
+                    'Rental Successfully Completed',
+                    `Dear ${renter.name},\n\nYour return for the bike "${bike.name}" has been confirmed by the seller. The rental process is now complete. We hope you had a great ride!\n\nCheck out more bikes: ${process.env.CLIENT_URL || 'http://localhost:5173'}/browse`,
+                    renterEmail
+                );
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Return confirmed and bike is now available',
+            data: bike
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     createBike: exports.createBike,
     getMyBikes: exports.getMyBikes,
@@ -975,5 +1125,7 @@ module.exports = {
     getSellerStats: exports.getSellerStats,
     releaseBikeForDelivery: exports.releaseBikeForDelivery,
     receiveBike: exports.receiveBike,
-    getMyPurchases: exports.getMyPurchases
+    getMyPurchases: exports.getMyPurchases,
+    initiateReturn: exports.initiateReturn,
+    confirmReturn: exports.confirmReturn
 };

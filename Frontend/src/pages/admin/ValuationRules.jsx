@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
-import { Save, Info, ChevronDown, Trash2, Edit2, Plus } from 'lucide-react';
+import { 
+    Save, Info, ChevronDown, Trash2, Edit2, Plus, 
+    Calculator, Settings, Bike, CheckCircle2, 
+    ThumbsUp, AlertCircle, Calendar, LayoutGrid, RotateCcw
+} from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 
@@ -19,6 +23,12 @@ const ValuationRules = () => {
     });
 
     const [editingId, setEditingId] = useState(null);
+    
+    // Refs for one-click focus
+    const inputA = useRef(null);
+    const inputB = useRef(null);
+    const inputC = useRef(null);
+    const inputY = useRef(null);
 
     useEffect(() => {
         fetchRules();
@@ -45,15 +55,7 @@ const ValuationRules = () => {
         try {
             await api.post('/api/valuation', formData);
             toast.success(editingId ? 'Rule updated successfully!' : 'Rule saved successfully!');
-            setFormData({
-                ccRange: '',
-                basePrice: '',
-                conditionA: '5',
-                conditionB: '15',
-                conditionC: '30',
-                yearlyDepreciation: '10'
-            });
-            setEditingId(null);
+            resetForm();
             fetchRules();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to save rule');
@@ -101,202 +103,293 @@ const ValuationRules = () => {
 
     return (
         <AdminLayout>
-            <div className="py-8 px-4 max-w-7xl">
-                {/* Header */}
-                <div className="mb-10 px-2 flex justify-between items-center bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Valuation Rules</h1>
-                        <p className="text-sm font-medium text-slate-500 italic mt-1">Configure pricing and depreciation rules for motorcycles</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    {/* Left: Add New Rule Form */}
-                    <div className="lg:col-span-5">
-                        <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                            <div className="px-8 py-6 border-b border-slate-50">
-                                <h2 className="text-xl font-bold text-slate-800 tracking-tight">
-                                    {editingId ? 'Edit Rule' : 'Add New Rule'}
-                                </h2>
-                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">Rule Configuration</p>
-                            </div>
-
-                            <form onSubmit={handleSave} className="p-8 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Engine CC Range *</label>
-                                    <div className="relative">
-                                        <select
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:border-orange-500 focus:bg-white transition-all text-slate-800 font-semibold appearance-none cursor-pointer outline-none shadow-sm"
-                                            value={formData.ccRange}
-                                            onChange={(e) => setFormData({ ...formData, ccRange: e.target.value })}
-                                            required
-                                        >
-                                            <option value="" disabled>Select CC Range</option>
-                                            <option value="below-125">Below 125cc</option>
-                                            <option value="125-200">125cc - 200cc</option>
-                                            <option value="200-400">200cc - 400cc</option>
-                                            <option value="above-400">Above 400cc</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Base Price *</label>
-                                    <div className="relative">
-                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold border-r border-slate-200 pr-4 mr-4">Rs</span>
-                                        <input
-                                            type="number"
-                                            placeholder="0.00"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-20 pr-5 py-4 focus:border-orange-500 focus:bg-white text-slate-800 font-semibold outline-none shadow-sm transition-all"
-                                            value={formData.basePrice}
-                                            onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Depreciation Penalties (%)</h3>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {['Excellent', 'Good', 'Fair'].map((cond, idx) => {
-                                            const field = idx === 0 ? 'conditionA' : idx === 1 ? 'conditionB' : 'conditionC';
-                                            return (
-                                                <div key={cond} className="space-y-2">
-                                                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">{cond} Condition</label>
-                                                    <div className="relative">
-                                                        <input
-                                                            type="number"
-                                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 focus:border-orange-500 focus:bg-white text-slate-800 font-semibold outline-none transition-all shadow-sm"
-                                                            value={formData[field]}
-                                                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                                                            required
-                                                        />
-                                                        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-sm">%</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Yearly Depreciation *</label>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 focus:border-orange-500 focus:bg-white text-slate-800 font-semibold outline-none transition-all shadow-sm"
-                                            value={formData.yearlyDepreciation}
-                                            onChange={(e) => setFormData({ ...formData, yearlyDepreciation: e.target.value })}
-                                            required
-                                        />
-                                        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-sm">% / Year</span>
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-4 transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-orange-600/20"
-                                >
-                                    {submitting ? 'SAVING...' : (
-                                        <>
-                                            <Save size={20} />
-                                            {editingId ? 'UPDATE RULE' : 'SAVE RULE'}
-                                        </>
-                                    )}
-                                </button>
-                                
-                                {editingId && (
-                                    <button
-                                        type="button"
-                                        onClick={resetForm}
-                                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all"
-                                    >
-                                        CANCEL EDIT
-                                    </button>
-                                )}
-                            </form>
+            <div className="bg-[#eff1f5] min-h-screen p-4 md:p-8">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header Section - Reduced Gap */}
+                    <div className="flex items-center gap-5 mb-8">
+                        <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shadow-sm">
+                            <Calculator className="text-orange-600" size={24} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-black text-[#111827] tracking-tight">Valuation Rules</h1>
+                            <p className="text-[#6b7280] text-[13px] font-medium mt-0.5">Configure pricing and depreciation rules for motorcycles</p>
                         </div>
                     </div>
 
-                    {/* Right: Saved Matrix & Info */}
-                    <div className="lg:col-span-7 space-y-8">
-                        <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                            <div className="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
-                                <div>
-                                    <h3 className="font-bold text-slate-800 uppercase tracking-widest text-sm">Stored Valuation Matrix</h3>
-                                    <p className="text-[10px] font-semibold text-slate-400 uppercase mt-1">Live active rules</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Left Column: Form Section */}
+                        <div className="lg:col-span-5 space-y-5">
+                            <div className="bg-white rounded-[2rem] shadow-sm border border-[#e5e7eb] p-6 md:p-8">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <Settings className="text-orange-600" size={18} />
+                                    <div>
+                                        <h2 className="text-lg font-black text-[#111827]">
+                                            {editingId ? 'Edit Rule' : 'Add New Rule'}
+                                        </h2>
+                                        <p className="text-[10px] text-[#9ca3af] font-bold uppercase tracking-widest">Set up a new valuation rule</p>
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-bold bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-sm">
-                                    {rules.length} RULES
-                                </span>
-                            </div>
 
-                            <div className="divide-y divide-slate-50">
-                                {loading ? (
-                                    <div className="p-20 flex justify-center">
-                                        <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+                                <form onSubmit={handleSave} className="space-y-6">
+                                    {/* CC Range Field */}
+                                    <div className="space-y-2">
+                                        <label className="text-[12px] font-bold text-[#374151] ml-1">Engine CC Range *</label>
+                                        <div className="relative">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center pointer-events-none">
+                                                <Bike className="text-orange-600" size={16} />
+                                            </div>
+                                            <select
+                                                className="w-full h-12 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl pl-16 pr-10 focus:border-orange-500 focus:bg-white outline-none transition-all text-[#111827] font-bold appearance-none cursor-pointer text-sm"
+                                                value={formData.ccRange}
+                                                onChange={(e) => setFormData({ ...formData, ccRange: e.target.value })}
+                                                required
+                                            >
+                                                <option value="" disabled>Select CC Range</option>
+                                                <option value="below-125">Below 125 CC</option>
+                                                <option value="125-200">125 200 CC</option>
+                                                <option value="200-400">200 400 CC</option>
+                                                <option value="above-400">Above 400 CC</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9ca3af] pointer-events-none" size={16} />
+                                        </div>
                                     </div>
-                                ) : rules.length === 0 ? (
-                                    <div className="p-20 text-center">
-                                        <p className="text-slate-400 font-bold italic">No pricing rules defined yet.</p>
+
+                                    {/* Base Price Field - RS icon instead of $ */}
+                                    <div className="space-y-2">
+                                        <label className="text-[12px] font-bold text-[#374151] ml-1">Base Price *</label>
+                                        <div className="relative">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center pointer-events-none">
+                                                <span className="text-orange-600 font-black text-[10px]">RS</span>
+                                            </div>
+                                            <input
+                                                type="number"
+                                                placeholder="0.00"
+                                                className="w-full h-12 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl pl-16 pr-12 focus:border-orange-500 focus:bg-white outline-none transition-all text-[#111827] font-bold text-sm"
+                                                value={formData.basePrice}
+                                                onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                                                required
+                                            />
+                                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[#9ca3af] font-black text-[10px]">RS</span>
+                                        </div>
+                                        <p className="text-[10px] text-[#9ca3af] font-bold px-1 uppercase tracking-tighter">Initial price for this CC range</p>
                                     </div>
-                                ) : (
-                                    rules.map((rule) => (
-                                        <div key={rule._id} className="p-10 hover:bg-slate-50/50 transition-all group relative">
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <h4 className="text-3xl font-bold text-slate-900 capitalize tracking-tighter">
-                                                            {rule.ccRange.replace('-', ' ')}
-                                                        </h4>
-                                                        <span className="text-sm font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-xl">
-                                                            Rs {rule.basePrice.toLocaleString()}
-                                                        </span>
+
+                                    {/* Penalties Section */}
+                                    <div className="pt-2">
+                                        <div className="bg-[#eff2ff] px-6 py-2 rounded-xl mb-5">
+                                            <h3 className="text-xs font-black text-[#4338ca] tracking-widest text-center uppercase">Depreciation Penalties (%)</h3>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {/* Excellent */}
+                                            <div 
+                                                className="space-y-2 cursor-pointer group"
+                                                onClick={() => inputA.current?.focus()}
+                                            >
+                                                <label className="text-[10px] font-bold text-[#6b7280] block text-center uppercase tracking-tighter">Excellent</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#10b981]">
+                                                        <CheckCircle2 size={14} />
                                                     </div>
-                                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                                                        <span className="flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div> E: {rule.conditionA}%</span>
-                                                        <span className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> G: {rule.conditionB}%</span>
-                                                        <span className="flex items-center gap-2"><div className="w-2 h-2 bg-slate-500 rounded-full"></div> F: {rule.conditionC}%</span>
-                                                        <div className="h-4 w-[1px] bg-slate-200"></div>
-                                                        <span className="text-slate-800">Yearly: {rule.yearlyDepreciation}%</span>
-                                                    </div>
+                                                    <input
+                                                        ref={inputA}
+                                                        type="number"
+                                                        className="w-full h-10 bg-[#ecfdf5] border border-[#d1fae5] rounded-lg pl-8 pr-5 text-center text-[#065f46] font-black text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
+                                                        value={formData.conditionA}
+                                                        onChange={(e) => setFormData({ ...formData, conditionA: e.target.value })}
+                                                    />
+                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6366f1] text-[9px] font-bold">%</span>
                                                 </div>
-
-                                                <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
-                                                    <button
-                                                        onClick={() => handleEdit(rule)}
-                                                        className="p-4 bg-white border border-slate-100 text-slate-400 hover:text-orange-600 hover:shadow-lg rounded-2xl transition-all"
-                                                        title="Edit"
-                                                    >
-                                                        <Edit2 size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(rule._id)}
-                                                        className="p-4 bg-white border border-slate-100 text-slate-400 hover:text-red-600 hover:shadow-lg rounded-2xl transition-all"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                            </div>
+                                            {/* Good */}
+                                            <div 
+                                                className="space-y-2 cursor-pointer group"
+                                                onClick={() => inputB.current?.focus()}
+                                            >
+                                                <label className="text-[10px] font-bold text-[#6b7280] block text-center uppercase tracking-tighter">Good</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#3b82f6]">
+                                                        <ThumbsUp size={14} />
+                                                    </div>
+                                                    <input
+                                                        ref={inputB}
+                                                        type="number"
+                                                        className="w-full h-10 bg-[#eff6ff] border border-[#dbeafe] rounded-lg pl-8 pr-5 text-center text-[#1e40af] font-black text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
+                                                        value={formData.conditionB}
+                                                        onChange={(e) => setFormData({ ...formData, conditionB: e.target.value })}
+                                                    />
+                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6366f1] text-[9px] font-bold">%</span>
+                                                </div>
+                                            </div>
+                                            {/* Fair */}
+                                            <div 
+                                                className="space-y-2 cursor-pointer group"
+                                                onClick={() => inputC.current?.focus()}
+                                            >
+                                                <label className="text-[10px] font-bold text-[#6b7280] block text-center uppercase tracking-tighter">Fair</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#f59e0b]">
+                                                        <AlertCircle size={14} />
+                                                    </div>
+                                                    <input
+                                                        ref={inputC}
+                                                        type="number"
+                                                        className="w-full h-10 bg-[#fffbeb] border border-[#fef3c7] rounded-lg pl-8 pr-5 text-center text-[#92400e] font-black text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none transition-all"
+                                                        value={formData.conditionC}
+                                                        onChange={(e) => setFormData({ ...formData, conditionC: e.target.value })}
+                                                    />
+                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6366f1] text-[9px] font-bold">%</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))
-                                )}
+                                    </div>
+
+                                    {/* Yearly Depreciation Field - Click to fill behavior */}
+                                    <div className="space-y-2">
+                                        <label className="text-[12px] font-bold text-[#374151] ml-1">Yearly Depreciation *</label>
+                                        <div 
+                                            className="relative cursor-pointer"
+                                            onClick={() => inputY.current?.focus()}
+                                        >
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center pointer-events-none">
+                                                <Calendar className="text-blue-600" size={16} />
+                                            </div>
+                                            <input
+                                                ref={inputY}
+                                                type="number"
+                                                className="w-full h-12 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl pl-16 pr-24 focus:border-blue-500 focus:bg-white outline-none transition-all text-[#111827] font-bold text-sm"
+                                                value={formData.yearlyDepreciation}
+                                                onChange={(e) => setFormData({ ...formData, yearlyDepreciation: e.target.value })}
+                                                required
+                                            />
+                                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[#9ca3af] font-black text-[9px] uppercase tracking-tighter">% per Year</span>
+                                        </div>
+                                        <p className="text-[10px] text-[#9ca3af] font-bold px-1 uppercase tracking-tighter">Annual depreciation rate applied to the base price</p>
+                                    </div>
+
+                                    {/* Buttons Section */}
+                                    <div className="flex items-center gap-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="flex-1 h-12 bg-white border border-[#e5e7eb] text-[#374151] font-black rounded-xl hover:bg-gray-50 transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-2"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Reset
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="flex-[2] h-12 bg-gradient-to-r from-[#f97316] to-[#ef4444] text-white font-black rounded-xl shadow-lg shadow-orange-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-2"
+                                        >
+                                            {submitting ? (
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            ) : (
+                                                <>
+                                                    <Save size={16} />
+                                                    {editingId ? 'Save Changes' : 'Save Rule'}
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
-                        {/* Info / Automated Systems */}
-                        <div className="bg-[#f0f9ff] border-2 border-[#e0f2fe] rounded-3xl p-8 flex items-start gap-6 shadow-sm">
-                            <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600">
-                                <Info size={24} />
+                        {/* Right Column: Matrix & Info */}
+                        <div className="lg:col-span-7 space-y-8">
+                            <div className="bg-white rounded-[2rem] shadow-sm border border-[#e5e7eb] p-6 md:p-8 min-h-[450px]">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <LayoutGrid className="text-blue-600" size={18} />
+                                        <div>
+                                            <h3 className="text-lg font-black text-[#111827]">Valuation Matrix</h3>
+                                            <p className="text-[10px] text-[#9ca3af] font-bold uppercase tracking-widest mt-0.5">Live active rules</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-tighter border border-blue-100">
+                                        {rules.length} Rules
+                                    </span>
+                                </div>
+
+                                <div className="space-y-5">
+                                    {loading ? (
+                                        <div className="py-20 flex items-center justify-center">
+                                            <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : rules.length === 0 ? (
+                                        <div className="py-20 text-center">
+                                            <Plus className="text-gray-200 mx-auto mb-3" size={40} />
+                                            <p className="text-[#9ca3af] font-black text-xs uppercase tracking-widest">No segments defined</p>
+                                        </div>
+                                    ) : (
+                                        rules.map((rule, index) => (
+                                            <div key={rule._id} className="relative group bg-[#f8fafc] rounded-2xl p-6 border border-[#e5e7eb] hover:border-orange-200 transition-all overflow-hidden shadow-sm hover:shadow-md">
+                                                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${index % 2 === 0 ? 'bg-[#10b981]' : 'bg-[#3b82f6]'}`}></div>
+                                                
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-4 flex-1">
+                                                        <h4 className="text-xl font-black text-[#111827] uppercase tracking-tight">
+                                                            {rule.ccRange.replace('-', ' ')} CC
+                                                        </h4>
+                                                        
+                                                        <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black text-[#f97316] uppercase tracking-[0.1em]">Base Price</p>
+                                                                <div className="text-lg font-black text-[#111827]">
+                                                                    <span className="text-xs font-bold mr-1 opacity-40">RS</span>
+                                                                    {rule.basePrice.toLocaleString()}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black text-[#6b7280] uppercase tracking-[0.1em]">Penalties</p>
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-[10px] font-bold text-[#10b981]">E: {rule.conditionA}%</span>
+                                                                    <span className="text-[10px] font-bold text-[#3b82f6]">G: {rule.conditionB}%</span>
+                                                                    <span className="text-[10px] font-bold text-[#6b7280]">F: {rule.conditionC}%</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black text-[#6b7280] uppercase tracking-[0.1em]">Yearly</p>
+                                                                <div className="bg-[#eef2ff] px-2 py-0.5 rounded-md">
+                                                                    <span className="text-xs font-black text-[#4338ca]">{rule.yearlyDepreciation}%</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                        <button 
+                                                            onClick={() => handleEdit(rule)}
+                                                            className="w-9 h-9 bg-white border border-[#e5e7eb] text-[#9ca3af] hover:text-orange-600 rounded-lg flex items-center justify-center shadow-sm transition-all"
+                                                        >
+                                                            <Edit2 size={14} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDelete(rule._id)}
+                                                            className="w-9 h-9 bg-white border border-[#e5e7eb] text-[#9ca3af] hover:text-red-600 rounded-lg flex items-center justify-center shadow-sm transition-all"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="text-lg font-bold text-slate-900 mb-1 uppercase tracking-tight">Automated Systems</h4>
-                                <p className="text-sm font-medium text-slate-600 leading-relaxed">
-                                    Changes to these rules will immediately affect new bike listings. Current valuation calculations will be recalculated upon metadata updates.
-                                </p>
+
+                            <div className="bg-[#f0f6ff] border border-[#dbeafe] rounded-2xl p-6 flex items-start gap-5">
+                                <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                                    <Info className="text-blue-600" size={20} />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="text-[13px] font-black text-[#111827] uppercase tracking-tight">System Notice</h4>
+                                    <p className="text-[#64748b] text-[11px] font-bold leading-relaxed uppercase tracking-tighter">
+                                        Valuation rules are applied globally and affect all listed motorcycle appraisals instantly.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

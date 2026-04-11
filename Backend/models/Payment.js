@@ -62,6 +62,14 @@ const paymentSchema = new mongoose.Schema({
     },
     releasedAt: {
         type: Date
+    },
+    bookingDetails: {
+        rentalPlan: String,
+        rentalDuration: Number,
+        bookingDate: Date,
+        deliveryMethod: String,
+        deliveryCharge: Number,
+        serviceDay: String
     }
 }, { timestamps: true });
 

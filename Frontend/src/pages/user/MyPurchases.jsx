@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
@@ -17,6 +18,7 @@ import {
 import { toast } from 'react-hot-toast';
 
 const MyPurchases = () => {
+    const navigate = useNavigate();
     const [purchases, setPurchases] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -49,6 +51,97 @@ const MyPurchases = () => {
         } catch (err) {
             toast.error(err.response?.data?.message || 'Action failed');
         }
+    };
+
+    const handleReturnBike = async (bikeId) => {
+        if (!window.confirm('Are you sure you want to initiate the return process? This will notify the seller.')) return;
+
+        try {
+            const response = await api.put(`/api/bikes/return/initiate/${bikeId}`);
+            if (response.data.success) {
+                toast.success('Return process initiated!');
+                fetchPurchases();
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Return initiation failed');
+        }
+    };
+
+    const handleDownloadReceipt = (bike) => {
+        const printWindow = window.open('', '_blank');
+        const bikeImage = bike.images?.[0] || 'https://placehold.co/600x400';
+        
+        const html = `
+            <html>
+                <head>
+                    <title>Receipt - ${bike.name}</title>
+                    <style>
+                        body { font-family: 'Courier New', Courier, monospace; width: 300px; padding: 20px; color: #000; margin: 0 auto; }
+                        .center { text-align: center; }
+                        .logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; }
+                        .divider { border-top: 1px dashed #000; margin: 15px 0; }
+                        .info-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+                        .label { font-weight: bold; }
+                        .item-summary { margin: 15px 0; font-size: 12px; }
+                        .total { font-size: 18px; font-weight: bold; margin-top: 10px; }
+                        .qr-mock { width: 60px; height: 60px; background: #eee; margin: 15px auto; }
+                        @media print {
+                            body { width: 100%; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="center">
+                        <div class="logo">RIDEHUB</div>
+                        <div style="font-size: 8px;">VERIFIED MOTORCYCLE ECOSYSTEM</div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="info-row">
+                        <span class="label">TRANS ID:</span>
+                        <span>#${bike._id.slice(-8).toUpperCase()}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">DATE:</span>
+                        <span>${new Date(bike.updatedAt).toLocaleDateString()}</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="item-summary">
+                        <strong>${bike.brand} ${bike.name}</strong><br/>
+                        <span style="font-size: 10px;">${bike.listingType} | ${bike.modelYear} Model</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="info-row total">
+                        <span class="label">TOTAL:</span>
+                        <span>NPR ${bike.price.toLocaleString()}</span>
+                    </div>
+
+                    <div class="center" style="margin-top: 20px;">
+                        <div style="font-size: 10px; font-weight: bold;">THANK YOU!</div>
+                        <div style="font-size: 8px;">Ride safe with RIDEHUB Nepal</div>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        };
+                    </script>
+                </body>
+            </html>
+        `;
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
+    const handleRateSeller = (bikeId) => {
+        navigate(`/rate-service/${bikeId}`);
     };
 
     const getStatusStep = (status, deliveryStatus) => {
@@ -190,12 +283,35 @@ const MyPurchases = () => {
                                                 CONFIRM RECEIPT <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         )}
+
+                                        {/* RETURN BIKE BUTTON */}
+                                        {bike.listingType === 'Rental' && bike.status === 'Rented' && (
+                                            <button
+                                                onClick={() => handleReturnBike(bike._id)}
+                                                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] group mt-4"
+                                            >
+                                                RETURN BIKE <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        )}
+
+                                        {bike.status === 'Pending Return' && (
+                                            <div className="bg-orange-50 text-orange-600 py-4 px-6 rounded-2xl border border-orange-100 flex items-center justify-center gap-3 mt-4">
+                                                <Clock size={16} className="animate-spin" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-center">Return Pending Seller Confirmation</span>
+                                            </div>
+                                        ) }
                                         {bike.deliveryStatus === 'Delivered' && (
                                             <div className="flex gap-4">
-                                                <button className="flex-1 bg-gray-50 text-gray-500 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-100 hover:bg-gray-100 transition-all">
+                                                <button 
+                                                    onClick={() => handleDownloadReceipt(bike)}
+                                                    className="flex-1 bg-gray-50 text-gray-500 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-100 hover:bg-gray-100 transition-all"
+                                                >
                                                     Download Receipt
                                                 </button>
-                                                <button className="flex-1 bg-white text-orange-600 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-orange-100 hover:bg-orange-50 transition-all italic">
+                                                <button 
+                                                    onClick={() => handleRateSeller(bike._id)}
+                                                    className="flex-1 bg-white text-orange-600 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-orange-100 hover:bg-orange-50 transition-all italic"
+                                                >
                                                     Rate Seller
                                                 </button>
                                             </div>

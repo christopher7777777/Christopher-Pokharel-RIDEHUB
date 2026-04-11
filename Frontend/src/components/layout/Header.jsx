@@ -94,8 +94,8 @@ const Header = () => {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled || (user && user.kycStatus !== 'verified')
-                    ? 'bg-orange-500 shadow-[0_4px_30px_rgba(249,115,22,0.1)] py-3'
-                    : 'bg-orange-400 py-4 border-b border-orange-300/30'
+                    ? 'bg-orange-700 shadow-[0_8px_30px_rgba(0,0,0,0.2)] py-3'
+                    : 'bg-orange-600 py-4 border-b border-orange-500/20'
                 }`}
         >
             {/* KYC Notification Banner */}
@@ -135,13 +135,13 @@ const Header = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`px-5 py-2 text-base font-bold tracking-tight transition-all duration-300 relative group overflow-hidden ${isActive(link.path)
+                            className={`px-5 py-2 text-sm font-bold uppercase tracking-wider transition-all duration-300 relative group overflow-hidden ${isActive(link.path)
                                     ? 'text-white'
-                                    : 'text-orange-50 hover:text-white'
+                                    : 'text-orange-100/80 hover:text-white'
                                 }`}
                         >
                             <span>{link.name}</span>
-                            <span className={`absolute bottom-0 left-0 w-full h-1 bg-white transform transition-transform duration-300 scale-x-0 group-hover:scale-x-100 ${isActive(link.path) ? 'scale-x-100' : ''}`}></span>
+                            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-white transform transition-transform duration-300 scale-x-0 group-hover:scale-x-100 ${isActive(link.path) ? 'scale-x-100' : ''}`}></span>
                         </Link>
                     ))}
                 </nav>
@@ -206,7 +206,7 @@ const Header = () => {
                                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                                         className="flex items-center gap-3 group px-2 py-1.5 rounded-full hover:bg-white/10 transition-all"
                                     >
-                                        <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-white/50 overflow-hidden shadow-md">
+                                        <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-white/20 overflow-hidden shadow-sm">
                                             {user.kycStatus === 'verified' && user.kycId?.userPhoto ? (
                                                 <img src={user.kycId.userPhoto} alt="" className="w-full h-full object-cover" />
                                             ) : (
@@ -259,8 +259,8 @@ const Header = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-6">
-                                <Link to="/login" className="text-sm font-bold text-slate-600 hover:text-orange-600 transition-colors">Login</Link>
-                                <Link to="/register" className="px-6 py-2.5 bg-orange-600 text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-orange-700 hover:shadow-lg transition-all active:scale-95 shadow-md">Join Now</Link>
+                                <Link to="/login" className="px-10 py-3.5 bg-white text-orange-600 text-sm font-bold uppercase tracking-widest rounded-full hover:bg-orange-50 hover:shadow-lg transition-all active:scale-95 shadow-md">Login</Link>
+                                <Link to="/register" className="px-8 py-3 border-2 border-white/40 text-sm font-bold uppercase tracking-widest text-white rounded-full hover:bg-white/10 transition-all shadow-sm active:scale-95">Join Now</Link>
                             </div>
                         )
                     )}
@@ -268,7 +268,7 @@ const Header = () => {
                     {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="lg:hidden p-2 text-slate-600 hover:text-orange-600 transition-colors ml-2"
+                        className="lg:hidden p-2 text-white hover:text-orange-100 transition-colors ml-2"
                     >
                         {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
                     </button>
@@ -293,9 +293,12 @@ const Header = () => {
                         </div>
                         <div className="h-px bg-slate-100"></div>
                         {user ? (
-                            <button onClick={logout} className="w-full py-4 bg-red-50 text-red-600 rounded-xl font-bold uppercase text-xs tracking-widest">Logout</button>
+                            <button onClick={logout} className="w-full py-4 bg-red-50 text-red-600 rounded-xl font-bold uppercase text-xs tracking-widest transition-colors hover:bg-red-100">Logout</button>
                         ) : (
-                            <Link to="/register" className="block w-full py-4 bg-orange-600 text-white rounded-xl text-center font-bold uppercase text-xs tracking-widest shadow-lg">Join RideHub</Link>
+                            <div className="space-y-4">
+                                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="block w-full py-4 border-2 border-orange-500 text-orange-600 rounded-xl text-center font-bold uppercase text-xs tracking-widest hover:bg-orange-50 transition-colors">Login</Link>
+                                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="block w-full py-4 bg-orange-600 text-white rounded-xl text-center font-bold uppercase text-xs tracking-widest shadow-lg hover:bg-orange-700 transition-all">Join RideHub</Link>
+                            </div>
                         )}
                     </div>
                 </div>

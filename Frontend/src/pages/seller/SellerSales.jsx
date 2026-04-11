@@ -27,7 +27,7 @@ const SellerSales = () => {
             const response = await api.get('/api/bikes/my-listings');
             // Filter bikes that are already sold or rented
             const soldBikes = response.data.data.filter(bike => 
-                ['Purchased', 'Rented', 'Sold'].includes(bike.status)
+                ['Purchased', 'Rented', 'Sold', 'Pending Return', 'Maintenance'].includes(bike.status)
             );
             setSales(soldBikes);
         } catch (err) {
@@ -51,6 +51,21 @@ const SellerSales = () => {
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update status');
+        }
+    };
+
+    const handleConfirmReturn = async (bikeId, isMaintenance = false) => {
+        const actionText = isMaintenance ? 'send to maintenance' : 'complete the return';
+        if (!window.confirm(`Are you sure you want to ${actionText}?`)) return;
+
+        try {
+            const response = await api.put(`/api/bikes/return/confirm/${bikeId}`, { isMaintenance });
+            if (response.data.success) {
+                toast.success(isMaintenance ? 'Bike sent to maintenance.' : 'Bike is now available for rent again!');
+                fetchSales();
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to confirm return');
         }
     };
 
@@ -205,6 +220,33 @@ const SellerSales = () => {
                                                         className="w-full sm:w-auto bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl flex items-center justify-center gap-3 group active:scale-95"
                                                     >
                                                         RELEASE FOR DELIVERY <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                                    </button>
+                                                )}
+
+                                                {/* CONFIRM RETURN BUTTONS */}
+                                                {sale.status === 'Pending Return' && (
+                                                    <div className="flex gap-3 w-full sm:w-auto">
+                                                        <button 
+                                                            onClick={() => handleConfirmReturn(sale._id, false)}
+                                                            className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg active:scale-95"
+                                                        >
+                                                            Confirm & Make Available
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleConfirmReturn(sale._id, true)}
+                                                            className="flex-1 bg-amber-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg active:scale-95"
+                                                        >
+                                                            Send to Maintenance
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {sale.status === 'Maintenance' && (
+                                                     <button 
+                                                        onClick={() => handleConfirmReturn(sale._id, false)}
+                                                        className="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+                                                    >
+                                                        Finish Maintenance
                                                     </button>
                                                 )}
                                             </div>

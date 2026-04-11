@@ -44,6 +44,13 @@ const SellerPayments = () => {
         grandTotalIncome: 0
     });
 
+    // Sync esewaId when user data loads/changes
+    useEffect(() => {
+        if (user?.esewaId) {
+            setEsewaId(user.esewaId);
+        }
+    }, [user]);
+
     const handleEsewaUpdate = async (e) => {
         e.preventDefault();
         try {

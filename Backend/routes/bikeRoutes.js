@@ -19,7 +19,9 @@ const {
     getSellerStats,
     releaseBikeForDelivery,
     receiveBike,
-    getMyPurchases
+    getMyPurchases,
+    initiateReturn,
+    confirmReturn
 } = require('../controllers/bikeController');
 const { protect, isSeller, isVerified, isAdmin } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
@@ -79,6 +81,12 @@ router.route('/release-delivery/:id')
 
 router.route('/receive-bike/:id')
     .put(protect, receiveBike);
+
+router.route('/return/initiate/:id')
+    .put(protect, initiateReturn);
+
+router.route('/return/confirm/:id')
+    .put(protect, isSeller, confirmReturn);
 
 router.route('/:id')
     .get(getBike)

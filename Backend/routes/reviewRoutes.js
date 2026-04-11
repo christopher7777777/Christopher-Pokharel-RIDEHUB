@@ -1,19 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const {
-    createReview,
-    getBikeReviews,
-    getSellerReviews
-} = require('../controllers/serviceReviewController');
+const { createReview, getBikeReviews, getSellerReviews } = require('../controllers/reviewController');
 const { protect } = require('../middleware/auth');
 
-router.route('/')
-    .post(protect, createReview);
-
-router.route('/bike/:bikeId')
-    .get(getBikeReviews);
-
-router.route('/seller/:sellerId')
-    .get(getSellerReviews);
+router.post('/', protect, createReview);
+router.get('/bike/:bikeId', getBikeReviews);
+router.get('/seller/:sellerId', getSellerReviews);
 
 module.exports = router;

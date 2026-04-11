@@ -21,7 +21,13 @@ exports.submitKYC = async (req, res) => {
             businessContactNumber,
             address,
             latitude,
-            longitude
+            longitude,
+            citizenshipNumber,
+            citizenshipIssueDate,
+            citizenshipIssueDistrict,
+            gender,
+            fatherName,
+            occupation
         } = req.body;
 
         // Check if user already has a verified KYC
@@ -45,6 +51,12 @@ exports.submitKYC = async (req, res) => {
             businessName,
             businessRegistrationNumber,
             businessContactNumber,
+            citizenshipNumber,
+            citizenshipIssueDate,
+            citizenshipIssueDistrict,
+            gender,
+            fatherName,
+            occupation,
             location: {
                 type: 'Point',
                 coordinates: longitude && latitude ? [parseFloat(longitude), parseFloat(latitude)] : [],
@@ -57,35 +69,21 @@ exports.submitKYC = async (req, res) => {
         if (existingKYC) {
             // Update existing rejected or pending KYC
             if (req.files) {
-                if (req.files.nagriktaFront) {
-                    kycData.nagriktaFront = req.files.nagriktaFront[0].path;
-                }
-                if (req.files.nagriktaBack) {
-                    kycData.nagriktaBack = req.files.nagriktaBack[0].path;
-                }
-                if (req.files.userPhoto) {
-                    kycData.userPhoto = req.files.userPhoto[0].path;
-                }
-                if (req.files.panPhoto) {
-                    kycData.panPhoto = req.files.panPhoto[0].path;
-                }
+                if (req.files.nagriktaFront) kycData.nagriktaFront = req.files.nagriktaFront[0].path;
+                if (req.files.nagriktaBack) kycData.nagriktaBack = req.files.nagriktaBack[0].path;
+                if (req.files.userPhoto) kycData.userPhoto = req.files.userPhoto[0].path;
+                if (req.files.panPhoto) kycData.panPhoto = req.files.panPhoto[0].path;
+                if (req.files.photoWithCitizenship) kycData.photoWithCitizenship = req.files.photoWithCitizenship[0].path;
             }
             kyc = await KYC.findByIdAndUpdate(existingKYC._id, kycData, { new: true });
         } else {
             // Handle file uploads for new KYC
             if (req.files) {
-                if (req.files.nagriktaFront) {
-                    kycData.nagriktaFront = req.files.nagriktaFront[0].path;
-                }
-                if (req.files.nagriktaBack) {
-                    kycData.nagriktaBack = req.files.nagriktaBack[0].path;
-                }
-                if (req.files.userPhoto) {
-                    kycData.userPhoto = req.files.userPhoto[0].path;
-                }
-                if (req.files.panPhoto) {
-                    kycData.panPhoto = req.files.panPhoto[0].path;
-                }
+                if (req.files.nagriktaFront) kycData.nagriktaFront = req.files.nagriktaFront[0].path;
+                if (req.files.nagriktaBack) kycData.nagriktaBack = req.files.nagriktaBack[0].path;
+                if (req.files.userPhoto) kycData.userPhoto = req.files.userPhoto[0].path;
+                if (req.files.panPhoto) kycData.panPhoto = req.files.panPhoto[0].path;
+                if (req.files.photoWithCitizenship) kycData.photoWithCitizenship = req.files.photoWithCitizenship[0].path;
             }
             kyc = await KYC.create(kycData);
         }

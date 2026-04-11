@@ -34,6 +34,18 @@ const kycSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Citizenship back photo is required']
     },
+    citizenshipNumber: {
+        type: String
+    },
+    citizenshipIssueDate: {
+        type: Date
+    },
+    citizenshipIssueDistrict: {
+        type: String
+    },
+    photoWithCitizenship: {
+        type: String
+    },
     userPhoto: {
         type: String,
         required: [true, 'User photo is required']
@@ -43,14 +55,26 @@ const kycSchema = new mongoose.Schema({
         required: [true, 'You must accept the declaration'],
         default: false
     },
-    // Seller specific fields
-    businessName: {
+    // User specific extended fields
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other']
+    },
+    fatherName: {
         type: String
     },
+    occupation: {
+        type: String
+    },
+    // Common/Seller pan fields
     panNumber: {
         type: String
     },
     panPhoto: {
+        type: String
+    },
+    // Seller specific fields
+    businessName: {
         type: String
     },
     businessRegistrationNumber: {

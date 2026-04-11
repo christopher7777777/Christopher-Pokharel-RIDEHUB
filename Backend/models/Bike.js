@@ -35,7 +35,7 @@ const bikeSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Available', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rented', 'Rejected', 'FinancePending'],
+        enum: ['Available', 'Pending Review', 'Negotiating', 'Countered', 'Approved', 'Purchased', 'Rented', 'Pending Return', 'Overdue', 'Rejected', 'FinancePending', 'Maintenance'],
         default: 'Available'
     },
     negotiatedPrice: {

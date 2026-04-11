@@ -36,6 +36,7 @@ import PaymentSuccess from './pages/user/PaymentSuccess';
 import PaymentFailure from './pages/user/PaymentFailure';
 import MyEMIApplications from './pages/user/MyEMIApplications';
 import MyPurchases from './pages/user/MyPurchases';
+import RateService from './pages/user/RateService';
 import AdminEMIApplications from './pages/admin/EMIApplications';
 import EMICalculatorPage from './pages/user/EMICalculatorPage';
 import Notifications from './pages/Notifications';
@@ -48,7 +49,14 @@ const GlobalSupportChat = () => {
 };
 
 const DashboardRedirect = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  if (loading) return null;
+  
+  if (!user) {
+    return <UserDashboard />;
+  }
+  
   if (user?.isAdmin) {
     return <AdminDashboard />;
   }
@@ -72,11 +80,7 @@ function App() {
             <Route path="/resetpassword/:token" element={<ResetPassword />} />
             <Route
               path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <DashboardRedirect />
-                </PrivateRoute>
-              }
+              element={<DashboardRedirect />}
             />
             <Route
               path="/browse"
@@ -103,7 +107,9 @@ function App() {
             <Route
               path="/contact"
               element={
-                <Contact />
+                <PrivateRoute>
+                  <Contact />
+                </PrivateRoute>
               }
             />
             <Route
@@ -154,6 +160,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <MyPurchases />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/rate-service/:bikeId"
+              element={
+                <PrivateRoute>
+                  <RateService />
                 </PrivateRoute>
               }
             />

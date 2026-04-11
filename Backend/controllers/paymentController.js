@@ -28,7 +28,7 @@ const initiatePayment = async (req, res) => {
         console.log('User:', req.user ? req.user._id : 'No user attached');
 
         validateEnvironmentVariables();
-        const { amount, productName, bikeId } = req.body;
+        const { amount, productName, bikeId, bookingDetails } = req.body;
 
         if (!amount || !productName || !bikeId) {
             return res.status(400).json({
@@ -58,7 +58,8 @@ const initiatePayment = async (req, res) => {
             transactionId: tempUuid,
             esewaTransactionUuid: tempUuid,
             paymentStatus: 'PENDING',
-            escrowStatus: 'none'
+            escrowStatus: 'none',
+            bookingDetails: bookingDetails
         });
 
         const transactionUuid = `HUB-${payment._id}-${Date.now()}`;
@@ -295,9 +296,41 @@ const verifyPayment = async (req, res) => {
                 if (bike.listingType === 'Sale' || bike.listingType === 'Purchase') {
                     bike.status = 'Purchased';
                     bike.purchasedBy = payment.user;
+
+                    // Apply stored sale details if present
+                    if (payment.bookingDetails) {
+                        bike.paymentMethod = 'Online';
+                        bike.deliveryMethod = payment.bookingDetails.deliveryMethod;
+                        bike.deliveryCharge = payment.bookingDetails.deliveryCharge;
+                        bike.bookingDate = payment.bookingDetails.bookingDate;
+                        bike.serviceDay = payment.bookingDetails.serviceDay;
+                        bike.userConfirmed = true;
+                    }
+
                 } else if (bike.listingType === 'Rental') {
                     bike.status = 'Rented';
                     bike.rentedBy = payment.user;
+
+                    // Apply stored rental details if present
+                    if (payment.bookingDetails) {
+                        bike.paymentMethod = 'Online';
+                        bike.rentalPlan = payment.bookingDetails.rentalPlan || 'Daily';
+                        bike.rentalDuration = payment.bookingDetails.rentalDuration || 1;
+                        bike.bookingDate = payment.bookingDetails.bookingDate;
+                        bike.deliveryMethod = payment.bookingDetails.deliveryMethod;
+                        bike.deliveryCharge = payment.bookingDetails.deliveryCharge;
+                        bike.serviceDay = payment.bookingDetails.serviceDay;
+
+                        // Recalculate expiry if not explicitly saved
+                        let expiryDate = new Date(payment.bookingDetails.bookingDate || Date.now());
+                        const duration = payment.bookingDetails.rentalDuration || 1;
+                        if (payment.bookingDetails.rentalPlan === 'Weekly') {
+                            expiryDate.setDate(expiryDate.getDate() + (duration * 7));
+                        } else {
+                            expiryDate.setDate(expiryDate.getDate() + duration);
+                        }
+                        bike.rentalExpiry = expiryDate;
+                    }
                 }
                 await bike.save();
                 console.log('Bike status updated successfully');
