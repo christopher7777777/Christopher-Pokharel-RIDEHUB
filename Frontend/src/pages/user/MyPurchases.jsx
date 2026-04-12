@@ -157,7 +157,7 @@ const MyPurchases = () => {
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-10">
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-4">
-                        My <span className="text-orange-600">Inventory</span>
+                        My <span className="text-orange-600">Orders</span>
                     </h1>
                     <p className="text-gray-500 italic mt-2">Track your rentals, purchases and delivery status.</p>
                 </div>
@@ -193,7 +193,7 @@ const MyPurchases = () => {
                                             className="w-full h-full object-contain transition-all duration-700 p-2"
                                         />
                                         <div className="absolute top-6 left-6">
-                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg backdrop-blur-md border border-white/20 ${bike.listingType === 'Rental' ? 'bg-blue-600/90 text-white' : 'bg-emerald-600/90 text-white'
+                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg backdrop-blur-md border border-white/20 ${bike.listingType === 'Rental' ? 'bg-orange-600 text-white' : 'bg-slate-900 text-white'
                                                 }`}>
                                                 {bike.listingType}
                                             </span>

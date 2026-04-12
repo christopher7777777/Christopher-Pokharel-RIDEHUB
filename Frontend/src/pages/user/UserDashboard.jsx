@@ -316,8 +316,10 @@ const UserDashboard = () => {
                                                 alt={bike.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
-                                            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-800 shadow-sm border border-white/50">
-                                                For {bike.listingType}
+                                            <div className={`absolute top-4 right-4 backdrop-blur-sm px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md border border-white/20 z-10 ${
+                                                bike.listingType === 'Rental' ? 'bg-orange-600 text-white' : 'bg-slate-900 text-white'
+                                            }`}>
+                                                For {bike.listingType === 'Rental' ? 'RENTAL' : 'SALE'}
                                             </div>
                                         </div>
                                         <div className="px-2 pb-2">

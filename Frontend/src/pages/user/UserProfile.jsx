@@ -18,16 +18,9 @@ import { Link } from 'react-router-dom';
 const UserProfile = () => {
     const { user, loadUser } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [updatingEsewa, setUpdatingEsewa] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
-    const [esewaId, setEsewaId] = useState(user?.esewaId || '');
 
-    // Sync esewaId when user data loads/changes
-    React.useEffect(() => {
-        if (user?.esewaId) {
-            setEsewaId(user.esewaId);
-        }
-    }, [user]);
+
 
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -86,24 +79,7 @@ const UserProfile = () => {
         }
     };
 
-    const onSaveEsewa = async (e) => {
-        e.preventDefault();
-        setUpdatingEsewa(true);
-        setMessage({ type: '', text: '' });
 
-        try {
-            await api.put('/api/auth/update-esewa', { esewaId });
-            await loadUser();
-            setMessage({ type: 'success', text: 'eSewa ID updated successfully!' });
-        } catch (err) {
-            setMessage({
-                type: 'error',
-                text: err.response?.data?.message || 'Failed to update eSewa ID'
-            });
-        } finally {
-            setUpdatingEsewa(false);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -114,7 +90,7 @@ const UserProfile = () => {
                     {/* Page header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
                         <div className="animate-fadeIn">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Profile Settings</h1>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Profile</h1>
                             <p className="text-gray-500 text-sm italic">Manage your personal information, security, and verification status.</p>
                         </div>
 
@@ -225,34 +201,7 @@ const UserProfile = () => {
                             </form>
                         </div>
 
-                        {/* Payout Settings Card */}
-                        <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.15s' }}>
-                            <div className="mb-8">
-                                <h2 className="text-xl font-black text-gray-900 mb-1">Payout Settings</h2>
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Required for receiving payments from rentals/sales.</p>
-                            </div>
 
-                            <form onSubmit={onSaveEsewa} className="space-y-6">
-                                <div>
-                                    <label className="block text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2 leading-none">eSewa ID (Phone Number)</label>
-                                    <input
-                                        type="text"
-                                        value={esewaId}
-                                        onChange={(e) => setEsewaId(e.target.value)}
-                                        placeholder="Enter your eSewa ID"
-                                        className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
-                                        required
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={updatingEsewa}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-purple-900/20 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-                                >
-                                    {updatingEsewa ? <Loader2 className="animate-spin" size={16} /> : 'Save Payout ID'}
-                                </button>
-                            </form>
-                        </div>
 
                         {/* KYC Verification Card */}
                         <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.2s' }}>

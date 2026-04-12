@@ -62,7 +62,7 @@ const BrowseBikes = () => {
             bike.listingType === filters.type ||
             (filters.type === 'Sale' && bike.listingType === 'Purchase');
 
-        {/* Brand filter */ }
+        // Brand filter
         const matchesBrand = filters.brand === 'all' || bike.brand === filters.brand;
 
         // Price filter
@@ -84,7 +84,7 @@ const BrowseBikes = () => {
         <div className="min-h-screen flex flex-col bg-gray-50 font-sans text-slate-800">
             <Header />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-20 md:pt-24 flex-grow w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24 md:pt-32 flex-grow w-full">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Filters */}
                     <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
@@ -226,6 +226,11 @@ const BrowseBikes = () => {
                                                     <Bike size={48} className="text-gray-300" />
                                                 </div>
                                             )}
+                                            <div className={`absolute top-3 right-3 backdrop-blur-sm px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm border border-white/20 z-10 ${
+                                                bike.listingType === 'Rental' ? 'bg-orange-600 text-white' : 'bg-slate-900 text-white'
+                                            }`}>
+                                                For {bike.listingType === 'Rental' ? 'RENTAL' : 'SALE'}
+                                            </div>
                                         </div>
                                         <div className="p-5 flex flex-col flex-1">
                                             <div className="mb-4">

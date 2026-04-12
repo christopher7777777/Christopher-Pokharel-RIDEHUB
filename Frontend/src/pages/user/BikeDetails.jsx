@@ -230,7 +230,7 @@ const BikeDetails = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             {!isViewOnly && <Header />}
 
-            <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isViewOnly ? 'pt-10' : 'pt-32'} pb-12 lg:pb-20`}>
+            <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isViewOnly ? 'pt-10' : 'pt-28 md:pt-40'} pb-12 lg:pb-20`}>
                 {/* Back button for Admin/Seller */}
                 {isViewOnly && (
                     <div className="mb-8">

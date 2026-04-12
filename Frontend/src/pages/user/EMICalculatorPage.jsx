@@ -53,7 +53,7 @@ const EMICalculatorPage = () => {
         <div className="min-h-screen bg-white font-sans text-slate-800">
             <Header />
 
-            <main className="pt-32 pb-20">
+            <main className="pt-28 md:pt-40 pb-20">
                 {/* Hero section */}
                 <section className="max-w-7xl mx-auto px-6 mb-20 text-center">
                     <div className="inline-flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-full mb-6 border border-orange-100 animate-fadeIn">

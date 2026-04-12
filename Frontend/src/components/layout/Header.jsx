@@ -231,8 +231,8 @@ const Header = () => {
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Navigation</p>
                                                     </div>
                                                     {[
-                                                        { label: 'Profile Settings', icon: User, path: '/profile' },
-                                                        { label: 'My Inventory', icon: Package, path: '/my-purchases' },
+                                                        { label: 'Profile', icon: User, path: '/profile' },
+                                                        { label: 'My Order', icon: Package, path: '/my-purchases' },
                                                         { label: 'My EMI Plans', icon: Calculator, path: '/my-emi' }
                                                     ].map((item) => (
                                                         <Link
