@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import SellerLayout from '../../components/layout/SellerLayout';
 import api from '../../utils/api';
-import { 
-    Package, 
-    Truck, 
-    CheckCircle2, 
-    PackageCheck, 
-    User, 
-    Calendar, 
-    Clock, 
+import {
+    Package,
+    Truck,
+    CheckCircle2,
+    PackageCheck,
+    User,
+    Calendar,
+    Clock,
     Loader2,
     Search,
     ChevronRight,
@@ -26,7 +26,7 @@ const SellerSales = () => {
             setLoading(true);
             const response = await api.get('/api/bikes/my-listings');
             // Filter bikes that are already sold or rented
-            const soldBikes = response.data.data.filter(bike => 
+            const soldBikes = response.data.data.filter(bike =>
                 ['Purchased', 'Rented', 'Sold', 'Pending Return', 'Maintenance'].includes(bike.status)
             );
             setSales(soldBikes);
@@ -75,7 +75,7 @@ const SellerSales = () => {
         return 1; // Pending or undefined
     };
 
-    const filteredSales = sales.filter(sale => 
+    const filteredSales = sales.filter(sale =>
         sale.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sale.brand.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -91,9 +91,9 @@ const SellerSales = () => {
                 <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-1 w-full">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input 
-                            type="text" 
-                            placeholder="Search by bike name or brand..." 
+                        <input
+                            type="text"
+                            placeholder="Search by bike name or brand..."
                             className="w-full pl-14 pr-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-orange-500 transition-all shadow-inner"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -123,15 +123,14 @@ const SellerSales = () => {
                                 <div className="flex flex-col lg:flex-row">
                                     {/* Bike Preview */}
                                     <div className="lg:w-72 h-48 lg:h-auto relative overflow-hidden group bg-gray-50">
-                                        <img 
-                                            src={sale.images?.[0] || 'https://placehold.co/400'} 
-                                            alt={sale.name} 
+                                        <img
+                                            src={sale.images?.[0] || 'https://placehold.co/400'}
+                                            alt={sale.name}
                                             className="w-full h-full object-contain transition-all duration-700 p-2"
                                         />
                                         <div className="absolute top-4 left-4">
-                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md border border-white/20 ${
-                                                sale.listingType === 'Rental' ? 'bg-blue-600/90 text-white' : 'bg-emerald-600/90 text-white'
-                                            }`}>
+                                            <span className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md border border-white/20 ${sale.listingType === 'Rental' ? 'bg-blue-600/90 text-white' : 'bg-emerald-600/90 text-white'
+                                                }`}>
                                                 {sale.listingType}
                                             </span>
                                         </div>
@@ -170,25 +169,23 @@ const SellerSales = () => {
                                         <div className="bg-gray-50/50 rounded-3xl p-8 mb-6 border border-gray-50">
                                             <div className="flex items-center justify-between relative mb-12">
                                                 <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2"></div>
-                                                <div 
+                                                <div
                                                     className="absolute top-1/2 left-0 h-1 bg-orange-600 -translate-y-1/2 transition-all duration-1000"
                                                     style={{ width: `${(getStatusStep(sale.deliveryStatus) - 1) * 50}%` }}
                                                 ></div>
-                                                
+
                                                 {[
                                                     { step: 1, label: 'Pending', icon: Box, active: true },
                                                     { step: 2, label: 'Shipped', icon: Truck, active: getStatusStep(sale.deliveryStatus) >= 2 },
                                                     { step: 3, label: 'Delivered', icon: CheckCircle2, active: getStatusStep(sale.deliveryStatus) >= 3 }
                                                 ].map((s) => (
                                                     <div key={s.step} className="relative z-10 flex flex-col items-center">
-                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-4 border-white transition-all shadow-sm ${
-                                                            s.active ? 'bg-orange-600 text-white shadow-xl shadow-orange-900/20' : 'bg-white text-gray-300'
-                                                        }`}>
+                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-4 border-white transition-all shadow-sm ${s.active ? 'bg-orange-600 text-white shadow-xl shadow-orange-900/20' : 'bg-white text-gray-300'
+                                                            }`}>
                                                             {s.step === 1 ? <PackageCheck size={20} /> : <s.icon size={20} />}
                                                         </div>
-                                                        <span className={`absolute -bottom-8 whitespace-nowrap text-[9px] font-black uppercase tracking-widest ${
-                                                            s.active ? 'text-orange-600' : 'text-gray-300'
-                                                        }`}>{s.label}</span>
+                                                        <span className={`absolute -bottom-8 whitespace-nowrap text-[9px] font-black uppercase tracking-widest ${s.active ? 'text-orange-600' : 'text-gray-300'
+                                                            }`}>{s.label}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -215,7 +212,7 @@ const SellerSales = () => {
                                                 </div>
 
                                                 {(!sale.deliveryStatus || sale.deliveryStatus === 'Pending') && (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleReleaseForDelivery(sale._id)}
                                                         className="w-full sm:w-auto bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl flex items-center justify-center gap-3 group active:scale-95"
                                                     >
@@ -226,13 +223,13 @@ const SellerSales = () => {
                                                 {/* CONFIRM RETURN BUTTONS */}
                                                 {sale.status === 'Pending Return' && (
                                                     <div className="flex gap-3 w-full sm:w-auto">
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleConfirmReturn(sale._id, false)}
                                                             className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg active:scale-95"
                                                         >
                                                             Confirm & Make Available
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleConfirmReturn(sale._id, true)}
                                                             className="flex-1 bg-amber-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg active:scale-95"
                                                         >
@@ -242,7 +239,7 @@ const SellerSales = () => {
                                                 )}
 
                                                 {sale.status === 'Maintenance' && (
-                                                     <button 
+                                                    <button
                                                         onClick={() => handleConfirmReturn(sale._id, false)}
                                                         className="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95"
                                                     >

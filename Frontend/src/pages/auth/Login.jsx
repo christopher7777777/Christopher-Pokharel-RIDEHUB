@@ -51,14 +51,14 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col pt-16 md:pt-20">
+        <div className="min-h-screen bg-slate-50 flex flex-col pt-20 md:pt-24">
             <Header />
-            <div className="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="flex-grow flex items-center justify-center py-12 md:py-20 px-4 relative overflow-hidden">
                 {/* Subtle background orange glow */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-100/50 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-100/50 rounded-full blur-[120px] -z-10 -translate-x-1/2 translate-y-1/2"></div>
 
-                <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-0 shadow-2xl rounded-[40px] overflow-hidden bg-white border border-gray-100">
+                <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-0 shadow-2xl rounded-[40px] overflow-hidden bg-white border border-gray-100 my-8 md:my-12">
                     {/* Left Side - Branding (Hidden on mobile) */}
                     <div className="hidden lg:flex bg-slate-900 p-12 flex-col justify-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-600/20 to-transparent"></div>

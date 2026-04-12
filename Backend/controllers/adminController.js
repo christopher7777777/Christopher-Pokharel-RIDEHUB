@@ -133,7 +133,7 @@ const getPendingEscrowPayments = async (req, res) => {
         const payments = await Payment.find({ escrowStatus: 'pending' })
             .populate('user', 'name email')
             .populate('seller', 'name email esewaId')
-            .populate('bike', 'name model brand')
+            .populate('bike', 'name model brand deliveryStatus isReleasedForDelivery')
             .sort('-createdAt');
 
         res.json({
@@ -222,6 +222,45 @@ const releaseEscrowPayment = async (req, res) => {
     }
 };
 
+// @desc    Admin releases bike for shipment (clears for seller to ship)
+// @route   PUT /api/admin/release-shipment/:bikeId
+// @access  Private/Admin
+const releaseForShipment = async (req, res) => {
+    try {
+        const bike = await Bike.findById(req.params.bikeId).populate('seller');
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        bike.isReleasedForDelivery = true;
+        await bike.save();
+
+        // Update Payment record if it's an online payment
+        const payment = await Payment.findOne({ bike: bike._id, escrowStatus: 'pending' });
+        if (payment) {
+            payment.isShipmentReleased = true;
+            await payment.save();
+        }
+
+        // Notify Seller
+        await Notification.create({
+            user: bike.seller._id,
+            title: 'Order Cleared for Shipment!',
+            message: `Admin has verified the payment for "${bike.name}". You can now release it for delivery in your sales hub.`,
+            type: 'ACCOUNT_UPDATE',
+            relatedId: bike._id
+        });
+
+        res.json({
+            success: true,
+            message: 'Bike released for shipment successfully'
+        });
+    } catch (error) {
+        console.error('Release shipment error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 // @desc    Get all service reviews
 // @route   GET /api/admin/reviews
 // @access  Private/Admin
@@ -291,8 +330,8 @@ const getFinancials = async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    totalRevenue: { 
-                        $sum: { $cond: [{ $eq: ['$paymentStatus', 'COMPLETED'] }, '$amount', 0] } 
+                    totalRevenue: {
+                        $sum: { $cond: [{ $eq: ['$paymentStatus', 'COMPLETED'] }, '$amount', 0] }
                     },
                     pendingPayouts: {
                         $sum: {
@@ -345,5 +384,6 @@ module.exports = {
     deleteReview,
     getPendingEscrowPayments,
     releaseEscrowPayment,
+    releaseForShipment,
     getFinancials
 };

@@ -44,10 +44,10 @@ const ResetPassword = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-800 flex flex-col">
+        <div className="min-h-screen bg-white font-sans text-slate-800 flex flex-col pt-20 md:pt-24">
             <Header />
-            <main className="flex-1 flex items-center justify-center p-6 bg-slate-50/50">
-                <div className="w-full max-w-md animate-fadeIn">
+            <main className="flex-1 flex items-center justify-center py-12 md:py-20 px-6 bg-slate-50/50">
+                <div className="w-full max-w-md animate-fadeIn my-8 md:my-12">
                     <div className="bg-white rounded-[40px] shadow-2xl shadow-orange-100/50 border border-gray-100 overflow-hidden">
                         <div className="p-8 lg:p-12">
                             <div className="mb-10">

@@ -155,10 +155,10 @@ const BikeDetails = () => {
             setBike(response.data.data);
             setIsBookingModalOpen(false);
 
-            // Redirect automatically after success (only for non-online or if something went wrong)
+            // Redirect automatically after success (only for non-online)
             setTimeout(() => {
-                navigate('/browse');
-            }, 3000);
+                navigate(`/booking-success?bikeId=${id}&bikeName=${encodeURIComponent(bike.name)}&type=${bike.listingType}`);
+            }, 2000);
 
         } catch (err) {
             setError(err.response?.data?.message || 'Transaction failed');

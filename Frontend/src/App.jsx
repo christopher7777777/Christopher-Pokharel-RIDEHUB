@@ -39,6 +39,7 @@ import MyPurchases from './pages/user/MyPurchases';
 import RateService from './pages/user/RateService';
 import AdminEMIApplications from './pages/admin/EMIApplications';
 import EMICalculatorPage from './pages/user/EMICalculatorPage';
+import BookingSuccess from './pages/user/BookingSuccess';
 import Notifications from './pages/Notifications';
 import { Toaster } from 'react-hot-toast';
 
@@ -130,6 +131,7 @@ function App() {
             />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-failure" element={<PaymentFailure />} />
+            <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/emi-calculator" element={<EMICalculatorPage />} />
             <Route
               path="/profile"

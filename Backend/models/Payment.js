@@ -70,6 +70,10 @@ const paymentSchema = new mongoose.Schema({
         deliveryMethod: String,
         deliveryCharge: Number,
         serviceDay: String
+    },
+    isShipmentReleased: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

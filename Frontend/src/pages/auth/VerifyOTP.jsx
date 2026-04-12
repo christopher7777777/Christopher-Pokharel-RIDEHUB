@@ -117,10 +117,10 @@ const VerifyOTP = () => {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col pt-16 md:pt-20">
+            <div className="min-h-screen bg-slate-50 flex flex-col pt-20 md:pt-24">
                 <Header />
-                <div className="flex-grow flex items-center justify-center p-4">
-                    <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 text-center border border-slate-100">
+                <div className="flex-grow flex items-center justify-center py-12 md:py-20 px-4">
+                    <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 text-center border border-slate-100 my-8 md:my-12">
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <CheckCircle2 className="w-10 h-10 text-green-600" />
                         </div>
@@ -143,14 +143,14 @@ const VerifyOTP = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col pt-16 md:pt-20">
+        <div className="min-h-screen bg-slate-50 flex flex-col pt-20 md:pt-24">
             <Header />
-            <div className="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="flex-grow flex items-center justify-center py-12 md:py-20 px-4 relative overflow-hidden">
                 {/* Background elements */}
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-100/40 rounded-full blur-[120px] -z-10 translate-x-1/3 -translate-y-1/3"></div>
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-50/40 rounded-full blur-[120px] -z-10 -translate-x-1/3 translate-y-1/3"></div>
 
-                <div className="max-w-md w-full bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white p-8 md:p-12">
+                <div className="max-w-md w-full bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white p-8 md:p-12 my-8 md:my-12">
                     <div className="text-center mb-10">
                         <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-600/20 transform -rotate-6">
                             <ShieldCheck className="w-8 h-8 text-white" />

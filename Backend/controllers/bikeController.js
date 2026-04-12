@@ -396,8 +396,9 @@ exports.confirmSale = async (req, res) => {
             deliveryCharge,
             bookingDate,
             serviceDay,
-            status: paymentMethod === 'Online' ? bike.status : (bike.status === 'Purchased' ? 'Purchased' : 'Approved'),
-            purchasedBy: paymentMethod === 'Online' ? bike.purchasedBy : req.user.id
+            status: paymentMethod === 'Online' ? bike.status : (bike.status === 'Purchased' ? 'Purchased' : (bike.listingType === 'Sale' || bike.listingType === 'Purchase' ? 'Purchased' : 'Approved')),
+            purchasedBy: paymentMethod === 'Online' ? bike.purchasedBy : req.user.id,
+            isReleasedForDelivery: ['Cash', 'Cash on Delivery'].includes(paymentMethod)
         };
 
         // Calculate final transaction price
@@ -445,7 +446,7 @@ exports.confirmSale = async (req, res) => {
         }
 
         // --- NEW: COD Escrow Activation ---
-        const isCOD = paymentMethod === 'Cash on Delivery' || (paymentMethod === 'Cash' && deliveryMethod === 'Home Delivery');
+        const isCOD = ['Cash', 'Cash on Delivery'].includes(paymentMethod);
         if (isCOD) {
             await Payment.create({
                 user: req.user.id,
@@ -456,7 +457,8 @@ exports.confirmSale = async (req, res) => {
                 method: 'cod',
                 transactionId: `COD-${Date.now()}-${req.user.id.toString().slice(-4)}`,
                 paymentStatus: 'PENDING',
-                escrowStatus: 'pending'
+                escrowStatus: 'pending',
+                isShipmentReleased: true
             });
 
             // Notify Admin
@@ -580,13 +582,14 @@ exports.rentBike = async (req, res) => {
             serviceDay,
             rentalPlan: rentalPlan || 'Daily',
             rentalExpiry: expiryDate,
-            rentedBy: req.user.id
+            rentedBy: req.user.id,
+            isReleasedForDelivery: ['Cash', 'Cash on Delivery'].includes(paymentMethod)
         };
 
         bike = await Bike.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).populate('seller', 'name email');
 
         // --- NEW: COD Escrow Activation ---
-        const isCOD = paymentMethod === 'Cash on Delivery' || (paymentMethod === 'Cash' && deliveryMethod === 'Home Delivery');
+        const isCOD = ['Cash', 'Cash on Delivery'].includes(paymentMethod);
         if (isCOD) {
             await Payment.create({
                 user: req.user.id,
@@ -597,7 +600,8 @@ exports.rentBike = async (req, res) => {
                 method: 'cod',
                 transactionId: `COD-RENT-${Date.now()}-${req.user.id.toString().slice(-4)}`,
                 paymentStatus: 'PENDING',
-                escrowStatus: 'pending'
+                escrowStatus: 'pending',
+                isShipmentReleased: true
             });
 
             // Notify Admin
@@ -841,7 +845,7 @@ exports.receiveBike = async (req, res) => {
         await bike.save();
 
         // Update COD payment status to COMPLETED
-        if (bike.paymentMethod === 'Cash on Delivery') {
+        if (['Cash', 'Cash on Delivery'].includes(bike.paymentMethod)) {
             await Payment.findOneAndUpdate(
                 { bike: bike._id, user: req.user.id, method: 'cod', paymentStatus: 'PENDING' },
                 { paymentStatus: 'COMPLETED' }

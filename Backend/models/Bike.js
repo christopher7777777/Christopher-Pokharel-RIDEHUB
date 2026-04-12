@@ -153,6 +153,10 @@ const bikeSchema = new mongoose.Schema({
         enum: ['Pending', 'Shipped', 'Delivered'],
         default: 'Pending'
     },
+    isReleasedForDelivery: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

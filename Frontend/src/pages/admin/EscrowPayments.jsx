@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import api from '../../utils/api';
-import { 
-    Clock, 
-    CheckCircle2, 
-    AlertCircle, 
-    Search, 
-    Loader2, 
-    ExternalLink, 
+import {
+    Clock,
+    CheckCircle2,
+    AlertCircle,
+    Search,
+    Loader2,
+    ExternalLink,
     CreditCard,
     ArrowUpRight,
     ArrowDownLeft,
@@ -59,11 +59,49 @@ const EscrowPayments = () => {
         }
     };
 
-    const filteredPayments = payments.filter(p => 
-        p.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.seller?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.bike?.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const handleReleaseForShipment = async (bikeId) => {
+        if (!window.confirm('Clear this order for shipment? The seller will be notified to dispatch the bike.')) return;
+        
+        try {
+            await api.put(`/api/admin/release-shipment/${bikeId}`);
+            toast.success('Order cleared for shipment!');
+            fetchPendingPayments();
+            setSelectedPayment(null);
+        } catch (err) {
+            console.error('Failed to release shipment:', err);
+            toast.error(err.response?.data?.message || 'Failed to release shipment');
+        }
+    };
+
+    const filteredPayments = payments.filter(p => {
+        // Universal Filter: Already released payments (settled) should NEVER show in the active escrow table
+        if (p.escrowStatus === 'released') return false;
+
+        // Search filter
+        const matchesSearch = (
+            p.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.seller?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.bike?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (!matchesSearch) return false;
+
+        // SPECIFIC LOGIC:
+        // Case 1: COD - Show if awaiting shipment OR ready for settlement
+        if (p.method === 'cod') {
+            if (!p.isShipmentReleased) return true;
+            if (p.bike?.deliveryStatus === 'Delivered') return true;
+            return false;
+        }
+        
+        // Case 2: Online (eSewa) - Show if awaiting Shipment Release
+        if (p.method === 'esewa' && !p.isShipmentReleased) return true;
+        
+        // Case 3: Online (eSewa) - Show if ready for final Fund Settlement (Delivered)
+        if (p.method === 'esewa' && p.bike?.deliveryStatus === 'Delivered') return true;
+
+        // Note: Payments in "Transit" phase (Released but not yet Delivered) are hidden.
+        return false;
+    });
 
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
@@ -128,7 +166,7 @@ const EscrowPayments = () => {
                 <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
                     <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h4 className="font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                             <CheckCircle2 className="text-orange-600" size={20} /> VERIFICATION QUEUE
+                            <CheckCircle2 className="text-orange-600" size={20} /> VERIFICATION QUEUE
                         </h4>
                         <div className="relative">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -215,7 +253,11 @@ const EscrowPayments = () => {
                                             <td className="px-8 py-6 text-right">
                                                 <button 
                                                     onClick={() => setSelectedPayment(p)}
-                                                    className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm border border-slate-100"
+                                                    className={`p-2.5 rounded-xl transition-all shadow-sm border ${
+                                                        !p.isShipmentReleased 
+                                                        ? 'bg-orange-50 text-orange-600 border-orange-100 animate-pulse' 
+                                                        : 'bg-slate-50 text-slate-600 border-slate-100 hover:bg-orange-600 hover:text-white'
+                                                    }`}
                                                 >
                                                     <ExternalLink size={16} />
                                                 </button>
@@ -303,34 +345,66 @@ const EscrowPayments = () => {
                                 <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-start gap-3">
                                     <AlertCircle className="text-red-600 shrink-0" size={20} />
                                     <p className="text-[11px] text-red-700 font-bold leading-relaxed">
-                                        CAUTION: This seller has not provided a valid eSewa ID. You cannot release funds until the seller updates their payout information in their dashboard.
+                                        CAUTION: This seller has not provided a valid eSewa ID.
+                                    </p>
+                                </div>
+                            )}
+
+                            {selectedPayment.method === 'cod' && selectedPayment.bike?.deliveryStatus !== 'Delivered' && (
+                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
+                                    <Info className="text-blue-600 shrink-0" size={20} />
+                                    <p className="text-[11px] text-blue-700 font-bold leading-relaxed">
+                                        COD NOTICE: Funds can only be settled after the buyer confirms receipt of the bike. Current status: {selectedPayment.bike?.deliveryStatus || 'Pending'}
+                                    </p>
+                                </div>
+                            )}
+
+                            {selectedPayment.method !== 'cod' && !selectedPayment.bike?.isReleasedForDelivery && (
+                                <div className="bg-orange-50 border border-orange-100 p-4 rounded-2xl flex items-start gap-3">
+                                    <AlertCircle className="text-orange-600 shrink-0" size={20} />
+                                    <p className="text-[11px] text-orange-700 font-bold leading-relaxed">
+                                        SHIPMENT CLEARANCE: Payment verified but shipment is NOT yet released for the seller.
                                     </p>
                                 </div>
                             )}
                         </div>
 
-                        <div className="p-10 bg-slate-50 flex gap-4">
+                        <div className="p-10 bg-slate-50 flex flex-col sm:flex-row gap-4">
                             <button 
                                 onClick={() => setSelectedPayment(null)}
-                                className="flex-1 py-4 bg-white text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
+                                className="flex-1 py-4 bg-white text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all shadow-sm order-2 sm:order-1"
                             >
                                 CLOSE
                             </button>
-                            <button 
-                                onClick={() => handleRelease(selectedPayment._id)}
-                                disabled={!selectedPayment.seller?.esewaId || releasing}
-                                className={`flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 ${
-                                    !selectedPayment.seller?.esewaId || releasing 
-                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
-                                    : 'bg-orange-600 text-white hover:bg-orange-700'
-                                }`}
-                            >
-                                {releasing === selectedPayment._id ? (
-                                    <Loader2 className="animate-spin" size={18} />
-                                ) : (
-                                    <>RELEASE FUNDS <ArrowUpRight size={18} /></>
-                                )}
-                            </button>
+                            
+                            {(!selectedPayment.bike?.isReleasedForDelivery && selectedPayment.method !== 'cod') ? (
+                                <button 
+                                    onClick={() => handleReleaseForShipment(selectedPayment.bike?._id)}
+                                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 order-1 sm:order-2"
+                                >
+                                    RELEASE FOR SHIPMENT <ArrowUpRight size={18} />
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={() => handleRelease(selectedPayment._id)}
+                                    disabled={
+                                        !selectedPayment.seller?.esewaId || 
+                                        releasing || 
+                                        (selectedPayment.method === 'cod' && selectedPayment.bike?.deliveryStatus !== 'Delivered')
+                                    }
+                                    className={`flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 order-1 sm:order-2 ${
+                                        !selectedPayment.seller?.esewaId || releasing || (selectedPayment.method === 'cod' && selectedPayment.bike?.deliveryStatus !== 'Delivered')
+                                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                                        : 'bg-orange-600 text-white hover:bg-orange-700'
+                                    }`}
+                                >
+                                    {releasing === selectedPayment._id ? (
+                                        <Loader2 className="animate-spin" size={18} />
+                                    ) : (
+                                        <>RELEASE FUNDS <ArrowUpRight size={18} /></>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
