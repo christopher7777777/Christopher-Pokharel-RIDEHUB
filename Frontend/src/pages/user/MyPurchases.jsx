@@ -67,6 +67,38 @@ const MyPurchases = () => {
         }
     };
 
+    const handlePayFine = async (bikeId, method) => {
+        try {
+            const response = await api.put(`/api/bikes/pay-fine/${bikeId}`, { paymentMethod: method });
+            
+            if (response.data.success) {
+                if (response.data.isEsewa) {
+                    // Create eSewa form and submit
+                    const { esewaConfig } = response.data;
+                    const form = document.createElement('form');
+                    form.setAttribute('method', 'POST');
+                    form.setAttribute('action', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form');
+                    
+                    Object.entries(esewaConfig).forEach(([key, value]) => {
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'hidden');
+                        input.setAttribute('name', key);
+                        input.setAttribute('value', value);
+                        form.appendChild(input);
+                    });
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    toast.success('Fine recorded via Cash. Please pay the seller during return.');
+                    fetchPurchases();
+                }
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Payment failed');
+        }
+    };
+
     const handleDownloadReceipt = (bike) => {
         const printWindow = window.open('', '_blank');
         const bikeImage = bike.images?.[0] || 'https://placehold.co/600x400';
@@ -299,7 +331,55 @@ const MyPurchases = () => {
                                                 <Clock size={16} className="animate-spin" />
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-center">Return Pending Seller Confirmation</span>
                                             </div>
-                                        ) }
+                                        )}
+
+                                        {/* FINE SECTION */}
+                                        {(bike.status === 'Overdue' || bike.fineAmount > 0) && (
+                                            <div className="mt-4 p-6 bg-red-50 border-2 border-red-100 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                                        <Clock size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-red-600 font-black text-sm uppercase tracking-widest">Late Return Penalty</h4>
+                                                        <p className="text-red-500 text-2xl font-black">Rs {bike.fineAmount.toLocaleString()}</p>
+                                                    </div>
+                                                </div>
+                                                {bike.fineAmount > 0 && (
+                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                        {(!bike.finePaymentMethod || bike.finePaymentMethod === 'none') ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handlePayFine(bike._id, 'esewa')}
+                                                                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-red-900/20"
+                                                                >
+                                                                    PAY VIA ESEWA
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handlePayFine(bike._id, 'cash')}
+                                                                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-900/10"
+                                                                >
+                                                                    PAY VIA CASH
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <div className="bg-green-600 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                                                                <CheckCircle2 size={14} /> FINE PAID VIA {bike.finePaymentMethod.toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {bike.status === 'Overdue' && (
+                                            <button
+                                                onClick={() => handleReturnBike(bike._id)}
+                                                className="w-full bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] group mt-4 border-2 border-red-500/20"
+                                            >
+                                                INITIATE LATE RETURN <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        )}
                                         {bike.deliveryStatus === 'Delivered' && (
                                             <div className="flex gap-4">
                                                 <button 

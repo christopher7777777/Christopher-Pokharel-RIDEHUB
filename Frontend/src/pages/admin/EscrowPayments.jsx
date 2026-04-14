@@ -81,15 +81,19 @@ const EscrowPayments = () => {
         const matchesSearch = (
             p.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.seller?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.bike?.name.toLowerCase().includes(searchQuery.toLowerCase())
+            p.bike?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.productName.toLowerCase().includes('fine')
         );
         if (!matchesSearch) return false;
 
-        // SPECIFIC LOGIC:
+        // Case 0: Fine Payments (Always show if pending, regardless of shipment)
+        if (p.productName.toLowerCase().includes('fine')) return true;
+
         // Case 1: COD - Show if awaiting shipment OR ready for settlement
-        if (p.method === 'cod') {
+        if (p.method === 'cod' || p.method === 'cash') {
             if (!p.isShipmentReleased) return true;
             if (p.bike?.deliveryStatus === 'Delivered') return true;
+            if (p.bike?.status === 'Pending Return') return true; // Show for returns too
             return false;
         }
         
@@ -97,7 +101,7 @@ const EscrowPayments = () => {
         if (p.method === 'esewa' && !p.isShipmentReleased) return true;
         
         // Case 3: Online (eSewa) - Show if ready for final Fund Settlement (Delivered)
-        if (p.method === 'esewa' && p.bike?.deliveryStatus === 'Delivered') return true;
+        if (p.method === 'esewa' && (p.bike?.deliveryStatus === 'Delivered' || p.bike?.status === 'Pending Return')) return true;
 
         // Note: Payments in "Transit" phase (Released but not yet Delivered) are hidden.
         return false;

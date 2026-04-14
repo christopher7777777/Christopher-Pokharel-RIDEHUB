@@ -22,7 +22,7 @@ const paymentSchema = new mongoose.Schema({
     },
     method: {
         type: String,
-        enum: ['esewa', 'cod'],
+        enum: ['esewa', 'cod', 'cash'],
         required: true
     },
     transactionId: {

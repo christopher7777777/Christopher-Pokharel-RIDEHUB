@@ -123,6 +123,15 @@ const bikeSchema = new mongoose.Schema({
     rentalExpiry: {
         type: Date
     },
+    fineAmount: {
+        type: Number,
+        default: 0
+    },
+    finePaymentMethod: {
+        type: String,
+        enum: ['esewa', 'cash', 'none'],
+        default: 'none'
+    },
     rentedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

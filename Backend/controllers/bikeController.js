@@ -92,10 +92,17 @@ exports.getMyPurchases = async (req, res) => {
             ]
         }).populate('seller', 'name email').sort('-updatedAt');
 
-        // Dynamically update status to Overdue if needed
+        // Dynamically update status to Overdue and calculate fine if needed
         const updatedBikes = await Promise.all(bikes.map(async (bike) => {
-            if (bike.status === 'Rented' && bike.rentalExpiry && new Date() > new Date(bike.rentalExpiry)) {
+            const currentDate = new Date();
+            if (bike.status === 'Rented' && bike.rentalExpiry && currentDate > new Date(bike.rentalExpiry)) {
                 bike.status = 'Overdue';
+
+                // Calculate fine (NPR 500 per day late)
+                const diffTime = Math.abs(currentDate - new Date(bike.rentalExpiry));
+                const lateDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                bike.fineAmount = lateDays * 500;
+
                 await bike.save();
             }
             return bike;
@@ -1021,6 +1028,7 @@ exports.initiateReturn = async (req, res) => {
             lateFee = lateDays * 500;
         }
 
+        bike.fineAmount = lateFee;
         bike.status = 'Pending Return';
         await bike.save();
 
@@ -1077,6 +1085,7 @@ exports.confirmReturn = async (req, res) => {
         bike.status = isMaintenance ? 'Maintenance' : 'Available';
         bike.rentedBy = null;
         bike.rentalExpiry = null;
+        bike.fineAmount = 0;
         bike.deliveryStatus = 'Pending'; // Reset for next rent
         await bike.save();
 
@@ -1110,6 +1119,101 @@ exports.confirmReturn = async (req, res) => {
     }
 };
 
+// @desc    Pay rental fine
+// @route   PUT /api/bikes/pay-fine/:id
+// @access  Private
+exports.payFine = async (req, res) => {
+    try {
+        const { paymentMethod } = req.body; // 'esewa' or 'cash'
+        const bike = await Bike.findById(req.params.id);
+        if (!bike) {
+            return res.status(404).json({ success: false, message: 'Bike not found' });
+        }
+
+        if (!bike.rentedBy || bike.rentedBy.toString() !== req.user.id.toString()) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        if (bike.fineAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'No fine to pay' });
+        }
+
+        if (paymentMethod === 'esewa') {
+            const { generateEsewaSignature } = require('../utils/esewa');
+            const tempUuid = `FINE-${Date.now()}`;
+
+            const payment = await Payment.create({
+                user: req.user.id,
+                bike: bike._id,
+                seller: bike.seller,
+                amount: bike.fineAmount,
+                productName: `Fine for ${bike.name}`,
+                method: 'esewa',
+                transactionId: tempUuid,
+                esewaTransactionUuid: tempUuid,
+                paymentStatus: 'PENDING',
+                escrowStatus: 'none'
+            });
+
+            const transactionUuid = `FINE-${payment._id}-${Date.now()}`;
+            payment.esewaTransactionUuid = transactionUuid;
+            payment.transactionId = transactionUuid;
+            await payment.save();
+
+            const esewaConfig = {
+                amount: bike.fineAmount.toString(),
+                tax_amount: "0",
+                total_amount: bike.fineAmount.toString(),
+                transaction_uuid: transactionUuid,
+                product_code: process.env.NEXT_PUBLIC_ESEWA_MERCHANT_CODE || 'EPAYTEST',
+                product_service_charge: "0",
+                product_delivery_charge: "0",
+                success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment-success`,
+                failure_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment-failure`,
+                signed_field_names: "total_amount,transaction_uuid,product_code",
+            };
+
+            const signatureString = `total_amount=${esewaConfig.total_amount},transaction_uuid=${esewaConfig.transaction_uuid},product_code=${esewaConfig.product_code}`;
+            const signature = generateEsewaSignature(
+                process.env.NEXT_PUBLIC_ESEWA_SECRET_KEY || process.env.ESEWA_SECRET_KEY,
+                signatureString
+            );
+
+            return res.status(200).json({
+                success: true,
+                isEsewa: true,
+                esewaConfig: { ...esewaConfig, signature }
+            });
+        } else {
+            // Cash payment
+            const transactionId = `CASH-FINE-${Date.now()}`;
+
+            await Payment.create({
+                user: req.user.id,
+                bike: bike._id,
+                seller: bike.seller,
+                amount: bike.fineAmount,
+                productName: `Fine for ${bike.name}`,
+                method: 'cash',
+                transactionId: transactionId,
+                paymentStatus: 'COMPLETED',
+                escrowStatus: 'pending'
+            });
+
+            bike.finePaymentMethod = 'cash';
+            await bike.save();
+
+            return res.status(200).json({
+                success: true,
+                message: 'Fine payment recorded via Cash. Please hand over the amount to the seller.',
+                isEsewa: false
+            });
+        }
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     createBike: exports.createBike,
     getMyBikes: exports.getMyBikes,
@@ -1131,5 +1235,6 @@ module.exports = {
     receiveBike: exports.receiveBike,
     getMyPurchases: exports.getMyPurchases,
     initiateReturn: exports.initiateReturn,
-    confirmReturn: exports.confirmReturn
+    confirmReturn: exports.confirmReturn,
+    payFine: exports.payFine
 };

@@ -12,7 +12,8 @@ import {
     Loader2,
     Search,
     ChevronRight,
-    MapPin
+    MapPin,
+    AlertCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -27,7 +28,7 @@ const SellerSales = () => {
             const response = await api.get('/api/bikes/my-listings');
             // Filter bikes that are already sold or rented
             const soldBikes = response.data.data.filter(bike =>
-                ['Purchased', 'Rented', 'Sold', 'Pending Return', 'Maintenance'].includes(bike.status)
+                ['Purchased', 'Rented', 'Sold', 'Pending Return', 'Maintenance', 'Overdue'].includes(bike.status)
             );
             setSales(soldBikes);
         } catch (err) {
@@ -203,6 +204,11 @@ const SellerSales = () => {
                                                             <Truck size={16} className="text-blue-600" />
                                                             <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest italic">In Transit to Buyer</span>
                                                         </div>
+                                                    ) : sale.status === 'Overdue' ? (
+                                                        <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-100 rounded-full">
+                                                            <AlertCircle size={16} className="text-red-600 animate-bounce" />
+                                                            <span className="text-[10px] font-black text-red-700 uppercase tracking-widest italic">Rental Overdue</span>
+                                                        </div>
                                                     ) : (
                                                         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-full">
                                                             <CheckCircle2 size={16} className="text-emerald-600" />
@@ -222,19 +228,27 @@ const SellerSales = () => {
 
                                                 {/* CONFIRM RETURN BUTTONS */}
                                                 {sale.status === 'Pending Return' && (
-                                                    <div className="flex gap-3 w-full sm:w-auto">
-                                                        <button
-                                                            onClick={() => handleConfirmReturn(sale._id, false)}
-                                                            className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg active:scale-95"
-                                                        >
-                                                            Confirm & Make Available
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleConfirmReturn(sale._id, true)}
-                                                            className="flex-1 bg-amber-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg active:scale-95"
-                                                        >
-                                                            Send to Maintenance
-                                                        </button>
+                                                    <div className="flex flex-col gap-3 w-full sm:w-auto">
+                                                        {sale.fineAmount > 0 && (
+                                                            <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 mb-2 flex flex-col">
+                                                                <span className="text-[8px] font-black uppercase">Late Fee (Paid by User)</span>
+                                                                <span className="text-sm font-black italic">Rs {sale.fineAmount.toLocaleString()}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex gap-3">
+                                                            <button
+                                                                onClick={() => handleConfirmReturn(sale._id, false)}
+                                                                className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg active:scale-95"
+                                                            >
+                                                                Confirm & Make Available
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleConfirmReturn(sale._id, true)}
+                                                                className="flex-1 bg-amber-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg active:scale-95"
+                                                            >
+                                                                Send to Maintenance
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 )}
 

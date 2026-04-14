@@ -12,6 +12,7 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const SellerBikes = () => {
     const [bikes, setBikes] = useState([]);
@@ -34,6 +35,21 @@ const SellerBikes = () => {
         }
     };
 
+    const handleConfirmReturn = async (bikeId, isMaintenance = false) => {
+        const actionText = isMaintenance ? 'send to maintenance' : 'complete the return';
+        if (!window.confirm(`Are you sure you want to ${actionText}?`)) return;
+
+        try {
+            const response = await api.put(`/api/bikes/return/confirm/${bikeId}`, { isMaintenance });
+            if (response.data.success) {
+                toast.success(isMaintenance ? 'Bike sent to maintenance.' : 'Bike is now available for rent again!');
+                fetchBikes();
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to confirm return');
+        }
+    };
+
     useEffect(() => {
         fetchBikes();
     }, []);
@@ -44,7 +60,8 @@ const SellerBikes = () => {
         const matchesFilter = filter === 'all' ||
             (filter === 'Purchased' ? bike.status === 'Purchased' :
                 filter === 'Exchange' ? bike.exchangeStatus === 'Valuated' :
-                    bike.listingType === filter);
+                    filter === 'Returns' ? ['Pending Return', 'Overdue'].includes(bike.status) :
+                        bike.listingType === filter);
         return matchesSearch && matchesFilter;
     });
 
@@ -80,7 +97,8 @@ const SellerBikes = () => {
         rentals: bikes.filter(b => b.listingType === 'Rental').length,
         sales: bikes.filter(b => b.listingType === 'Sale').length,
         exchanges: bikes.filter(b => b.exchangeStatus === 'Valuated').length,
-        sold: bikes.filter(b => b.status === 'Purchased').length
+        sold: bikes.filter(b => b.status === 'Purchased').length,
+        returns: bikes.filter(b => ['Pending Return', 'Overdue'].includes(b.status)).length
     };
 
     if (loading) {
@@ -108,6 +126,7 @@ const SellerBikes = () => {
                     {[
                         { label: 'Total Items', value: stats.total, icon: BikeIcon, color: 'text-gray-900', bg: 'bg-white' },
                         { label: 'For Rent', value: stats.rentals, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50/50' },
+                        { label: 'Returns', value: stats.returns, icon: Filter, color: 'text-red-600', bg: 'bg-red-50/50' },
                         { label: 'For Exchange', value: stats.exchanges, icon: ArrowUpRight, color: 'text-orange-600', bg: 'bg-orange-50/50' },
                         { label: 'Completed Sales', value: stats.sold, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50/50' },
                     ].map((stat, idx) => (
@@ -136,7 +155,7 @@ const SellerBikes = () => {
                         />
                     </div>
                     <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl w-full md:w-auto overflow-x-auto">
-                        {['all', 'Rental', 'Sale', 'Exchange', 'Purchased'].map((t) => (
+                        {['all', 'Rental', 'Sale', 'Exchange', 'Returns', 'Purchased'].map((t) => (
                             <button
                                 key={t}
                                 onClick={() => setFilter(t)}
@@ -236,10 +255,10 @@ const SellerBikes = () => {
                                                             await api.put(`/api/bikes/complete-payment/${bike._id}`, {
                                                                 paymentMessage: `Transaction completed and payment received by dealer.`
                                                             });
-                                                            alert(`Successfully marked as ${action}! Notification sent to buyer.`);
+                                                            toast.success(`Successfully marked as ${action}! Notification sent to buyer.`);
                                                             fetchBikes();
                                                         } catch (err) {
-                                                            alert(`Failed to complete ${action}: ${err.response?.data?.message || err.message}`);
+                                                            toast.error(`Failed to complete ${action}: ${err.response?.data?.message || err.message}`);
                                                         }
                                                     }
                                                 }}
@@ -247,6 +266,38 @@ const SellerBikes = () => {
                                             >
                                                 <CheckCircle2 size={14} /> MARK AS {bike.listingType === 'Sale' ? 'SOLD' : 'RENTED'}
                                             </button>
+                                        )}
+
+                                        {/* RENTAL RETURN ACTIONS */}
+                                        {bike.status === 'Pending Return' && (
+                                            <div className="flex flex-col gap-2">
+                                                <div className="bg-orange-50 text-orange-600 p-2 rounded-xl text-[8px] font-black uppercase tracking-widest text-center border border-orange-100">
+                                                    User Initiated Return
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleConfirmReturn(bike._id, false)}
+                                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-black text-[8px] uppercase tracking-widest transition-all"
+                                                    >
+                                                        ACCEPT RETURN
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleConfirmReturn(bike._id, true)}
+                                                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-black text-[8px] uppercase tracking-widest transition-all"
+                                                    >
+                                                        TO MAINTAIN
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {bike.status === 'Overdue' && (
+                                            <div className="bg-red-50 text-red-600 p-3 rounded-xl flex flex-col items-center gap-1 border border-red-100">
+                                                <span className="text-[9px] font-black uppercase tracking-widest animate-pulse flex items-center gap-1">
+                                                    <AlertCircle size={10} /> RENTAL OVERDUE
+                                                </span>
+                                                <span className="text-[8px] font-bold">Fine: Rs {bike.fineAmount?.toLocaleString()}</span>
+                                            </div>
                                         )}
                                     </div>
                                 </div>

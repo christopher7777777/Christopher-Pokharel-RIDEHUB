@@ -293,7 +293,14 @@ const verifyPayment = async (req, res) => {
 
             if (bike) {
                 console.log('Updating bike status for bike:', bike._id);
-                if (bike.listingType === 'Sale' || bike.listingType === 'Purchase') {
+
+                // Check if this is a fine payment
+                if (payment.transactionId.startsWith('FINE-')) {
+                    bike.fineAmount = 0;
+                    bike.finePaymentMethod = 'esewa';
+                    await bike.save();
+                    console.log('Fine cleared for bike:', bike._id);
+                } else if (bike.listingType === 'Sale' || bike.listingType === 'Purchase') {
                     bike.status = 'Purchased';
                     bike.purchasedBy = payment.user;
 
