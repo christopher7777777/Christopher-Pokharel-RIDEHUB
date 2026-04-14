@@ -87,8 +87,8 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                             <FileText size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Finance Application</h2>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{bike.name} • Rs {loanDetails.monthlyEMI.toLocaleString()}/mo</p>
+                            <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Finance Application</h2>
+                            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">{bike.name} • RS {loanDetails.monthlyEMI.toLocaleString()}/mo</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 border border-gray-100 transition-all">
@@ -102,7 +102,7 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                             <CheckCircle2 size={48} className="text-green-500 animate-bounce" />
                         </div>
                         <h3 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tight">Application Sent!</h3>
-                        <p className="text-gray-500 max-w-md mx-auto italic">
+                        <p className="text-sm text-gray-500 max-w-md mx-auto">
                             Your finance application has been received. Our team will review your documents and forward them to our partner banks.
                             The bike status has been set to <span className="text-orange-600 font-bold">FinancePending</span>.
                         </p>
@@ -119,18 +119,18 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                         <div className="grid md:grid-cols-2 gap-10">
                             {/* Personal Details Section */}
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <h4 className="text-xs font-black text-orange-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                                     <User size={14} /> Part 1: Personal Details
                                 </h4>
 
                                 <div className="space-y-4">
                                     <div className="group">
-                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Full Name (As per Citizenship)</label>
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Full Name (As per Citizenship)</label>
                                         <div className="relative">
                                             <input
                                                 type="text" name="fullName" required
                                                 value={personalDetails.fullName} onChange={handleInputChange}
-                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-black text-xs text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
+                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-semibold text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
                                                 placeholder="e.g. Christopher Pokharel"
                                             />
                                         </div>
@@ -138,44 +138,44 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Occupation</label>
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Occupation</label>
                                             <input
                                                 type="text" name="occupation" required
                                                 value={personalDetails.occupation} onChange={handleInputChange}
-                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-black text-xs text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
+                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-semibold text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
                                                 placeholder="Software Engineer"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Monthly Income (Rs)</label>
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Monthly Income (RS)</label>
                                             <input
                                                 type="number" name="monthlyIncome" required
                                                 value={personalDetails.monthlyIncome} onChange={handleInputChange}
-                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-black text-xs text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
+                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 font-semibold text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
                                                 placeholder="50000"
                                             />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Contact Number</label>
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Contact Number</label>
                                         <div className="relative flex items-center">
-                                            <span className="absolute left-4 font-black text-gray-400 text-xs text-orange-600">+977</span>
+                                            <span className="absolute left-4 font-black text-sm text-orange-600">+977</span>
                                             <input
                                                 type="tel" name="contactNumber" required
                                                 value={personalDetails.contactNumber} onChange={handleInputChange}
-                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 pl-14 font-black text-xs text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
+                                                className="w-full bg-gray-50 border-none rounded-2xl p-4 pl-14 font-semibold text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
                                                 placeholder="98XXXXXXXX"
                                             />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Current Address</label>
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">Current Address</label>
                                         <input
                                             type="text" name="currentAddress" required
                                             value={personalDetails.currentAddress} onChange={handleInputChange}
-                                            className="w-full bg-gray-50 border-none rounded-2xl p-4 font-black text-xs text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
+                                            className="w-full bg-gray-50 border-none rounded-2xl p-4 font-semibold text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 transition-all outline-none"
                                             placeholder="Kathmandu, Nepal"
                                         />
                                     </div>
@@ -184,7 +184,7 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
 
                             {/* Document Upload Section */}
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <h4 className="text-xs font-black text-orange-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                                     <Upload size={14} /> Part 2: Required Documents
                                 </h4>
 
@@ -195,7 +195,7 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                                         { id: 'lalPurja', label: 'Lal Purja (Optional)', required: false }
                                     ].map((doc) => (
                                         <div key={doc.id} className="relative group">
-                                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">
+                                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block px-2">
                                                 {doc.label} {doc.required && <span className="text-red-500">*</span>}
                                             </label>
                                             <label className={`flex flex-col items-center justify-center w-full min-h-[80px] border-2 border-dashed rounded-[20px] cursor-pointer transition-all ${documents[doc.id] ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-100 hover:border-orange-200 hover:bg-orange-50/10'}`}>
@@ -203,12 +203,12 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                                                     {documents[doc.id] ? (
                                                         <>
                                                             <CheckCircle2 size={24} className="text-green-500 mb-1" />
-                                                            <p className="text-[9px] font-black text-green-600 uppercase truncate max-w-[150px]">{documents[doc.id].name.slice(0, 15)}...</p>
+                                                            <p className="text-xs font-black text-green-600 uppercase truncate max-w-[150px]">{documents[doc.id].name.slice(0, 15)}...</p>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <Upload size={18} className="text-gray-400 mb-1 group-hover:text-orange-500 group-hover:scale-110 transition-all" />
-                                                            <p className="text-[8px] font-black text-gray-400 uppercase group-hover:text-orange-600">Click To Upload</p>
+                                                            <p className="text-xs font-black text-gray-400 uppercase group-hover:text-orange-600">Click To Upload</p>
                                                         </>
                                                     )}
                                                 </div>
@@ -231,7 +231,7 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                                         className="w-5 h-5 rounded-md text-orange-600 focus:ring-orange-500 cursor-pointer"
                                     />
                                 </div>
-                                <div className="text-[10px] text-gray-500 leading-relaxed italic">
+                                <div className="text-sm text-gray-500 leading-relaxed">
                                     <p className="font-black text-gray-900 mb-2 uppercase tracking-widest">Legal Disclaimer & Agreement</p>
                                     <p>
                                         I understand that RideHub is not a financial institution and does not provide loans directly.
@@ -246,13 +246,13 @@ const FinanceModal = ({ isOpen, onClose, bike, loanDetails }) => {
                         {/* Submit Button */}
                         <div className="mt-8 flex items-center justify-between gap-6">
                             <div className="hidden md:block">
-                                <p className="text-sm font-black text-gray-900">Rs {loanDetails.monthlyEMI.toLocaleString()} <span className="text-[9px] text-gray-400 uppercase italic">/ month</span></p>
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{loanDetails.tenure} Months • {loanDetails.interestRate}% Interest</p>
+                                <p className="text-base font-black text-gray-900">RS {loanDetails.monthlyEMI.toLocaleString()} <span className="text-xs text-gray-400 uppercase">/ month</span></p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{loanDetails.tenure} Months • {loanDetails.interestRate}% Interest</p>
                             </div>
                             <button
                                 type="submit"
                                 disabled={loading || !disclaimerAccepted}
-                                className="flex-1 md:flex-none md:min-w-[250px] bg-orange-600 text-white py-5 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-900/10 hover:bg-orange-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 md:flex-none md:min-w-[250px] bg-orange-600 text-white py-5 rounded-[22px] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-orange-900/10 hover:bg-orange-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? (
                                     <>Processing Application...</>

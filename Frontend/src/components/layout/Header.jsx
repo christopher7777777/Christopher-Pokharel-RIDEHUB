@@ -13,7 +13,8 @@ import {
     Heart,
     Menu,
     X,
-    Package
+    Package,
+    Bike
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -233,7 +234,8 @@ const Header = () => {
                                                     {[
                                                         { label: 'Profile', icon: User, path: '/profile' },
                                                         { label: 'My Order', icon: Package, path: '/my-purchases' },
-                                                        { label: 'My EMI Plans', icon: Calculator, path: '/my-emi' }
+                                                        { label: 'My EMI Plans', icon: Calculator, path: '/my-emi' },
+                                                        { label: 'My Selling', icon: Bike, path: '/my-selling' }
                                                     ].map((item) => (
                                                         <Link
                                                             key={item.label}
