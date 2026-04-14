@@ -10,7 +10,9 @@ import {
     Camera,
     Plus,
     X,
-    Loader2
+    Loader2,
+    Upload,
+    FileCheck
 } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import Header from '../../components/layout/Header';
@@ -233,28 +235,50 @@ const ListBike = () => {
                         </div>
                     </div>
 
-                    {/* Bluebook photo */}
+                    {/* Bluebook PDF */}
                     <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 animate-slideInUp" style={{ animationDelay: '0.25s' }}>
-                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3 tracking-tight">
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-3 tracking-tight">
                             <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
                                 <FileText className="text-orange-600" size={20} />
                             </div>
                             Ownership Documents
                         </h2>
-                        <div className="relative aspect-[16/9] max-w-md mx-auto">
-                            <input type="file" id="bluebook" className="hidden" onChange={(e) => handlePhotoUpload(e, 'bluebook')} />
-                            <label htmlFor="bluebook" className={`w-full h-full rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all ${previewUrls.bluebook ? 'border-orange-500' : 'border-gray-200 hover:bg-orange-50'}`}>
-                                {previewUrls.bluebook ? (
-                                    <img src={previewUrls.bluebook} className="w-full h-full object-cover" alt="Bluebook" />
+                        <p className="text-xs text-gray-400 font-semibold mb-6 ml-[52px]">Upload your bluebook as a PDF file — required for verification</p>
+                        <div className="relative max-w-md mx-auto">
+                            <input
+                                type="file"
+                                id="bluebook"
+                                accept="application/pdf"
+                                className="hidden"
+                                onChange={(e) => handlePhotoUpload(e, 'bluebook')}
+                            />
+                            <label
+                                htmlFor="bluebook"
+                                className={`w-full rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all py-10 px-6 ${
+                                    bluebook ? 'border-orange-400 bg-orange-50' : 'border-gray-200 hover:bg-orange-50 hover:border-orange-300'
+                                }`}
+                            >
+                                {bluebook ? (
+                                    <div className="text-center">
+                                        <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                            <FileCheck className="text-orange-600" size={32} />
+                                        </div>
+                                        <p className="text-sm font-bold text-orange-700 truncate max-w-[240px]">{bluebook.name}</p>
+                                        <p className="text-xs text-gray-400 mt-1">{(bluebook.size / 1024).toFixed(1)} KB &middot; PDF</p>
+                                    </div>
                                 ) : (
                                     <div className="text-center">
-                                        <Camera className="text-gray-300 mx-auto mb-2" size={48} />
-                                        <p className="text-xs font-black text-gray-400 uppercase">Upload Bluebook Main Page</p>
+                                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                            <Upload className="text-gray-400" size={28} />
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-500">Click to upload Bluebook PDF</p>
+                                        <p className="text-xs text-gray-400 mt-1">PDF format only &middot; Max 10MB</p>
                                     </div>
                                 )}
                             </label>
-                            {previewUrls.bluebook && (
+                            {bluebook && (
                                 <button
+                                    type="button"
                                     onClick={() => removePhoto('bluebook')}
                                     className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
                                 >

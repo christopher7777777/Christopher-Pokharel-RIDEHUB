@@ -6,14 +6,22 @@ import {
     Clock,
     CheckCircle2,
     XCircle,
-    DollarSign,
     Search,
     ArrowUpRight,
     Loader2,
     Upload,
     Banknote,
     QrCode,
-    CreditCard
+    CreditCard,
+    X,
+    ChevronLeft,
+    ChevronRight,
+    Eye,
+    Gauge,
+    Zap,
+    Calendar,
+    Shield,
+    FileText
 } from 'lucide-react';
 
 const SellerPurchaseHub = () => {
@@ -28,6 +36,8 @@ const SellerPurchaseHub = () => {
     const [selectedBike, setSelectedBike] = useState(null);
     const [showQrModal, setShowQrModal] = useState(false);
     const [qrImageUrl, setQrImageUrl] = useState('');
+    const [previewBike, setPreviewBike] = useState(null);
+    const [previewImageIndex, setPreviewImageIndex] = useState(0);
 
     useEffect(() => {
         fetchRequests();
@@ -148,12 +158,21 @@ const SellerPurchaseHub = () => {
                             <div key={request._id} className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 group">
                                 <div className="flex flex-col h-full">
                                     <div className="flex flex-col sm:flex-row border-b border-gray-50">
-                                        <div className="sm:w-48 h-48 relative overflow-hidden">
+                                        <div
+                                            className="sm:w-48 h-48 relative overflow-hidden cursor-pointer"
+                                            onClick={() => { setPreviewBike(request); setPreviewImageIndex(0); }}
+                                        >
                                             <img
                                                 src={request.images[0] || 'https://placehold.co/400'}
                                                 alt={request.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-all bg-white/90 backdrop-blur-sm rounded-2xl px-3 py-2 flex items-center gap-1.5">
+                                                    <Eye size={14} className="text-orange-600" />
+                                                    <span className="text-[10px] font-black text-orange-600">VIEW DETAILS</span>
+                                                </div>
+                                            </div>
                                             <div className="absolute top-4 left-4">
                                                 <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-md shadow-lg ${getStatusColor(request.status)}`}>
                                                     {request.status}
@@ -164,7 +183,12 @@ const SellerPurchaseHub = () => {
                                         <div className="flex-1 p-6 text-sm">
                                             <div className="flex justify-between items-start mb-4">
                                                 <div>
-                                                    <h3 className="text-lg font-black text-gray-900 mb-1">{request.name}</h3>
+                                                    <h3
+                                                        className="text-lg font-black text-gray-900 mb-1 cursor-pointer hover:text-orange-600 transition-colors"
+                                                        onClick={() => { setPreviewBike(request); setPreviewImageIndex(0); }}
+                                                    >
+                                                        {request.name}
+                                                    </h3>
                                                     <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider underline decoration-orange-600/30 underline-offset-4">
                                                         By {request.seller?.name || 'Unknown User'}
                                                     </p>
@@ -265,7 +289,6 @@ const SellerPurchaseHub = () => {
                                                             }}
                                                             className="flex-1 bg-orange-600 text-white px-4 py-2.5 rounded-xl font-black text-[10px] hover:bg-orange-700 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
                                                         >
-                                                            <DollarSign size={14} />
                                                             {request.status === 'Countered' ? 'RESPOND' : (request.status === 'Negotiating' ? 'RE-NEGOTIATE' : 'MAKE OFFER')}
                                                         </button>
                                                         <button
@@ -450,6 +473,185 @@ const SellerPurchaseHub = () => {
                                 >
                                     MARK AS PAID
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Bike Detail Preview Modal */}
+                {previewBike && (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" onClick={() => setPreviewBike(null)}>
+                        <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-md" />
+                        <div
+                            className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-zoomIn max-h-[90vh] flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
+                                <div>
+                                    <h2 className="text-xl font-black text-gray-900">{previewBike.name}</h2>
+                                    <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+                                        By {previewBike.seller?.name || 'Unknown User'}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setPreviewBike(null)}
+                                    className="w-10 h-10 bg-gray-100 hover:bg-red-50 hover:text-red-500 rounded-2xl flex items-center justify-center transition-all"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <div className="overflow-y-auto flex-1">
+                                {/* Image Gallery */}
+                                <div className="relative bg-gray-900 h-72">
+                                    <img
+                                        src={previewBike.images[previewImageIndex] || 'https://placehold.co/800x400'}
+                                        alt={previewBike.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {/* Image counter */}
+                                    {previewBike.images.length > 1 && (
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                                            {previewBike.images.map((_, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setPreviewImageIndex(i)}
+                                                    className={`w-2 h-2 rounded-full transition-all ${
+                                                        i === previewImageIndex ? 'bg-white w-6' : 'bg-white/50'
+                                                    }`}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* Prev/Next arrows */}
+                                    {previewBike.images.length > 1 && (
+                                        <>
+                                            <button
+                                                onClick={() => setPreviewImageIndex(i => Math.max(0, i - 1))}
+                                                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white transition-all disabled:opacity-30"
+                                                disabled={previewImageIndex === 0}
+                                            >
+                                                <ChevronLeft size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => setPreviewImageIndex(i => Math.min(previewBike.images.length - 1, i + 1))}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white transition-all disabled:opacity-30"
+                                                disabled={previewImageIndex === previewBike.images.length - 1}
+                                            >
+                                                <ChevronRight size={20} />
+                                            </button>
+                                        </>
+                                    )}
+                                    {/* Status badge */}
+                                    <div className="absolute top-4 left-4">
+                                        <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-md shadow-lg ${getStatusColor(previewBike.status)}`}>
+                                            {previewBike.status}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Thumbnail strip */}
+                                {previewBike.images.length > 1 && (
+                                    <div className="flex gap-2 px-6 py-3 bg-gray-50 overflow-x-auto">
+                                        {previewBike.images.map((img, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setPreviewImageIndex(i)}
+                                                className={`flex-shrink-0 w-16 h-14 rounded-xl overflow-hidden border-2 transition-all ${
+                                                    i === previewImageIndex ? 'border-orange-500' : 'border-transparent opacity-60 hover:opacity-100'
+                                                }`}
+                                            >
+                                                <img src={img} alt={`view-${i}`} className="w-full h-full object-cover" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Bike Specs */}
+                                <div className="p-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    <div className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <Gauge size={14} className="text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Mileage</p>
+                                            <p className="text-sm font-black text-gray-900">{previewBike.mileage?.toLocaleString()} KM</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <Zap size={14} className="text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Engine</p>
+                                            <p className="text-sm font-black text-gray-900">{previewBike.engineCapacity || '—'} CC</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <Calendar size={14} className="text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Year</p>
+                                            <p className="text-sm font-black text-gray-900">{previewBike.modelYear || '—'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <Shield size={14} className="text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Condition</p>
+                                            <p className="text-sm font-black text-gray-900">Grade {previewBike.condition}</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-orange-50 rounded-2xl p-4 col-span-2 sm:col-span-1 flex items-start gap-3 border border-orange-100">
+                                        <div className="w-8 h-8 bg-orange-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <span className="text-[10px] font-black text-orange-700">Rs</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest">Asking Price</p>
+                                            <p className="text-sm font-black text-orange-700">Rs {previewBike.price?.toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                    {previewBike.category && (
+                                        <div className="bg-gray-50 rounded-2xl p-4 flex items-start gap-3">
+                                            <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                <Package size={14} className="text-orange-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Category</p>
+                                                <p className="text-sm font-black text-gray-900">{previewBike.category}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Additional Details */}
+                                {previewBike.additionalDetails && (
+                                    <div className="px-6 pb-4">
+                                        <div className="bg-gray-50 rounded-2xl p-4">
+                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Additional Notes</p>
+                                            <p className="text-sm text-gray-700 font-medium leading-relaxed">{previewBike.additionalDetails}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Bluebook link */}
+                                {previewBike.bluebookImage && (
+                                    <div className="px-6 pb-6">
+                                        <a
+                                            href={previewBike.bluebookImage}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-dashed border-gray-200 hover:border-orange-400 hover:bg-orange-50 rounded-2xl text-[11px] font-black text-gray-500 hover:text-orange-600 transition-all"
+                                        >
+                                            <FileText size={14} />
+                                            VIEW BLUEBOOK PDF
+                                        </a>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
