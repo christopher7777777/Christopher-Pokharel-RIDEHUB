@@ -17,10 +17,6 @@ exports.createReview = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Bike listing not found' });
         }
 
-        // Potential check: ensure the user has actually interacted with this bike (e.g., status is Purchased or Rented to them)
-        // But for now, we'll allow anyone with an account to rate to keeps things simple, 
-        // OR we can restrict it to the purchasedBy/rentedBy if needed.
-
         const review = await ServiceReview.create({
             bike: bikeId,
             reviewer: req.user.id,

@@ -367,7 +367,7 @@ const forgotPassword = async (req, res) => {
         const resetToken = user.getResetPasswordToken();
 
         await user.save({ validateBeforeSave: false });
-        const resetUrl = `${req.protocol}://${req.get('host').replace('5000', '5173')}/resetpassword/${resetToken}`;
+        const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/resetpassword/${resetToken}`;
 
         const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
