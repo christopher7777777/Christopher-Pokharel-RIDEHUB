@@ -55,6 +55,12 @@ const ListBike = () => {
         bluebook: null
     });
 
+    React.useEffect(() => {
+        if (user && user.kycStatus !== 'verified' && !user.isAdmin) {
+            navigate(user.role === 'seller' ? '/seller/kyc' : '/kyc-verification');
+        }
+    }, [user, navigate]);
+
     const brands = ['Honda', 'Yamaha', 'Suzuki', 'Kawasaki', 'Hero', 'Bajaj', 'TVS', 'Royal Enfield', 'KTM', 'Other'];
     const years = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
 

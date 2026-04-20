@@ -58,13 +58,24 @@ const isSeller = (req, res, next) => {
     }
 };
 
+// Verify KYC status
 const isVerified = (req, res, next) => {
-    if (req.user && (req.user.kycStatus === 'verified' || req.user.isAdmin)) {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized, no user'
+        });
+    }
+
+    const isKycVerified = req.user.kycStatus && req.user.kycStatus.toLowerCase() === 'verified';
+    
+    if (isKycVerified || req.user.isAdmin || req.user.role === 'admin') {
         next();
     } else {
+        console.log(`[isVerified Block] User: ${req.user.email}, Role: ${req.user.role}, KYC Status: ${req.user.kycStatus}`);
         res.status(403).json({
             success: false,
-            message: 'Your KYC must be verified to perform this action.'
+            message: 'Your KYC must be verified to perform this action. Current status: ' + (req.user.kycStatus || 'none')
         });
     }
 };

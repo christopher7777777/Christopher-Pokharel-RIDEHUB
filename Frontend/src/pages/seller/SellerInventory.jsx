@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SellerLayout from '../../components/layout/SellerLayout';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import {
     Plus,
@@ -15,6 +17,8 @@ import { toast } from 'react-hot-toast';
 import BikeFormModal from '../../components/models/BikeFormModal';
 
 const SellerInventory = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
     const [bikes, setBikes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -73,6 +77,11 @@ const SellerInventory = () => {
     };
 
     const handleAdd = () => {
+        if (user?.kycStatus !== 'verified' && !user?.isAdmin) {
+            toast.error('You need to verify your KYC before you can list a bike.');
+            navigate('/seller/kyc');
+            return;
+        }
         setSelectedBike(null);
         setIsModalOpen(true);
     };

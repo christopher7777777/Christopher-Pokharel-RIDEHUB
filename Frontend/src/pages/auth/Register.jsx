@@ -31,21 +31,34 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setLoading(true);
 
+        // Validation
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            setLoading(false);
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        // Email validation: must be @gmail.com
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!emailRegex.test(formData.email)) {
+            toast.error('Registration is restricted to @gmail.com emails only');
+            return;
+        }
+
+        // Password validation: at least one letter and one symbol
+        const passwordLetterRegex = /[a-zA-Z]/;
+        const passwordSymbolRegex = /[^a-zA-Z0-9]/;
+        if (!passwordLetterRegex.test(formData.password) || !passwordSymbolRegex.test(formData.password)) {
+            toast.error('Password must contain at least one letter and one symbol');
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
-            setLoading(false);
+            toast.error('Password must be at least 6 characters long');
             return;
         }
 
+        setLoading(true);
         try {
             const result = await register(formData);
             if (result.success) {

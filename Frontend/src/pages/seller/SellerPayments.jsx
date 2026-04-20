@@ -69,15 +69,12 @@ const SellerPayments = () => {
     const fetchPayments = async () => {
         try {
             setLoading(true);
-            const [myListingsRes, saleRequestsRes, payoutsRes] = await Promise.all([
-                api.get('/api/bikes/my-listings'),
-                api.get('/api/bikes/sale-requests'),
+            const [payoutsRes] = await Promise.all([
                 api.get('/api/payment/seller-payouts')
             ]);
 
-            const listings = myListingsRes.data.data || [];
-            const requests = saleRequestsRes.data.data || [];
             const payouts = payoutsRes.data.data || [];
+
 
             const processedData = [];
 
@@ -103,52 +100,7 @@ const SellerPayments = () => {
                 });
             });
 
-            // 2. Process Rental and Sale Income (Legacy/Fallback for non-escrow)
-            listings.forEach(bike => {
-                // Avoid duplicating if we already have it from payouts
-                if (processedData.some(d => d.bikeId === bike._id)) return;
-
-                if (bike.status === 'Rented' || bike.status === 'Purchased' || bike.status === 'Approved') {
-                    processedData.push({
-                        id: bike._id,
-                        bikeName: bike.name,
-                        user: bike.rentedBy?.name || (bike.status === 'Rented' ? 'Renter' : 'Buyer'),
-                        amount: bike.totalAmount || bike.negotiatedPrice || bike.price,
-                        bookPrice: bike.price,
-                        paidPrice: bike.negotiatedPrice || bike.price,
-                        type: bike.status === 'Rented' ? 'Rental Income' : 'Sale Income',
-                        method: bike.paymentMethod || (bike.status === 'Rented' ? 'Portal' : 'Bank Transfer'),
-                        status: (bike.status === 'Purchased' || bike.status === 'Rented') ? 'Completed' : 'Pending',
-                        date: bike.updatedAt || bike.createdAt,
-                        proof: bike.paymentScreenshot,
-                        isIncoming: true,
-                        isEscrow: false
-                    });
-                }
-            });
-
-            requests.forEach(req => {
-                if (req.status === 'Purchased' || (req.status === 'Approved' && req.userConfirmed)) {
-                    processedData.push({
-                        id: req._id,
-                        bikeName: req.name,
-                        user: req.seller?.name || 'User',
-                        amount: req.totalAmount || req.negotiatedPrice || req.price,
-                        bookPrice: req.price, // Original bike price from user
-                        paidPrice: req.negotiatedPrice || req.price, // Final price paid to user
-                        type: req.status === 'Purchased' ? 'Bike Purchase' : 'Pending Buy',
-                        method: req.paymentMethod || (req.status === 'Purchased' ? 'Bank Transfer' : 'Pending'),
-                        status: req.status === 'Purchased' ? 'Completed' : 'Pending',
-                        date: req.updatedAt || req.createdAt,
-                        proof: req.paymentScreenshot,
-                        isIncoming: false,
-                        isEscrow: false,
-                        isExchange: req.isExchange,
-                        exchangeValuation: req.exchangeValuation
-                    });
-                }
-            });
-
+            // 2. Sort and Set data (Fallbacks removed as per requirement: show only completed payments)
             processedData.sort((a, b) => new Date(b.date) - new Date(a.date));
             setTransactions(processedData);
 

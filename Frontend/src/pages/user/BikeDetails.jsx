@@ -4,6 +4,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 import {
     Bike as BikeIcon,
     Calendar,
@@ -78,6 +79,11 @@ const BikeDetails = () => {
     }, [id]);
 
     const handleAction = () => {
+        if (user?.kycStatus !== 'verified' && !user?.isAdmin) {
+            toast.error('You need to verify your KYC before you can perform this action.');
+            navigate(user?.role === 'seller' ? '/seller/kyc' : '/kyc-verification');
+            return;
+        }
         setIsBookingModalOpen(true);
     };
 
@@ -451,7 +457,14 @@ const BikeDetails = () => {
 
                                     {isBuyBike && (
                                         <button
-                                            onClick={() => setIsExchangeModalOpen(true)}
+                                            onClick={() => {
+                                                if (user?.kycStatus !== 'verified' && !user?.isAdmin) {
+                                                    toast.error('You need to verify your KYC before requesting an exchange.');
+                                                    navigate(user?.role === 'seller' ? '/seller/kyc' : '/kyc-verification');
+                                                    return;
+                                                }
+                                                setIsExchangeModalOpen(true);
+                                            }}
                                             disabled={bike.status !== 'Available' || bike.exchangeStatus === 'Pending' || bike.exchangeStatus === 'Valuated'}
                                             className="flex-1 bg-gray-900 text-white py-5 rounded-[25px] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group border border-transparent hover:border-orange-500/30 disabled:opacity-50"
                                         >

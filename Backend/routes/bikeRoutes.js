@@ -58,7 +58,7 @@ router.route('/sale-status/:id')
 
 // User confirmation & counter
 router.route('/confirm-sale/:id')
-    .put(protect, upload.fields([{ name: 'userQrImage', maxCount: 1 }]), confirmSale);
+    .put(protect, isVerified, upload.fields([{ name: 'userQrImage', maxCount: 1 }]), confirmSale);
 
 router.route('/complete-payment/:id')
     .put(protect, isSeller, upload.fields([{ name: 'paymentScreenshot', maxCount: 1 }]), completePayment);
@@ -67,10 +67,10 @@ router.route('/counter-offer/:id')
     .put(protect, counterOffer);
 
 router.route('/rent/:id')
-    .put(protect, rentBike);
+    .put(protect, isVerified, rentBike);
 
 router.route('/exchange/:id')
-    .put(protect, upload.fields([
+    .put(protect, isVerified, upload.fields([
         { name: 'blueBookPhoto', maxCount: 1 },
         { name: 'bikeModelPhoto', maxCount: 1 },
         { name: 'fullBikePhoto', maxCount: 1 },

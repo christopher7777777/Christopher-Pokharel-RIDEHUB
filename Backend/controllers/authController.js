@@ -13,11 +13,29 @@ const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Validation: Check for required fields
-        if (!name || !email || !password) {
+        // Email validation: must be @gmail.com
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!emailRegex.test(email)) {
             return res.status(400).json({
                 success: false,
-                message: 'Please add all required fields (name, email, password)'
+                message: 'Registration is restricted to @gmail.com emails only'
+            });
+        }
+
+        // Password validation: at least one letter and one symbol
+        const passwordLetterRegex = /[a-zA-Z]/;
+        const passwordSymbolRegex = /[^a-zA-Z0-9]/;
+        if (!passwordLetterRegex.test(password) || !passwordSymbolRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must contain at least one letter and one symbol'
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long'
             });
         }
 
